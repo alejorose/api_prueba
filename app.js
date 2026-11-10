@@ -39,7 +39,7 @@ const ROOMDEF = [
     cam: 'standing in the hallway at the south end, looking north along the kitchen counter (on the right) and the dining table' },
   { k: 'bath1', n: 'BAÑO PRINCIPAL', en: 'Primary bathroom', r: [277, 986, 425, 1080], lab: [352, 1010] },
   { k: 'bath2', n: 'BAÑO 2', en: 'Second bathroom', r: [277, 1100, 433, 1190], lab: [352, 1170] },
-  { k: 'bed2', n: 'RECÁMARA 2', en: 'Second bedroom', r: [277, 1197, 518, 1355], lab: [420, 1214], eye: [505, 1210], tg: [360, 1300], fov: 70,
+  { k: 'bed2', n: 'RECÁMARA 2', en: 'Second bedroom', r: [320, 1197, 518, 1355], lab: [430, 1214], eye: [505, 1210], tg: [360, 1300], fov: 70,
     cam: 'standing in the north-east corner of the room by the door, looking south-west toward the bed' },
   { k: 'entry', n: 'ENTRADA', en: 'Entry hall', r: [525, 1240, 738, 1355], lab: [650, 1270] },
   { k: 'patio', n: 'PATIO', en: 'Balcony', r: [268, 615, 628, 758], lab: [440, 740] },
@@ -64,7 +64,7 @@ const GLASS = [  // [rect px, alto, y0]
   [[277, 758, 628, 768], WALL_H, 0], [[277, 986, 325, 1080], 2.1, 0],   // ventanal, regadera
   [[262, 612, 620, 618], 1.05, 0], [[262, 612, 268, 758], 1.05, 0],      // barandal patio
 ];
-const COLLIDERS = [...WALLS, [277, 758, 628, 768], [314, 1205, 320, 1350],
+const COLLIDERS = [...WALLS, [277, 758, 628, 768], [277, 1197, 320, 1355],
   ...FIXTURES.filter(f => (f[3] || 0) === 0).map(f => f[0])].map(rectOf);
 
 /* ============================================================
@@ -242,12 +242,24 @@ for (let i = 0; i <= 5; i++) {
   const m = new THREE.Mesh(new THREE.BoxGeometry(.05, WALL_H, .14), mat('#2b2e33'));
   m.position.set(wx(277) + i * (wx(628) - wx(277)) / 5, WALL_H / 2, wz(763)); scene.add(m); mull.push(m);
 }
-// closet recámara 2 (puertas corredizas)
+// Clóset empotrado de la recámara 2: ~0.64 × 2.46 m a lo largo de la pared oeste, 3 puertas corredizas blancas
 {
-  const { cx, cz, w, d } = rectOf([314, 1205, 320, 1350]);
-  const m = new THREE.Mesh(new THREE.BoxGeometry(w, 2.2, d), mat('#f0ede8'));
-  m.position.set(cx, 1.1, cz); m.castShadow = true; scene.add(m);
-  wallMeshes.push(Object.assign(m, { userData: { fixedH: true } }));
+  const y0 = 1197, y1 = 1355, len = (y1 - y0) / 3;
+  [0, 1, 2].forEach(i => {                                   // dos rieles: los paneles se traslapan
+    const { cx, cz, w, d } = rectOf([i % 2 ? 318 : 314, y0 + i * len - (i ? 2 : 0), i % 2 ? 321 : 317, y0 + (i + 1) * len + (i < 2 ? 2 : 0)]);
+    const m = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), mat('#f1eee9', { roughness: .6 }));
+    m.userData = { cx, cz, ww: w, d }; m.castShadow = m.receiveShadow = true; scene.add(m); wallMeshes.push(m);
+  });
+  const fl = floorMesh({ r: [277, y0, 314, y1], k: 'wood', y: .004 }); fl.material.color.set('#8f8579'); scene.add(fl);
+  const c0 = rectOf([277, y0, 314, y1]);
+  const wood = mat('#e8e2d8');                                // repisa y barra
+  const shelf = new THREE.Mesh(new THREE.BoxGeometry(c0.w, .03, c0.d - .04), wood); shelf.position.set(c0.cx, 1.95, c0.cz); scene.add(shelf);
+  const rod = new THREE.Mesh(new THREE.CylinderGeometry(.014, .014, c0.d - .06, 10), mat('#9aa0a8', { metalness: .6 }));
+  rod.rotation.x = Math.PI / 2; rod.position.set(c0.cx, 1.8, c0.cz); scene.add(rod);
+  ['#d9d4cc', '#5b6b82', '#2f343b', '#c9b79c', '#8a9a7b', '#e8e2d8', '#3b3f46', '#b08968', '#9fb0c4', '#6b7a8f'].forEach((c, i) => {
+    const g = new THREE.Mesh(new THREE.BoxGeometry(c0.w * .55, .9, .05), mat(c, { roughness: 1 }));
+    g.position.set(c0.cx, 1.3, c0.cz - c0.d / 2 + .15 + i * (c0.d - .3) / 9); g.rotation.y = (i % 3 - 1) * .08; g.castShadow = true; scene.add(g);
+  });
 }
 FIXTURES.forEach(([r, h, c, y0 = 0]) => {
   const { cx, cz, w, d } = rectOf(r);
@@ -959,7 +971,7 @@ ${room ? 'ROOM' : 'ROOMS'} (interior dimensions)
 ${dims.join('\n')}
 
 FIXED FINISHES (from the real unit)
-Grey-brown wood-look vinyl plank floors, white walls and ceiling, floor-to-ceiling windows with sliding balcony door, dark grey flat-panel kitchen cabinets with grey stone-look backsplash and stainless steel appliances, bathrooms with large dark grey floor tile and white fixtures, white panel doors, mirrored sliding closet doors in the entry.
+Grey-brown wood-look vinyl plank floors, white walls and ceiling, floor-to-ceiling windows with sliding balcony door, dark grey flat-panel kitchen cabinets with grey stone-look backsplash and stainless steel appliances, bathrooms with large dark grey floor tile and white fixtures, white panel doors, mirrored sliding closet doors in the entry${!room || room.k === 'bed2' ? '; a built-in closet in the second bedroom along the whole west wall, 0.62 m deep × 2.46 m long, with three white sliding doors (already excluded from the bedroom dimensions above)' : ''}.
 
 FURNITURE (measured, numbers match the plan)
 ${lines.length ? lines.join('\n') : 'None'}

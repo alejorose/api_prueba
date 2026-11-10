@@ -6,30 +6,34 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
    Escala calibrada con las camas del plano (~1.52 x 2.0 m).
    El plano es aproximado: verifica medidas reales antes de comprar.
    ============================================================ */
-const S = 0.0157, X0 = 262, Y0 = 615;          // m por px, origen = esquina del patio
+// Escala calibrada (tools/calibrate.py): la huella a caras exteriores = 664 sq ft (61.7 m²);
+// valida con la cama queen del plano (~98 px = 1.52 m = 60 in).
+const S = 0.0156, X0 = 262, Y0 = 615;           // m por px, origen = esquina del patio
+const FOOT = [[262, 758], [645, 758], [645, 1225], [750, 1225], [750, 1378], [262, 1378]];
+const footArea = () => Math.abs(FOOT.reduce((a, p, i) => { const q = FOOT[(i + 1) % FOOT.length]; return a + p[0] * q[1] - q[0] * p[1]; }, 0)) / 2 * S * S;
 const wx = px => (px - X0) * S;
 const wz = py => (py - Y0) * S;
 const rectOf = ([x1, y1, x2, y2]) => ({ cx: wx((x1 + x2) / 2), cz: wz((y1 + y2) / 2), w: (x2 - x1) * S, d: (y2 - y1) * S });
 const WALL_H = 2.5, LOW_H = 0.55;
 
 const WALLS = [
-  [262, 765, 277, 1378], [262, 1355, 750, 1378], [738, 1225, 750, 1378],
-  [645, 1225, 680, 1240], [628, 765, 645, 1182], [585, 1182, 645, 1225],
+  [262, 758, 277, 1378], [262, 1355, 750, 1378], [738, 1225, 750, 1378],
+  [645, 1225, 680, 1240], [628, 758, 645, 1182], [585, 1182, 645, 1225],
   [277, 978, 372, 986], [425, 980, 433, 1135], [277, 1080, 433, 1100],
   [277, 1190, 380, 1197], [445, 810, 455, 921], [445, 915, 492, 921],
-  [518, 1197, 525, 1300], [620, 615, 645, 765],
+  [518, 1197, 525, 1300], [620, 615, 645, 758],
 ];
 
 const FLOORS = [
-  { r: [277, 775, 628, 1197], k: 'wood' }, { r: [277, 1197, 645, 1225], k: 'wood' },
-  { r: [277, 1225, 738, 1355], k: 'wood' }, { r: [268, 615, 628, 765], k: 'deck' },
+  { r: [277, 768, 628, 1197], k: 'wood' }, { r: [277, 1197, 645, 1225], k: 'wood' },
+  { r: [277, 1225, 738, 1355], k: 'wood' }, { r: [268, 615, 628, 758], k: 'deck' },
   { r: [277, 986, 425, 1080], k: 'tile', y: .004 }, { r: [277, 1100, 433, 1190], k: 'tile', y: .004 },
 ];
 
 const ROOMDEF = [
-  { k: 'prim', n: 'RECÁMARA PRINCIPAL', en: 'Primary bedroom', r: [277, 775, 445, 980], lab: [368, 800], eye: [435, 790], tg: [320, 905], fov: 70,
+  { k: 'prim', n: 'RECÁMARA PRINCIPAL', en: 'Primary bedroom', r: [277, 768, 445, 980], lab: [368, 800], eye: [435, 790], tg: [320, 905], fov: 70,
     cam: 'standing in the north-east corner of the room (window side), looking south-west toward the bed' },
-  { k: 'liv', n: 'SALA', en: 'Living room', r: [455, 775, 628, 980], lab: [545, 800], eye: [505, 975], tg: [545, 790], fov: 66,
+  { k: 'liv', n: 'SALA', en: 'Living room', r: [455, 768, 628, 980], lab: [545, 800], eye: [505, 975], tg: [545, 790], fov: 66,
     cam: 'standing at the south edge of the living room (kitchen side), looking north toward the floor-to-ceiling balcony windows' },
   { k: 'kit', n: 'COCINA / COMEDOR', en: 'Kitchen and dining area', r: [433, 980, 592, 1190], lab: [510, 1160], eye: [540, 1215], tg: [500, 1000], fov: 66,
     cam: 'standing in the hallway at the south end, looking north along the kitchen counter (on the right) and the dining table' },
@@ -38,7 +42,7 @@ const ROOMDEF = [
   { k: 'bed2', n: 'RECÁMARA 2', en: 'Second bedroom', r: [277, 1197, 518, 1355], lab: [420, 1214], eye: [505, 1210], tg: [360, 1300], fov: 70,
     cam: 'standing in the north-east corner of the room by the door, looking south-west toward the bed' },
   { k: 'entry', n: 'ENTRADA', en: 'Entry hall', r: [525, 1240, 738, 1355], lab: [650, 1270] },
-  { k: 'patio', n: 'PATIO', en: 'Balcony', r: [268, 615, 628, 765], lab: [440, 740] },
+  { k: 'patio', n: 'PATIO', en: 'Balcony', r: [268, 615, 628, 758], lab: [440, 740] },
 ];
 
 // Fijos: [rect px, alto, color, y0, opciones]
@@ -57,10 +61,10 @@ const FIXTURES = [
   [[530, 1308, 572, 1350], .88, '#e8e9ec'],             // lavadora/secadora
 ];
 const GLASS = [  // [rect px, alto, y0]
-  [[277, 765, 628, 775], WALL_H, 0], [[277, 986, 325, 1080], 2.1, 0],   // ventanal, regadera
-  [[262, 612, 620, 618], 1.05, 0], [[262, 612, 268, 765], 1.05, 0],      // barandal patio
+  [[277, 758, 628, 768], WALL_H, 0], [[277, 986, 325, 1080], 2.1, 0],   // ventanal, regadera
+  [[262, 612, 620, 618], 1.05, 0], [[262, 612, 268, 758], 1.05, 0],      // barandal patio
 ];
-const COLLIDERS = [...WALLS, [277, 765, 628, 775], [314, 1205, 320, 1350],
+const COLLIDERS = [...WALLS, [277, 758, 628, 768], [314, 1205, 320, 1350],
   ...FIXTURES.filter(f => (f[3] || 0) === 0).map(f => f[0])].map(rectOf);
 
 /* ============================================================
@@ -217,7 +221,7 @@ const glassMeshes = GLASS.map(([r, h, y0]) => {
 const mull = [];
 for (let i = 0; i <= 5; i++) {
   const m = new THREE.Mesh(new THREE.BoxGeometry(.05, WALL_H, .14), mat('#2b2e33'));
-  m.position.set(wx(277) + i * (wx(628) - wx(277)) / 5, WALL_H / 2, wz(770)); scene.add(m); mull.push(m);
+  m.position.set(wx(277) + i * (wx(628) - wx(277)) / 5, WALL_H / 2, wz(763)); scene.add(m); mull.push(m);
 }
 // closet recámara 2 (puertas corredizas)
 {
@@ -675,6 +679,7 @@ canvas.addEventListener('pointerdown', () => { menu.hidden = true; });
 $('#wallsBtn').onclick = () => { wallMode = (wallMode + 1) % 3; applyWalls(); save(); };
 $('#unitsBtn').onclick = () => { units = units === 'm' ? 'ft' : 'm'; $('#unitsBtn').textContent = 'Unidades: ' + units; buildCards(); updateSelUI(); updateGaps(); drawRoomLabels(); save(); };
 $('#dimsBtn').onclick = () => { showDims = !showDims; $('#dimsBtn').textContent = 'Cotas de cuartos: ' + (showDims ? 'sí' : 'no'); drawRoomLabels(); };
+$('#calInfo').textContent = `Huella ${footArea().toFixed(1)} m² = ${Math.round(footArea() / 0.09290304)} ft² · escala ${(S * 100).toFixed(2)} cm/px`;
 $('#snapBtn').onclick = () => { snap = snap ? 0 : .05; $('#snapBtn').textContent = 'Imán: ' + (snap ? '5 cm' : 'libre'); };
 $('#resetBtn').onclick = () => { loadItems(SUGGESTED); menu.hidden = true; };
 $('#clearBtn').onclick = () => { if (confirm('¿Quitar todos los muebles?')) loadItems([]); menu.hidden = true; };

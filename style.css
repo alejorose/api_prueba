@@ -86,3 +86,5 @@ button.danger{color:#ff8a8e}
 button.primary{background:var(--accent);border-color:transparent;color:#fff;font-weight:600}
 .warnline{margin:0;color:#fbbf24;font-size:12.5px}
 .warnline:empty{display:none}
+
+.cal{color:var(--muted);font-size:11px;padding:0 4px}

@@ -34,3 +34,7 @@ Al seleccionar un mueble se muestran las distancias libres (atrás/frente/izq/de
 en ámbar si son menores a 60 cm.
 
 `python3 tools/build_artifact.py salida.html` genera una versión de un solo archivo.
+
+## Calibración
+
+La escala sale de medir el plano contra el área publicada. Ver `docs/calibration.md` y `tools/calibrate.py`.

@@ -128,9 +128,9 @@ const camera = new THREE.PerspectiveCamera(42, 1, .1, 120);
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = false;
 controls.maxPolarAngle = Math.PI / 2 - .02;
-controls.minDistance = .05; controls.maxDistance = 40;
+controls.minDistance = 1.2; controls.maxDistance = 45;
 controls.screenSpacePanning = true;
-controls.zoomToCursor = true;
+controls.zoomToCursor = false; controls.zoomSpeed = 1.6;
 controls.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
 
 scene.add(new THREE.HemisphereLight('#c9d3ff', '#4b3d38', .9));
@@ -605,20 +605,61 @@ function pick(e) {
   return rugHit;
 }
 
-let drag = null;
+let drag = null, gesture = null;
+const pointers = new Map();
+
+// zoom / pan propios (pellizco con dos dedos aunque el primero caiga sobre un mueble)
+function zoomBy(f) {
+  const off = camera.position.clone().sub(controls.target);
+  off.setLength(THREE.MathUtils.clamp(off.length() * f, controls.minDistance, controls.maxDistance));
+  camera.position.copy(controls.target).add(off); controls.update(); redraw();
+}
+function panBy(dx, dy) {
+  const k = 2 * camera.position.distanceTo(controls.target) * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) / innerHeight;
+  const m = camera.matrix.elements, d = new THREE.Vector3(m[0] * -dx + m[4] * dy, m[1] * -dx + m[5] * dy, m[2] * -dx + m[6] * dy).multiplyScalar(k);
+  camera.position.add(d); controls.target.add(d); controls.update(); redraw();
+}
+function cancelItemDrag() {
+  if (!drag || drag.none) return;
+  if (drag.moved) {                       // deshace el movimiento accidental
+    const o = JSON.parse(drag.snap).find(i => i.id === drag.id), it = byId(drag.id);
+    if (o && it) { it.x = o.x; it.z = o.z; place(groups.get(it.id), it); syncRing(); checkCollisions(); }
+    hist.pop(); $('#undoBtn').disabled = !hist.length;
+  }
+  drag = null;
+}
+function pinchStep() {
+  const [a, b] = [...pointers.values()]; if (!a || !b) return;
+  const d = Math.hypot(a.x - b.x, a.y - b.y), m = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+  if (gesture.d) { if (d > 4) zoomBy(THREE.MathUtils.clamp(gesture.d / d, .7, 1.4)); panBy(m.x - gesture.m.x, m.y - gesture.m.y); }
+  gesture.d = d; gesture.m = m;
+}
+
 canvas.addEventListener('pointerdown', e => {
-  const id = pick(e);
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  document.body.classList.add('touching');   // las etiquetas/minimapa no deben robar el segundo dedo
   hideHint();
+  if (pointers.size >= 2) {
+    if (drag && !drag.none) {              // el primer dedo estaba sobre un mueble: tomamos el pellizco nosotros
+      e.stopImmediatePropagation(); cancelItemDrag(); controls.enabled = false; gesture = { d: 0, m: null }; pinchStep();
+    }
+    return;                                // si empezó en el fondo, OrbitControls ya maneja el pellizco
+  }
+  const ck = chipAt(e.clientX, e.clientY);   // toque sobre una etiqueta de cuarto
+  if (ck) { drag = { none: true, chip: ck, x: e.clientX, y: e.clientY }; return; }
+  const id = pick(e);
   if (id == null) { drag = { none: true, x: e.clientX, y: e.clientY }; return; }
   e.stopImmediatePropagation();
   controls.enabled = false;
   select(id);
   const it = byId(id), p = groundPoint(e);
   drag = { id, off: p ? new THREE.Vector2(it.x - p.x, it.z - p.z) : new THREE.Vector2(), moved: false, x: e.clientX, y: e.clientY, snap: snapshot() };
-  canvas.setPointerCapture(e.pointerId);
+  try { canvas.setPointerCapture(e.pointerId); } catch { }
 }, { capture: true });
 
 canvas.addEventListener('pointermove', e => {
+  if (pointers.has(e.pointerId)) pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (gesture) { pinchStep(); return; }
   if (!drag || drag.none) return;
   if (!drag.moved && Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 6) { drag.moved = true; pushHist(drag.snap); }
   if (!drag.moved) return;
@@ -630,13 +671,34 @@ canvas.addEventListener('pointermove', e => {
   place(groups.get(it.id), it); syncRing(); checkCollisions(); redraw();
 });
 const endDrag = e => {
+  pointers.delete(e.pointerId);
+  if (!pointers.size) document.body.classList.remove('touching');
+  if (gesture) { if (!pointers.size) { gesture = null; controls.enabled = true; } else { gesture.d = 0; gesture.m = null; } return; }
   if (!drag) return;
-  if (drag.none) { if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 5) select(null); }
+  if (drag.none) {
+    const tap = Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 8 && !pointers.size;
+    if (tap && drag.chip) focusRoom(drag.chip); else if (tap) select(null);
+  }
   else { controls.enabled = true; save(); }
   drag = null;
 };
 canvas.addEventListener('pointerup', endDrag);
 canvas.addEventListener('pointercancel', endDrag);
+
+// botones de zoom: toque = un paso, mantener = zoom continuo
+(function zoomButtons() {
+  let raf = 0, t0 = 0;
+  const bind = (id, f) => {
+    const b = $(id), stop = () => { cancelAnimationFrame(raf); clearTimeout(t0); };
+    b.addEventListener('pointerdown', e => {
+      e.preventDefault(); e.stopPropagation(); stop(); zoomBy(f ** 7);
+      t0 = setTimeout(function loop() { zoomBy(f); raf = requestAnimationFrame(loop); }, 260);
+    });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => b.addEventListener(ev, stop));
+  };
+  bind('#zIn', .965); bind('#zOut', 1.035);
+  $('#zFit').onclick = () => (focusK ? focusRoom(focusK) : setView(view));
+})();
 
 function mutateSel(fn, record = true) {
   const it = byId(selectedId); if (!it) return;
@@ -728,11 +790,12 @@ function setView(v) {
   controls.enableRotate = v !== 'top';
   controls.touches.ONE = v === 'top' ? THREE.TOUCH.PAN : THREE.TOUCH.ROTATE;
   controls.mouseButtons.LEFT = v === 'top' ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE;
+  controls.minDistance = v === 'eye' ? .05 : 1.2;
   focusK = null; roomLabels.forEach(m => { m.visible = v === 'top'; }); markMini(); applyWalls(false);
   document.querySelectorAll('#views button').forEach(b => b.classList.toggle('on', b.dataset.view === v));
   const aspect = camera.aspect, tf = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
   if (v === '3d') {
-    const dist = Math.max(14, 19 / aspect * .8);
+    const dist = Math.max(14, 3.9 / (tf * aspect) * 1.32);
     flyTo(new THREE.Vector3(CENTER.x + dist * .14, dist * .9, CENTER.z + .9 + dist * .42), new THREE.Vector3(CENTER.x, 0, CENTER.z + .9));
   } else if (v === 'top') {
     const h = 12.4, w = 8.2;
@@ -767,6 +830,13 @@ const chips = ROOMDEF.filter(r => CHIP_KEYS.includes(r.k)).map(r => {
 function areaText(r) { const q = rectOf(r.r), a = q.w * q.d; return units === 'm' ? a.toFixed(1) + ' m²' : Math.round(a * 10.7639) + ' ft²'; }
 function drawChips() { chips.forEach(({ r, d }) => { d.innerHTML = `<b>${title(r.n)}</b><small>${areaText(r)}</small>`; }); }
 const _v = new THREE.Vector3();
+function chipAt(x, y) {
+  for (const { r, d } of chips) {
+    if (d.style.display === 'none' || $('#chips').style.display === 'none') continue;
+    const b = d.getBoundingClientRect(); if (x >= b.left - 4 && x <= b.right + 4 && y >= b.top - 4 && y <= b.bottom + 4) return r.k;
+  }
+  return null;
+}
 function updateChips() {
   const show = view === '3d' && !document.body.classList.contains('sel') && $('#photo').hidden;
   $('#chips').style.display = show ? '' : 'none';
@@ -1019,4 +1089,4 @@ if (location.hash === '#eye') setView('eye');
 tween && (tween.ms = 1);
 requestAnimationFrame(frame);
 setTimeout(hideHint, 9000);
-window.__app = { setView, items: () => items, select, camera };
+window.__app = { setView, items: () => items, select, camera, controls };

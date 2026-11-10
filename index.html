@@ -26,12 +26,14 @@
     <button data-view="top">Planta</button>
     <button data-view="eye">Persona</button>
   </div>
+  <button id="photoBtn" class="ico" aria-label="Foto-realista con ChatGPT">📷</button>
   <button id="menuBtn" class="ico" aria-label="Menú">⋯</button>
 </header>
 
 <div id="menu" hidden>
   <button id="wallsBtn">Muros: bajos</button>
   <button id="unitsBtn">Unidades: m</button>
+  <button id="dimsBtn">Cotas de cuartos: sí</button>
   <button id="snapBtn">Imán: 5 cm</button>
   <hr>
   <button id="resetBtn">Layout sugerido</button>
@@ -50,6 +52,7 @@
     <div><b id="selName"></b><small id="selDims"></small></div>
     <button id="selClose" class="ico sm" aria-label="Cerrar">✕</button>
   </div>
+  <div class="gaps" id="selGaps"></div>
   <div class="selrow tools">
     <button id="rotL">↺ 15°</button>
     <button id="rotR">↻ 15°</button>
@@ -59,6 +62,26 @@
   </div>
   <div class="swatches" id="swatches"></div>
 </section>
+
+<div id="photo" hidden>
+  <div class="sheet" id="photoBody">
+    <div class="selrow"><b>Foto-realista con ChatGPT</b><button id="photoClose" class="ico sm" aria-label="Cerrar">✕</button></div>
+    <ol class="steps">
+      <li>Elige la toma y el estilo.</li>
+      <li>Guarda las imágenes (mantén presionado cada una) o toca Compartir.</li>
+      <li>Abre ChatGPT, adjunta las imágenes en este orden, pega el prompt y envía.</li>
+    </ol>
+    <div class="row"><select id="shotSel" aria-label="Toma"></select><select id="styleSel" aria-label="Estilo"></select></div>
+    <p id="photoWarn" class="warnline"></p>
+    <div id="shots" class="shots"></div>
+    <textarea id="promptTxt" readonly rows="12" aria-label="Prompt para ChatGPT"></textarea>
+    <div class="row">
+      <button id="copyPrompt" class="primary">Copiar prompt</button>
+      <a id="openGpt" class="btn" href="https://chatgpt.com/" target="_blank" rel="noopener">Abrir ChatGPT</a>
+      <button id="shareImgs" hidden>Compartir imágenes</button>
+    </div>
+  </div>
+</div>
 
 <footer id="tray">
   <div class="tabs" id="tabs"></div>

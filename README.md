@@ -21,3 +21,16 @@ python3 -m http.server 8000   # http://localhost:8000
 - Teclado: `R` gira 90°, flechas mueven, `Supr` borra.
 
 three.js r160 va incluido en `vendor/` (sin CDN).
+
+## Foto-realista con ChatGPT (botón 📷)
+
+Genera un paquete de referencia para un generador de imágenes: **plano numerado**,
+**vista de la toma** (sala, cocina/comedor, recámaras) y **vista aérea**, más un **prompt**
+con medidas de cada cuarto, y por mueble: dimensiones, posición respecto a los muros,
+hacia dónde mira y espacio libre al frente. Guarda las imágenes, adjúntalas en ChatGPT
+y pega el prompt.
+
+Al seleccionar un mueble se muestran las distancias libres (atrás/frente/izq/der);
+en ámbar si son menores a 60 cm.
+
+`python3 tools/build_artifact.py salida.html` genera una versión de un solo archivo.

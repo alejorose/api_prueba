@@ -33,15 +33,16 @@ const ROOMS = [
 
 // Fijos: [rect px, alto, color, y0, opciones]
 const FIXTURES = [
-  [[592, 980, 628, 1150], .9, '#cfcac2'],               // barra cocina
-  [[590, 978, 630, 1152], .04, '#2b2e33', .9],          // cubierta
-  [[592, 1150, 628, 1182], 1.85, '#b9bec5'],            // refri
+  [[592, 980, 628, 1150], .9, '#4a4e54'],               // barra cocina
+  [[590, 978, 630, 1152], .04, '#b9b3aa', .9],          // cubierta
+  [[592, 1150, 628, 1182], 1.85, '#b9bec5'],
+  [[606, 985, 628, 1150], .75, '#4a4e54', 1.45],        // gabinetes altos            // refri
   [[596, 1060, 624, 1105], .02, '#101214', .94],        // estufa
   [[596, 995, 624, 1030], .02, '#7d8791', .94],         // fregadero
   [[340, 1030, 364, 1070], .4, '#f3f3f1'],              // WC 1
-  [[388, 1048, 430, 1076], .85, '#d9d4cc'],             // lavabo 1
+  [[388, 1048, 430, 1076], .85, '#3d4046'],             // lavabo 1
   [[340, 1104, 364, 1146], .4, '#f3f3f1'],              // WC 2
-  [[388, 1104, 430, 1130], .85, '#d9d4cc'],             // lavabo 2
+  [[388, 1104, 430, 1130], .85, '#3d4046'],             // lavabo 2
   [[280, 1104, 324, 1188], .55, '#f6f6f4'],             // tina
   [[530, 1308, 572, 1350], .88, '#e8e9ec'],             // lavadora/secadora
 ];
@@ -62,10 +63,11 @@ const CATALOG = {
   nightstand: { n: 'Buró', cat: 'Recámara', w: .45, d: .4, h: .5, c: '#b08968', em: '🗄️', b: 'cabinet' },
   dresser:    { n: 'Cómoda', cat: 'Recámara', w: 1.2, d: .5, h: .85, c: '#b08968', em: '🗄️', b: 'dresser' },
   wardrobe:   { n: 'Armario', cat: 'Recámara', w: 1.0, d: .6, h: 2.0, c: '#e8e2d8', em: '🚪', b: 'wardrobe' },
-  sofa3:      { n: 'Sofá 3 plazas', cat: 'Sala', w: 2.1, d: .92, c: '#6b7a8f', em: '🛋️', b: 'sofa' },
+  sofa3:      { n: 'Sofá 3 plazas', cat: 'Sala', w: 2.1, d: .92, c: '#e8e2d8', em: '🛋️', b: 'sofa' },
   sofa2:      { n: 'Sofá 2 plazas', cat: 'Sala', w: 1.6, d: .92, c: '#6b7a8f', em: '🛋️', b: 'sofa' },
   armchair:   { n: 'Sillón', cat: 'Sala', w: .85, d: .85, c: '#c97b4a', em: '💺', b: 'sofa' },
   coffee:     { n: 'Mesa de centro', cat: 'Sala', w: 1.0, d: .55, h: .4, c: '#b08968', em: '☕', b: 'table' },
+  coffee_r:   { n: 'Mesa centro redonda', cat: 'Sala', w: .8, d: .8, h: .4, c: '#3b3f46', em: '⚫', b: 'round' },
   side:       { n: 'Mesa lateral', cat: 'Sala', w: .5, d: .5, h: .5, c: '#b08968', em: '⚪', b: 'round' },
   tv:         { n: 'Mueble TV', cat: 'Sala', w: 1.5, d: .4, h: .5, c: '#3b3f46', em: '📺', b: 'tv' },
   shelf:      { n: 'Librero', cat: 'Sala', w: .8, d: .3, h: 1.8, c: '#b08968', em: '📚', b: 'shelf' },
@@ -87,10 +89,10 @@ const PALETTE = ['#6b7a8f', '#8fa3b8', '#c97b4a', '#b08968', '#e8e2d8', '#3b3f46
 const px = (x, y) => [wx(x), wz(y)];
 const SUGGESTED = [
   ['bed_queen', ...px(344, 878), 90], ['nightstand', ...px(291, 806), 90], ['nightstand', ...px(291, 950), 90],
-  ['sofa3', ...px(598, 845), -90], ['coffee', ...px(530, 848), 90], ['rug', ...px(535, 850), 90],
+  ['sofa3', ...px(598, 845), -90], ['coffee_r', ...px(530, 848), 0], ['rug', ...px(535, 850), 90],
   ['tv', ...px(468, 862), 90], ['plant', ...px(478, 790), 0],
-  ['dining', ...px(500, 1068), 90], ['chair', ...px(458, 1050), 90], ['chair', ...px(458, 1088), 90],
-  ['chair', ...px(542, 1050), -90], ['chair', ...px(542, 1088), -90],
+  ['round', ...px(500, 1068), 0], ['chair', ...px(455, 1068), 90],
+  ['chair', ...px(545, 1050), -90], ['chair', ...px(545, 1088), -90],
   ['bed_queen', ...px(418, 1288), 180], ['nightstand', ...px(352, 1334), 180], ['nightstand', ...px(484, 1334), 180],
   ['desk', ...px(497, 1255), -90],
   ['plant', ...px(600, 700), 0], ['side', ...px(440, 695), 0], ['armchair', ...px(350, 690), 150], ['armchair', ...px(530, 690), 210],
@@ -141,17 +143,17 @@ function canvasTex(draw, size = 256) {
 }
 const TEX = {
   wood: canvasTex((g, n) => {
-    g.fillStyle = '#c9a77c'; g.fillRect(0, 0, n, n);
+    g.fillStyle = '#a89c90'; g.fillRect(0, 0, n, n);
     for (let i = 0; i < 8; i++) {
-      g.fillStyle = `hsl(32 ${35 + (i * 7) % 15}% ${58 + (i * 11) % 12}%)`;
+      g.fillStyle = `hsl(28 ${9 + (i * 7) % 8}% ${52 + (i * 11) % 10}%)`;
       g.fillRect(0, i * n / 8, n, n / 8 - 2);
       g.fillStyle = 'rgba(0,0,0,.22)'; g.fillRect(0, i * n / 8 + n / 8 - 2, n, 2);
       g.fillRect((i * 97) % n, i * n / 8, 2, n / 8);
     }
   }),
   tile: canvasTex((g, n) => {
-    g.fillStyle = '#e9ecee'; g.fillRect(0, 0, n, n);
-    g.strokeStyle = '#b9c0c6'; g.lineWidth = 3; g.strokeRect(0, 0, n, n);
+    g.fillStyle = '#5d5f62'; g.fillRect(0, 0, n, n);
+    g.strokeStyle = '#3f4143'; g.lineWidth = 3; g.strokeRect(0, 0, n, n);
   }),
   deck: canvasTex((g, n) => {
     g.fillStyle = '#8b8378'; g.fillRect(0, 0, n, n);
@@ -213,6 +215,7 @@ FIXTURES.forEach(([r, h, c, y0 = 0]) => {
   const { cx, cz, w, d } = rectOf(r);
   const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat(c));
   m.position.set(cx, y0 + h / 2, cz); m.castShadow = m.receiveShadow = true; scene.add(m);
+  if (y0 >= 1) mull.push(m); // gabinetes altos: solo con muros altos
 });
 
 let wallMode = 1; // 0 altos, 1 bajos, 2 ocultos

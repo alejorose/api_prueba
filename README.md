@@ -38,3 +38,9 @@ en ámbar si son menores a 60 cm.
 ## Calibración
 
 La escala sale de medir el plano contra el área publicada. Ver `docs/calibration.md` y `tools/calibrate.py`.
+
+## Vista tipo maqueta
+
+Fondo azul marino, base de maqueta, luz cálida por cuarto y muros automáticos que bajan
+los que tapan la vista (Muros: auto). Etiquetas flotantes por cuarto (toca una para acercarte),
+minimapa arriba a la derecha (toca un cuarto para ir a él) y botones 3D / Planta / Persona.

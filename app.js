@@ -117,12 +117,13 @@ const SUGGESTED = [
    ============================================================ */
 const $ = s => document.querySelector(s);
 const canvas = $('#c');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.15;
+renderer.setClearColor(0x000000, 0);   // el fondo azul marino es CSS
 const scene = new THREE.Scene();
-scene.background = new THREE.Color('#12151b');
 const camera = new THREE.PerspectiveCamera(42, 1, .1, 120);
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = false;
@@ -132,9 +133,10 @@ controls.screenSpacePanning = true;
 controls.zoomToCursor = true;
 controls.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
 
-scene.add(new THREE.HemisphereLight('#ffffff', '#6b6458', 1.25));
-const sun = new THREE.DirectionalLight('#fff3df', 1.6);
-sun.position.set(2, 14, 14);
+scene.add(new THREE.HemisphereLight('#c9d3ff', '#4b3d38', .9));
+const sun = new THREE.DirectionalLight('#ffe3c4', 2.3);
+sun.position.set(-4, 14, 11);
+const rim = new THREE.DirectionalLight('#6f8cff', .7); rim.position.set(9, 6, -9); scene.add(rim);
 sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048);
 Object.assign(sun.shadow.camera, { left: -9, right: 9, top: 11, bottom: -11, near: 1, far: 40 });
@@ -143,6 +145,10 @@ sun.target.position.set(wx(500), 0, wz(1000));
 scene.add(sun, sun.target);
 
 const CENTER = new THREE.Vector3(wx(500), 0, wz(1000));
+// luces cálidas dentro de los cuartos (ambiente de casa habitada)
+[[368, 880], [545, 880], [510, 1090], [400, 1280], [352, 1050], [650, 1300]].forEach(([x, y]) => {
+  const l = new THREE.PointLight('#ffb067', 3.2, 5.5, 1.6); l.position.set(wx(x), 1.9, wz(y)); scene.add(l);
+});
 let dirty = true;
 const redraw = () => { dirty = true; };
 
@@ -187,6 +193,17 @@ function floorMesh({ r, k, y = 0 }) {
   return m;
 }
 FLOORS.forEach(f => scene.add(floorMesh(f)));
+// base tipo maqueta (plinto) + sombra suave sobre el fondo
+{
+  const mk = pts => { const sh = new THREE.Shape(pts.map(([x, y]) => new THREE.Vector2(wx(x), wz(y)))); const g = new THREE.ExtrudeGeometry(sh, { depth: .45, bevelEnabled: false });
+    const m = new THREE.Mesh(g, mat('#252d5c', { roughness: .9 })); m.rotation.x = Math.PI / 2; m.position.y = -.012; m.receiveShadow = true; scene.add(m); };
+  mk(FOOT); mk([[262, 615], [645, 615], [645, 758], [262, 758]]);
+  const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d');
+  const gr = g.createRadialGradient(128, 128, 20, 128, 128, 128); gr.addColorStop(0, 'rgba(4,6,20,.75)'); gr.addColorStop(1, 'rgba(4,6,20,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 256, 256);
+  const sh = new THREE.Mesh(new THREE.PlaneGeometry(20, 24), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false }));
+  sh.rotation.x = -Math.PI / 2; sh.position.set(CENTER.x + .6, -.47, wz(880)); sh.renderOrder = -1; scene.add(sh);
+}
 
 let roomLabels = [], showDims = true;
 function drawRoomLabels() {
@@ -199,7 +216,7 @@ function drawRoomLabels() {
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
     const m = new THREE.Mesh(new THREE.PlaneGeometry(2.4, .6), new THREE.MeshBasicMaterial({ map: t, transparent: true, depthWrite: false }));
     m.rotation.x = -Math.PI / 2; m.position.set(wx(r.lab[0]), .012, wz(r.lab[1])); m.renderOrder = 2;
-    scene.add(m); return m;
+    m.visible = view === 'top'; scene.add(m); return m;
   });
   redraw();
 }
@@ -220,7 +237,7 @@ const glassMeshes = GLASS.map(([r, h, y0]) => {
   m.userData.full = h === WALL_H; return m;
 });
 // postes del ventanal
-const mull = [];
+const mull = [], cabs = [];
 for (let i = 0; i <= 5; i++) {
   const m = new THREE.Mesh(new THREE.BoxGeometry(.05, WALL_H, .14), mat('#2b2e33'));
   m.position.set(wx(277) + i * (wx(628) - wx(277)) / 5, WALL_H / 2, wz(763)); scene.add(m); mull.push(m);
@@ -236,22 +253,36 @@ FIXTURES.forEach(([r, h, c, y0 = 0]) => {
   const { cx, cz, w, d } = rectOf(r);
   const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat(c));
   m.position.set(cx, y0 + h / 2, cz); m.castShadow = m.receiveShadow = true; scene.add(m);
-  if (y0 >= 1) mull.push(m); // gabinetes altos: solo con muros altos
+  if (y0 >= 1) cabs.push(m); // gabinetes altos: solo si el muro este está alto
 });
 
-let wallMode = 1; // 0 altos, 1 bajos, 2 ocultos
-function applyWalls() {
-  const h = [WALL_H, LOW_H, 0.001][wallMode];
+let wallMode = 3; // 0 altos, 1 bajos, 2 ocultos, 3 auto (maqueta: baja los muros que tapan la vista)
+const WALL_NAMES = ['altos', 'bajos', 'ocultos', 'auto'];
+const setWallH = (m, h) => { const { cx, cz, ww, d } = m.userData; m.scale.set(ww, Math.max(h, .001), d); m.position.set(cx, h / 2, cz); };
+const camDot = (x, z) => { const dx = camera.position.x - CENTER.x, dz = camera.position.z - CENTER.z, L = Math.hypot(dx, dz);
+  return L < 1.5 ? 0 : ((x - CENTER.x) * dx + (z - CENTER.z) * dz) / L; };
+function applyWalls(immediate = true) {
+  const auto = wallMode === 3 && view !== 'top';
+  const front = (x, z) => auto && camDot(x, z) > .8;          // muro entre la cámara y el centro
   wallMeshes.forEach(m => {
     if (m.userData.fixedH) { m.visible = wallMode === 0; return; }
-    const { cx, cz, ww, d } = m.userData;
-    m.scale.set(ww, h, d); m.position.set(cx, h / 2, cz); m.visible = wallMode < 2;
+    m.visible = wallMode !== 2;
+    m.userData.tgt = wallMode === 0 ? WALL_H : wallMode === 2 ? .001 : wallMode === 1 || wallMode === 3 && !auto ? LOW_H : front(m.userData.cx, m.userData.cz) ? LOW_H : WALL_H;
+    if (immediate || m.userData.h == null) { m.userData.h = m.userData.tgt; setWallH(m, m.userData.h); }
   });
-  glassMeshes.forEach(m => { m.visible = m.userData.full ? wallMode === 0 : wallMode < 2; });
-  mull.forEach(m => m.visible = wallMode === 0);
-  const names = ['altos', 'bajos', 'ocultos'];
-  $('#wallsBtn').textContent = 'Muros: ' + names[wallMode];
+  const northTall = wallMode === 0 || auto && !front(CENTER.x, wz(763));
+  glassMeshes.forEach(m => { m.visible = m.userData.full ? northTall : wallMode < 2; });
+  mull.forEach(m => { m.visible = northTall; });
+  const eastTall = wallMode === 0 || auto && !front(wx(636), wz(970));
+  cabs.forEach(m => { m.visible = eastTall; });
+  $('#wallsBtn').textContent = 'Muros: ' + WALL_NAMES[wallMode];
   redraw();
+}
+function animateWalls() {
+  wallMeshes.forEach(m => {
+    const u = m.userData; if (u.tgt == null || Math.abs(u.h - u.tgt) < .004) { if (u.tgt != null && u.h !== u.tgt) { u.h = u.tgt; setWallH(m, u.h); dirty = true; } return; }
+    u.h += (u.tgt - u.h) * .22; setWallH(m, u.h); dirty = true;
+  });
 }
 
 /* ============================================================
@@ -495,7 +526,7 @@ function save() {
 function load() {
   try {
     const d = JSON.parse(localStorage.getItem(STORE) || 'null');
-    if (d && Array.isArray(d.items)) { units = d.units || 'm'; wallMode = d.wallMode ?? 1; return d.items; }
+    if (d && Array.isArray(d.items)) { units = d.units || 'm'; return d.items; }
   } catch { }
   return null;
 }
@@ -697,11 +728,12 @@ function setView(v) {
   controls.enableRotate = v !== 'top';
   controls.touches.ONE = v === 'top' ? THREE.TOUCH.PAN : THREE.TOUCH.ROTATE;
   controls.mouseButtons.LEFT = v === 'top' ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE;
+  focusK = null; roomLabels.forEach(m => { m.visible = v === 'top'; }); markMini(); applyWalls(false);
   document.querySelectorAll('#views button').forEach(b => b.classList.toggle('on', b.dataset.view === v));
   const aspect = camera.aspect, tf = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
   if (v === '3d') {
-    const dist = Math.max(13, 17 / aspect * .75);
-    flyTo(new THREE.Vector3(CENTER.x + 4.5, dist * .78, CENTER.z + dist * .72 + 1), new THREE.Vector3(CENTER.x, 0, CENTER.z - .3));
+    const dist = Math.max(14, 19 / aspect * .8);
+    flyTo(new THREE.Vector3(CENTER.x + dist * .14, dist * .9, CENTER.z + .9 + dist * .42), new THREE.Vector3(CENTER.x, 0, CENTER.z + .9));
   } else if (v === 'top') {
     const h = 12.4, w = 8.2;
     const dist = Math.max(h / 2 / tf, w / 2 / (tf * aspect)) * 1.16;
@@ -714,14 +746,61 @@ function setView(v) {
 }
 document.querySelectorAll('#views button').forEach(b => b.onclick = () => setView(b.dataset.view));
 
+/* ---------- Navegación por cuartos: etiquetas flotantes + minimapa ---------- */
+let focusK = null;
+function focusRoom(k) {
+  const r = ROOMDEF.find(x => x.k === k); if (!r) return;
+  if (view !== '3d') setView('3d');
+  const q = rectOf(r.r), t = new THREE.Vector3(q.cx, .3, q.cz);
+  const tf = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+  const dist = Math.max(q.w / (2 * tf * camera.aspect), q.d / (2 * tf)) * 1.55 + 1.2, dir = new THREE.Vector3(.35, .95, .75).normalize();
+  flyTo(t.clone().addScaledVector(dir, dist), t);
+  focusK = k; markMini();
+}
+const title = n => n[0] + n.slice(1).toLowerCase();
+const CHIP_AT = { prim: [360, 900], liv: [560, 890], kit: [520, 1100], bed2: [400, 1290], patio: [440, 690] };
+const CHIP_KEYS = Object.keys(CHIP_AT);
+const chips = ROOMDEF.filter(r => CHIP_KEYS.includes(r.k)).map(r => {
+  const d = document.createElement('button'); d.className = 'chip'; d.setAttribute('aria-label', 'Ir a ' + title(r.n));
+  d.onclick = () => focusRoom(r.k); $('#chips').appendChild(d); return { r, d };
+});
+function areaText(r) { const q = rectOf(r.r), a = q.w * q.d; return units === 'm' ? a.toFixed(1) + ' m²' : Math.round(a * 10.7639) + ' ft²'; }
+function drawChips() { chips.forEach(({ r, d }) => { d.innerHTML = `<b>${title(r.n)}</b><small>${areaText(r)}</small>`; }); }
+const _v = new THREE.Vector3();
+function updateChips() {
+  const show = view === '3d' && !document.body.classList.contains('sel') && $('#photo').hidden;
+  $('#chips').style.display = show ? '' : 'none';
+  if (!show) return;
+  const placed = [];
+  chips.forEach(({ r, d }) => {
+    _v.set(wx(CHIP_AT[r.k][0]), .9, wz(CHIP_AT[r.k][1])).project(camera);
+    const x = (_v.x + 1) / 2 * innerWidth, y = (1 - _v.y) / 2 * innerHeight;
+    const clash = placed.some(p => Math.abs(p[0] - x) < 84 && Math.abs(p[1] - y) < 34);
+    const ok = (focusK == null || focusK === r.k) && _v.z < 1 && x > 30 && x < innerWidth - 30 && y > 110 && y < innerHeight - 100 && !clash;
+    if (ok) placed.push([x, y]);
+    d.style.display = ok ? '' : 'none'; d.classList.toggle('on', focusK === r.k);
+    d.style.transform = `translate(${x.toFixed(1)}px,${y.toFixed(1)}px) translate(-50%,-100%)`;
+  });
+}
+const NS = 'http://www.w3.org/2000/svg';
+(function buildMini() {
+  const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', '250 605 510 785'); svg.setAttribute('aria-hidden', 'true');
+  const add = (tag, at, par = svg) => { const e = document.createElementNS(NS, tag); Object.entries(at).forEach(([k, v]) => e.setAttribute(k, v)); par.appendChild(e); return e; };
+  ROOMDEF.forEach(r => { const [x1, y1, x2, y2] = r.r; add('rect', { x: x1, y: y1, width: x2 - x1, height: y2 - y1, class: 'mr', 'data-k': r.k }); });
+  WALLS.forEach(([x1, y1, x2, y2]) => add('rect', { x: x1, y: y1, width: x2 - x1, height: y2 - y1, class: 'mw' }));
+  svg.addEventListener('pointerdown', e => { const t = e.target.closest('[data-k]'); if (t) { e.stopPropagation(); focusRoom(t.dataset.k); } });
+  $('#mini').appendChild(svg);
+})();
+function markMini() { document.querySelectorAll('#mini .mr').forEach(e => e.classList.toggle('on', e.dataset.k === focusK)); }
+
 /* ============================================================
    Menú + utilidades
    ============================================================ */
 const menu = $('#menu');
 $('#menuBtn').onclick = () => { menu.hidden = !menu.hidden; };
 canvas.addEventListener('pointerdown', () => { menu.hidden = true; });
-$('#wallsBtn').onclick = () => { wallMode = (wallMode + 1) % 3; applyWalls(); save(); };
-$('#unitsBtn').onclick = () => { units = units === 'm' ? 'ft' : 'm'; $('#unitsBtn').textContent = 'Unidades: ' + units; buildCards(); updateSelUI(); updateGaps(); drawRoomLabels(); save(); };
+$('#wallsBtn').onclick = () => { wallMode = (wallMode + 1) % 4; applyWalls(false); save(); };
+$('#unitsBtn').onclick = () => { units = units === 'm' ? 'ft' : 'm'; $('#unitsBtn').textContent = 'Unidades: ' + units; drawChips(); buildCards(); updateSelUI(); updateGaps(); drawRoomLabels(); save(); };
 $('#dimsBtn').onclick = () => { showDims = !showDims; $('#dimsBtn').textContent = 'Cotas de cuartos: ' + (showDims ? 'sí' : 'no'); drawRoomLabels(); };
 $('#calInfo').textContent = `Huella ${footArea().toFixed(1)} m² = ${Math.round(footArea() / 0.09290304)} ft² · escala ${(S * 100).toFixed(2)} cm/px`;
 $('#snapBtn').onclick = () => { snap = snap ? 0 : .05; $('#snapBtn').textContent = 'Imán: ' + (snap ? '5 cm' : 'libre'); };
@@ -835,7 +914,7 @@ function capture(w, h, pos, target, fov, walls, numbers) {
   const bg = scene.background; scene.background = new THREE.Color('#e6e9ee');
   const prev = { p: camera.position.clone(), q: camera.quaternion.clone(), fov: camera.fov, asp: camera.aspect, wm: wallMode, ring: ring.visible };
   const sprites = numbers ? items.map((it, i) => { const sp = numberSprite(i + 1); sp.position.set(it.x - (CATALOG[it.type].rug ? .55 : 0), 2.2, it.z); scene.add(sp); return sp; }) : [];
-  gapObjs.forEach(g => { g.line.visible = g.sp.visible = false; }); ring.visible = false;
+  gapObjs.forEach(g => { g.line.visible = g.sp.visible = false; }); ring.visible = false; roomLabels.forEach(m => { m.visible = true; });
   renderer.setPixelRatio(1); renderer.setSize(w, h, false);
   camera.fov = fov; camera.aspect = w / h; camera.position.copy(pos); camera.lookAt(target); camera.updateProjectionMatrix();
   wallMode = walls; applyWalls();
@@ -845,6 +924,7 @@ function capture(w, h, pos, target, fov, walls, numbers) {
   scene.background = bg; wallMode = prev.wm; applyWalls(); ring.visible = prev.ring;
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.setSize(innerWidth, innerHeight, false);
   camera.fov = prev.fov; camera.aspect = prev.asp; camera.position.copy(prev.p); camera.quaternion.copy(prev.q); camera.updateProjectionMatrix();
+  roomLabels.forEach(m => { m.visible = view === 'top'; }); applyWalls(true);
   updateGaps(); redraw();
   return url;
 }
@@ -879,11 +959,11 @@ function openPhoto() {
     $('#shotSel').innerHTML = '<option value="all">Todo el departamento</option>' + ROOMDEF.filter(r => r.eye).map(r => `<option value="${r.k}">${r.n[0] + r.n.slice(1).toLowerCase()}</option>`).join('');
     $('#styleSel').innerHTML = Object.entries(STYLES).map(([k, v]) => `<option value="${k}">${v[0]}</option>`).join('');
   }
-  $('#photo').hidden = false; $('#photoBody').scrollTop = 0;
+  document.body.classList.add('photo'); $('#photo').hidden = false; $('#photoBody').scrollTop = 0;
   requestAnimationFrame(() => setTimeout(() => refreshPhoto(true), 30));
 }
 $('#photoBtn').onclick = openPhoto;
-$('#photoClose').onclick = () => { $('#photo').hidden = true; };
+$('#photoClose').onclick = () => { $('#photo').hidden = true; document.body.classList.remove('photo'); redraw(); };
 $('#shotSel').onchange = () => refreshPhoto(true);
 $('#styleSel').onchange = () => refreshPhoto(false);
 $('#copyPrompt').onclick = async () => {
@@ -910,7 +990,7 @@ function resize() {
   layoutTray(); redraw();
 }
 addEventListener('resize', resize);
-controls.addEventListener('change', redraw);
+controls.addEventListener('change', () => { if (wallMode === 3) applyWalls(false); redraw(); });
 
 function frame(now) {
   if (tween) {
@@ -921,14 +1001,15 @@ function frame(now) {
     if (k >= 1) tween = null;
     controls.update(); dirty = true;
   }
-  if (dirty) { dirty = false; renderer.render(scene, camera); }
+  animateWalls();
+  if (dirty) { dirty = false; renderer.render(scene, camera); updateChips(); }
   requestAnimationFrame(frame);
 }
 
 // Init
 const saved = load();
 resize();
-applyWalls(); drawRoomLabels();
+applyWalls(); drawRoomLabels(); drawChips();
 $('#unitsBtn').textContent = 'Unidades: ' + units;
 buildTabs(); buildCards();
 loadItems(saved || SUGGESTED);

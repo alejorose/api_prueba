@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>IMIX 10C · Layout 3D</title>
+<meta name="theme-color" content="#12151b">
+<link rel="stylesheet" href="style.css">
+<script type="importmap">
+{ "imports": {
+  "three": "./vendor/three.module.js",
+  "three/addons/": "./vendor/addons/"
+} }
+</script>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<header id="top">
+  <div class="brand">
+    <b>IMIX · Suite 10C</b>
+    <span>664 sq ft · 2 hab · 2 baños</span>
+  </div>
+  <div class="seg" id="views">
+    <button data-view="3d" class="on">3D</button>
+    <button data-view="top">Planta</button>
+    <button data-view="eye">Persona</button>
+  </div>
+  <button id="menuBtn" class="ico" aria-label="Menú">⋯</button>
+</header>
+
+<div id="menu" hidden>
+  <button id="wallsBtn">Muros: bajos</button>
+  <button id="unitsBtn">Unidades: m</button>
+  <button id="snapBtn">Imán: 5 cm</button>
+  <hr>
+  <button id="resetBtn">Layout sugerido</button>
+  <button id="clearBtn">Vaciar espacio</button>
+  <hr>
+  <button id="shotBtn">Guardar captura PNG</button>
+  <button id="exportBtn">Exportar layout (.json)</button>
+  <button id="importBtn">Importar layout</button>
+  <input type="file" id="importFile" accept="application/json" hidden>
+</div>
+
+<div id="hint">Arrastra un mueble para moverlo · arrastra el fondo para orbitar · pellizca para zoom</div>
+
+<section id="sel" hidden>
+  <div class="selrow">
+    <div><b id="selName"></b><small id="selDims"></small></div>
+    <button id="selClose" class="ico sm" aria-label="Cerrar">✕</button>
+  </div>
+  <div class="selrow tools">
+    <button id="rotL">↺ 15°</button>
+    <button id="rotR">↻ 15°</button>
+    <button id="rot90">⟳ 90°</button>
+    <button id="dup">Duplicar</button>
+    <button id="del" class="danger">Borrar</button>
+  </div>
+  <div class="swatches" id="swatches"></div>
+</section>
+
+<footer id="tray">
+  <div class="tabs" id="tabs"></div>
+  <div class="cards" id="cards"></div>
+</footer>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

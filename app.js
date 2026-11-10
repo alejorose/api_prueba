@@ -129,6 +129,8 @@ controls.enableDamping = false;
 controls.maxPolarAngle = Math.PI / 2 - .02;
 controls.minDistance = .05; controls.maxDistance = 40;
 controls.screenSpacePanning = true;
+controls.zoomToCursor = true;
+controls.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
 
 scene.add(new THREE.HemisphereLight('#ffffff', '#6b6458', 1.25));
 const sun = new THREE.DirectionalLight('#fff3df', 1.6);
@@ -480,6 +482,13 @@ function updateGaps() {
   });
   redraw();
 }
+const hist = [];
+const snapshot = () => JSON.stringify(items.map(({ hit, ...r }) => r));
+function pushHist(snap) { hist.push(snap || snapshot()); if (hist.length > 40) hist.shift(); $('#undoBtn').disabled = false; }
+function undo() {
+  const snap = hist.pop(); $('#undoBtn').disabled = !hist.length; if (!snap) return;
+  const keep = selectedId; loadItems(JSON.parse(snap)); if (byId(keep)) select(keep);
+}
 function save() {
   try { localStorage.setItem(STORE, JSON.stringify({ v: 1, units, wallMode, items: items.map(({ hit, ...r }) => r) })); } catch { }
 }
@@ -506,7 +515,7 @@ function select(id) {
     ring.geometry.setFromPoints([[-hw, -hd], [hw, -hd], [hw, hd], [-hw, hd]].map(([x, z]) => new THREE.Vector3(x, .03, z)));
     syncRing();
   }
-  $('#sel').hidden = id == null;
+  $('#sel').hidden = id == null; document.body.classList.toggle('sel', id != null);
   buildSwatches(); updateSelUI(); updateGaps(); layoutTray(); redraw();
 }
 function syncRing() {
@@ -527,7 +536,7 @@ function buildSwatches() {
   const it = byId(selectedId); if (!it) return;
   PALETTE.forEach(c => {
     const i = document.createElement('i'); i.style.background = c; if (c === it.color) i.className = 'on';
-    i.onclick = () => { it.color = c; removeGroup(it.id); addGroup(it); checkCollisions(); buildSwatches(); save(); redraw(); };
+    i.onclick = () => { pushHist(); it.color = c; removeGroup(it.id); addGroup(it); checkCollisions(); buildSwatches(); save(); redraw(); };
     box.appendChild(i);
   });
 }
@@ -543,8 +552,26 @@ function groundPoint(e) { setNDC(e); const p = new THREE.Vector3(); return ray.r
 function pick(e) {
   setNDC(e);
   const hits = ray.intersectObjects([...groups.values()], true);
-  for (const h of hits) { let o = h.object; while (o && o.userData.id == null) o = o.parent; if (o) return o.userData.id; }
-  return null;
+  let rugHit = null;
+  for (const h of hits) {
+    let o = h.object; while (o && o.userData.id == null) o = o.parent; if (!o) continue;
+    if (CATALOG[byId(o.userData.id).type].rug) { rugHit = rugHit ?? o.userData.id; continue; }
+    return o.userData.id;
+  }
+  // tolerancia táctil: el dedo es grande, acepta toques cerca del mueble
+  const p = new THREE.Vector3();
+  if (ray.ray.intersectPlane(ground, p)) {
+    const tol = THREE.MathUtils.clamp(camera.position.distanceTo(p) / 38, .1, .45);
+    let best = null, bd = 1e9;
+    items.forEach(it => {
+      const k = CATALOG[it.type]; if (k.rug) return;
+      const c = Math.cos(it.rot), s = Math.sin(it.rot), dx = p.x - it.x, dz = p.z - it.z;
+      const lx = dx * c - dz * s, lz = dx * s + dz * c;
+      if (Math.abs(lx) <= k.w / 2 + tol && Math.abs(lz) <= k.d / 2 + tol) { const d = Math.hypot(lx, lz); if (d < bd) { bd = d; best = it.id; } }
+    });
+    if (best != null) return best;
+  }
+  return rugHit;
 }
 
 let drag = null;
@@ -556,13 +583,13 @@ canvas.addEventListener('pointerdown', e => {
   controls.enabled = false;
   select(id);
   const it = byId(id), p = groundPoint(e);
-  drag = { id, off: p ? new THREE.Vector2(it.x - p.x, it.z - p.z) : new THREE.Vector2(), moved: false, x: e.clientX, y: e.clientY };
+  drag = { id, off: p ? new THREE.Vector2(it.x - p.x, it.z - p.z) : new THREE.Vector2(), moved: false, x: e.clientX, y: e.clientY, snap: snapshot() };
   canvas.setPointerCapture(e.pointerId);
 }, { capture: true });
 
 canvas.addEventListener('pointermove', e => {
   if (!drag || drag.none) return;
-  if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 3) drag.moved = true;
+  if (!drag.moved && Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 6) { drag.moved = true; pushHist(drag.snap); }
   if (!drag.moved) return;
   const p = groundPoint(e); if (!p) return;
   const it = byId(drag.id);
@@ -580,8 +607,9 @@ const endDrag = e => {
 canvas.addEventListener('pointerup', endDrag);
 canvas.addEventListener('pointercancel', endDrag);
 
-function mutateSel(fn) {
+function mutateSel(fn, record = true) {
   const it = byId(selectedId); if (!it) return;
+  if (record) pushHist();
   fn(it); place(groups.get(it.id), it); syncRing(); checkCollisions(); save(); redraw();
 }
 const rotate = deg => mutateSel(it => { it.rot += deg * Math.PI / 180; });
@@ -589,12 +617,23 @@ $('#rotL').onclick = () => rotate(15);
 $('#rotR').onclick = () => rotate(-15);
 $('#rot90').onclick = () => rotate(-90);
 $('#selClose').onclick = () => select(null);
+$('#undoBtn').onclick = undo;
+$('#trayToggle').onclick = () => document.body.classList.toggle('tray-min');
+// flechas de precisión (mantén presionado para repetir)
+document.querySelectorAll('.nud').forEach(b => {
+  let t1, t2;
+  const step = first => { const st = snap || .05; mutateSel(it => { it.x += +b.dataset.dx * st; it.z += +b.dataset.dz * st; }, first); };
+  const stop = () => { clearTimeout(t1); clearInterval(t2); };
+  b.addEventListener('pointerdown', e => { e.preventDefault(); step(true); t1 = setTimeout(() => { t2 = setInterval(() => step(false), 80); }, 380); });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => b.addEventListener(ev, stop));
+});
 $('#del').onclick = () => {
   const id = selectedId; if (id == null) return;
-  removeGroup(id); items = items.filter(i => i.id !== id); select(null); checkCollisions(); save(); redraw();
+  pushHist(); removeGroup(id); items = items.filter(i => i.id !== id); select(null); checkCollisions(); save(); redraw();
 };
 $('#dup').onclick = () => {
   const it = byId(selectedId); if (!it) return;
+  pushHist();
   const c = { ...it, id: nextId++, x: it.x + .3, z: it.z + .3, hit: false };
   items.push(c); addGroup(c); select(c.id); checkCollisions(); save();
 };
@@ -602,6 +641,7 @@ addEventListener('keydown', e => {
   if (e.key === 'Delete' || e.key === 'Backspace') $('#del').click();
   else if (e.key === 'r' || e.key === 'R') rotate(e.shiftKey ? 15 : -90);
   else if (e.key === 'Escape') select(null);
+  else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { undo(); e.preventDefault(); }
   else if (selectedId != null && e.key.startsWith('Arrow')) {
     const st = e.shiftKey ? .01 : .05, k = e.key;
     mutateSel(it => { if (k === 'ArrowLeft') it.x -= st; if (k === 'ArrowRight') it.x += st; if (k === 'ArrowUp') it.z -= st; if (k === 'ArrowDown') it.z += st; });
@@ -635,7 +675,7 @@ function addItem(type) {
   const k = CATALOG[type], n = items.length % 5 * .15;
   const it = { id: nextId++, type, x: p.x + n, z: p.z + n, rot: 0, color: k.c };
   if (snap) { it.x = Math.round(it.x / snap) * snap; it.z = Math.round(it.z / snap) * snap; }
-  items.push(it); addGroup(it); select(it.id); checkCollisions(); save();
+  pushHist(); items.push(it); addGroup(it); select(it.id); checkCollisions(); save();
 }
 function layoutTray() {
   requestAnimationFrame(() => document.documentElement.style.setProperty('--tray-h', $('#tray').offsetHeight + 'px'));
@@ -653,6 +693,10 @@ function setView(v) {
   if (v === 'eye' && view !== 'eye') { wallsBeforeEye = wallMode; wallMode = 0; applyWalls(); }
   if (v !== 'eye' && view === 'eye' && wallsBeforeEye != null) { wallMode = wallsBeforeEye; wallsBeforeEye = null; applyWalls(); }
   view = v;
+  // en planta 1 dedo mueve la vista (no gira); en 3D/persona gira
+  controls.enableRotate = v !== 'top';
+  controls.touches.ONE = v === 'top' ? THREE.TOUCH.PAN : THREE.TOUCH.ROTATE;
+  controls.mouseButtons.LEFT = v === 'top' ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE;
   document.querySelectorAll('#views button').forEach(b => b.classList.toggle('on', b.dataset.view === v));
   const aspect = camera.aspect, tf = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
   if (v === '3d') {
@@ -660,7 +704,7 @@ function setView(v) {
     flyTo(new THREE.Vector3(CENTER.x + 4.5, dist * .78, CENTER.z + dist * .72 + 1), new THREE.Vector3(CENTER.x, 0, CENTER.z - .3));
   } else if (v === 'top') {
     const h = 12.4, w = 8.2;
-    const dist = Math.max(h / 2 / tf, w / 2 / (tf * aspect)) * 1.04;
+    const dist = Math.max(h / 2 / tf, w / 2 / (tf * aspect)) * 1.16;
     flyTo(new THREE.Vector3(wx(505), dist, wz(996) + .01), new THREE.Vector3(wx(505), 0, wz(996)));
   } else {
     const eye = new THREE.Vector3(wx(552), 1.6, wz(1300));
@@ -681,8 +725,8 @@ $('#unitsBtn').onclick = () => { units = units === 'm' ? 'ft' : 'm'; $('#unitsBt
 $('#dimsBtn').onclick = () => { showDims = !showDims; $('#dimsBtn').textContent = 'Cotas de cuartos: ' + (showDims ? 'sí' : 'no'); drawRoomLabels(); };
 $('#calInfo').textContent = `Huella ${footArea().toFixed(1)} m² = ${Math.round(footArea() / 0.09290304)} ft² · escala ${(S * 100).toFixed(2)} cm/px`;
 $('#snapBtn').onclick = () => { snap = snap ? 0 : .05; $('#snapBtn').textContent = 'Imán: ' + (snap ? '5 cm' : 'libre'); };
-$('#resetBtn').onclick = () => { loadItems(SUGGESTED); menu.hidden = true; };
-$('#clearBtn').onclick = () => { if (confirm('¿Quitar todos los muebles?')) loadItems([]); menu.hidden = true; };
+$('#resetBtn').onclick = () => { pushHist(); loadItems(SUGGESTED); menu.hidden = true; };
+$('#clearBtn').onclick = () => { pushHist(); loadItems([]); menu.hidden = true; };
 function download(name, href) { const a = document.createElement('a'); a.href = href; a.download = name; a.click(); }
 $('#shotBtn').onclick = () => {
   ring.visible = false; renderer.render(scene, camera);

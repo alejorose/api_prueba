@@ -21,6 +21,7 @@
     <b>IMIX · Suite 10C</b>
     <span>664 sq ft · 2 hab · 2 baños</span>
   </div>
+  <button id="undoBtn" class="ico" aria-label="Deshacer" disabled>↶</button>
   <div class="seg" id="views">
     <button data-view="3d" class="on">3D</button>
     <button data-view="top">Planta</button>
@@ -46,22 +47,32 @@
   <input type="file" id="importFile" accept="application/json" hidden>
 </div>
 
-<div id="hint">Arrastra un mueble para moverlo · arrastra el fondo para orbitar · pellizca para zoom</div>
+<div id="hint">Toca un mueble para moverlo · arrastra el fondo para mover la vista · pellizca para zoom</div>
 
 <section id="sel" hidden>
   <div class="selrow">
-    <div><b id="selName"></b><small id="selDims"></small></div>
-    <button id="selClose" class="ico sm" aria-label="Cerrar">✕</button>
+    <div class="selname"><b id="selName"></b><small id="selDims"></small></div>
+    <button id="selClose" class="done">Listo</button>
   </div>
   <div class="gaps" id="selGaps"></div>
+  <div class="pad">
+    <div class="grp">
+      <button id="rotL" aria-label="Girar izquierda 15 grados">↺ 15°</button>
+      <button id="rotR" aria-label="Girar derecha 15 grados">↻ 15°</button>
+      <button id="rot90" aria-label="Girar 90 grados">⟳ 90°</button>
+    </div>
+    <div class="grp dpad">
+      <button class="nud" data-dx="-1" data-dz="0" aria-label="Mover izquierda">◀</button>
+      <button class="nud" data-dx="0" data-dz="-1" aria-label="Mover arriba">▲</button>
+      <button class="nud" data-dx="0" data-dz="1" aria-label="Mover abajo">▼</button>
+      <button class="nud" data-dx="1" data-dz="0" aria-label="Mover derecha">▶</button>
+    </div>
+  </div>
   <div class="selrow tools">
-    <button id="rotL">↺ 15°</button>
-    <button id="rotR">↻ 15°</button>
-    <button id="rot90">⟳ 90°</button>
+    <div class="swatches" id="swatches"></div>
     <button id="dup">Duplicar</button>
     <button id="del" class="danger">Borrar</button>
   </div>
-  <div class="swatches" id="swatches"></div>
 </section>
 
 <div id="photo" hidden>
@@ -85,7 +96,7 @@
 </div>
 
 <footer id="tray">
-  <div class="tabs" id="tabs"></div>
+  <div class="trayhead"><div class="tabs" id="tabs"></div><button id="trayToggle" class="ico sm" aria-label="Ocultar catálogo">▾</button></div>
   <div class="cards" id="cards"></div>
 </footer>
 

@@ -55,6 +55,8 @@ layout.json                      posiciones de los muebles (datos)
 | Recámara 2 (con clóset) · toma 1 | `03-prompts/prompt-recamara-2-1.md` | `plano-numerado.jpg`, `toma-recamara-2-1.jpg`, `tour-recamara2-closet.jpg`, `tour-cocina-hacia-recamara2.jpg`, `inspo-3.jpg`, `inspo-4.jpg` |
 | Recámara 2 (con clóset) · toma 2 | `03-prompts/prompt-recamara-2-2.md` | `plano-numerado.jpg`, `toma-recamara-2-2.jpg`, `tour-recamara2-closet.jpg`, `tour-cocina-hacia-recamara2.jpg`, `inspo-3.jpg`, `inspo-4.jpg` |
 | Entrada · toma 1 | `03-prompts/prompt-entrada-1.md` | `plano-numerado.jpg`, `toma-entrada-1.jpg`, `tour-entrada.jpg`, `tour-pasillo.jpg`, `inspo-1.jpg` |
+| Recámara 2 · isométrica hacia el escritorio | `03-prompts/prompt-recamara-2-iso-escritorio.md` | `plano-numerado.jpg`, `toma-recamara-2-iso-escritorio.jpg`, `tour-recamara2-closet.jpg`, `tour-cocina-hacia-recamara2.jpg`, `inspo-3.jpg` |
+| Recámara 2 · isométrica hacia el clóset | `03-prompts/prompt-recamara-2-iso-closet.md` | `plano-numerado.jpg`, `toma-recamara-2-iso-closet.jpg`, `tour-recamara2-closet.jpg`, `tour-cocina-hacia-recamara2.jpg`, `inspo-3.jpg` |
 
 Orden sugerido: primero **Vista aérea** (comprueba que respeta el plano), luego **Sala**, **Cocina y comedor**, **Recámara principal**, **Recámara 2** y **Entrada**.
 

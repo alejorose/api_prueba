@@ -58,6 +58,27 @@ const ROOMS = {
     write('03-prompts/' + name, `# ${s.meta.es} · toma ${s.n}\n\n## 1. Adjunta estos archivos (en este orden)\n\n${attach.map((a, i) => `${i + 1}. \`${a}\``).join('\n')}\n\n## 2. Pega este prompt\n\n\`\`\`text\n${prompt}\n\`\`\`\n\n## 3. Formato\n\nImagen horizontal 3:2 (1536×1024). Si el resultado no respeta la distribución, usa las frases de corrección de \`00-LEEME-chatgpt.md\`.\n`);
     promptFiles.push({ name, es: s.meta.es, n: s.n, attach });
   }
+  // vistas isométricas de la recámara 2: hacia el escritorio y hacia el clóset
+  const ISO = [
+    { slug: 'iso-escritorio', es: 'Recámara 2 · isométrica hacia el escritorio', eye: [290, 1405, 3.7], tg: [485, 1262, 0.5], fov: 48, tall: false,
+      cam: 'High-angle isometric-style view of the second bedroom with the ceiling removed and the near walls cut away. The camera hovers about 3.7 m above the floor outside the south-west corner, tilted down about 35 degrees, 35 mm lens, looking north-east toward the desk on the east wall. The full bed (head against the south wall, on the right side of the frame) with its wall art, two wall lamps and floating bedside shelves is in the foreground, the desk against the east wall is in the middle distance, and the white closet doors are on the near west wall.' },
+    { slug: 'iso-closet', es: 'Recámara 2 · isométrica hacia el clóset', eye: [585, 1335, 4.2], tg: [340, 1288, 0.7], fov: 54, tall: true,
+      cam: 'High-angle isometric-style view of the second bedroom with the ceiling removed and the near walls cut away. The camera hovers about 4.2 m above the floor outside the south-east corner, tilted down about 35 degrees, 35 mm lens, looking west-north-west toward the built-in closet: three white sliding doors, closed, fill the whole west wall (0.62 m deep x 2.46 m long closet). The bed (head against the south wall, on the left side of the frame) with its wall art and wall lamps is in the lower left, the plant by the closet door is in the middle, and the desk runs along the east wall in the lower right foreground.' },
+  ];
+  for (const v of ISO) {
+    const file = `02-tomas/toma-recamara-2-${v.slug}.jpg`;
+    save(await page.evaluate(([e, t, f, a]) => __app.isoShotPx(e, t, f, 1536, 1152, a), [v.eye, v.tg, v.fov, v.tall]), file);
+    const files = [
+      ['plano-numerado.jpg', 'top-down plan of the furnished suite; the numbers match the furniture list (ground truth for the layout)'],
+      [path.basename(file), 'plain 3D camera reference (no textures): reproduce this exact high-angle viewpoint, framing and which walls are cut away'],
+      ['tour-recamara2-closet.jpg', TOUR_DESC], ['tour-cocina-hacia-recamara2.jpg', TOUR_DESC], ['inspo-3.jpg', INSPO_DESC(3)],
+    ];
+    const prompt = await page.evaluate(([f, c]) => __app.buildPrompt('bed2', 'japandi', { files: f, camFull: c }), [files, v.cam + ' Natural perspective with slight wide-angle distortion only; keep verticals straight.']);
+    const attach = ['01-referencias/plano-numerado.jpg', file, '01-referencias/tour-recamara2-closet.jpg', '01-referencias/tour-cocina-hacia-recamara2.jpg', '01-referencias/inspo-3.jpg'];
+    const name = `prompt-recamara-2-${v.slug}.md`;
+    write('03-prompts/' + name, `# ${v.es}\n\n## 1. Adjunta estos archivos (en este orden)\n\n${attach.map((a, i) => `${i + 1}. \`${a}\``).join('\n')}\n\n## 2. Pega este prompt\n\n\`\`\`text\n${prompt}\n\`\`\`\n\n## 3. Formato\n\nImagen horizontal 3:2 (1536×1024). Vista alta tipo maqueta: sin techo y con los muros cercanos cortados, como en la referencia de cámara.\n`);
+    promptFiles.push({ name, es: v.es, n: '', attach });
+  }
   // vista aérea completa
   {
     const files = [['plano-numerado.jpg', 'top-down numbered plan of the furnished suite (ground truth for the layout)'], ['vista-aerea.jpg', 'plain 3D aerial reference (no textures): reproduce this viewpoint'],

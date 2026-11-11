@@ -258,7 +258,7 @@ for (let i = 0; i <= 5; i++) {
   [0, 1, 2].forEach(i => {                                   // dos rieles: los paneles se traslapan
     const { cx, cz, w, d } = rectOf([i % 2 ? 318 : 314, y0 + i * len - (i ? 2 : 0), i % 2 ? 321 : 317, y0 + (i + 1) * len + (i < 2 ? 2 : 0)]);
     const m = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), mat('#f1eee9', { roughness: .6 }));
-    m.userData = { cx, cz, ww: w, d }; m.castShadow = m.receiveShadow = true; scene.add(m); wallMeshes.push(m);
+    m.userData = { cx, cz, ww: w, d, closet: true }; m.castShadow = m.receiveShadow = true; scene.add(m); wallMeshes.push(m);
   });
   const fl = floorMesh({ r: [277, y0, 314, y1], k: 'wood', y: .004 }); fl.material.color.set('#8f8579'); scene.add(fl);
   const c0 = rectOf([277, y0, 314, y1]);
@@ -279,6 +279,7 @@ FIXTURES.forEach(([r, h, c, y0 = 0]) => {
 });
 
 let wallMode = 3; // 0 altos, 1 bajos, 2 ocultos, 3 auto (maqueta: baja los muros que tapan la vista)
+let doorsTall = false;   // solo para tomas de render: puertas del clóset cerradas a altura completa
 const WALL_NAMES = ['altos', 'bajos', 'ocultos', 'auto'];
 const setWallH = (m, h) => { const { cx, cz, ww, d } = m.userData; m.scale.set(ww, Math.max(h, .001), d); m.position.set(cx, h / 2, cz); };
 const camDot = (x, z) => { const dx = camera.position.x - CENTER.x, dz = camera.position.z - CENTER.z, L = Math.hypot(dx, dz);
@@ -290,6 +291,7 @@ function applyWalls(immediate = true) {
     if (m.userData.fixedH) { m.visible = wallMode === 0; return; }
     m.visible = wallMode !== 2;
     m.userData.tgt = wallMode === 0 ? WALL_H : wallMode === 2 ? .001 : wallMode === 1 || wallMode === 3 && !auto ? LOW_H : front(m.userData.cx, m.userData.cz) ? LOW_H : WALL_H;
+    if (doorsTall && m.userData.closet) m.userData.tgt = WALL_H;
     if (immediate || m.userData.h == null) { m.userData.h = m.userData.tgt; setWallH(m, m.userData.h); }
   });
   const northTall = wallMode === 0 || auto && !front(CENTER.x, wz(763));
@@ -1043,7 +1045,7 @@ STYLE (decor and textiles only; keep the furniture colours above)
 ${STYLES[style][1]}
 
 CAMERA
-${camTxt ? 'Eye level at 1.5 m, 24 mm wide-angle lens, vertical lines straight, ' + camTxt + '.' : 'High three-quarter aerial view of the whole suite with the ceiling removed, as in the aerial reference image.'}
+${opts.camFull ? opts.camFull : camTxt ? 'Eye level at 1.5 m, 24 mm wide-angle lens, vertical lines straight, ' + camTxt + '.' : 'High three-quarter aerial view of the whole suite with the ceiling removed, as in the aerial reference image.'}
 ${style === 'japandi' ? 'Lighting: follow the STYLE section (warm lamps on, plus soft window light). ' : 'Natural daylight from the windows. '}Soft realistic shadows, 4K architectural photography, interior magazine quality.`;
 }
 
@@ -1210,4 +1212,6 @@ setTimeout(hideHint, 9000);
 const shotPx = (eye, tg, fov, w, h) => capture(w, h, new THREE.Vector3(wx(eye[0]), 1.5, wz(eye[1])), new THREE.Vector3(wx(tg[0]), 1.0, wz(tg[1])), fov, 0, false);
 const planShot = (w, h, numbers) => { const tf = Math.tan(THREE.MathUtils.degToRad(21)), top = Math.max(12.6 / 2 / tf, 8.4 / 2 / (tf * (w / h))) * 1.04; return capture(w, h, new THREE.Vector3(wx(505), top, wz(996) + .01), new THREE.Vector3(wx(505), 0, wz(996)), 42, 1, numbers); };
 const aerialShot = (w, h) => capture(w, h, new THREE.Vector3(CENTER.x + 4.5, 15.5 * .78, CENTER.z + 15.5 * .72 + 1), new THREE.Vector3(CENTER.x, 0, CENTER.z - .3), 42, 1, false);
-window.__app = { setView, items: () => items, select, camera, controls, shopRows, totals, ROOMDEF, buildPrompt, describe, shotPx, planShot, aerialShot, EXTRAS, PRODUCTS, CATALOG, STYLES, money, shopText };
+// Vista alta/isométrica: eye y tg = [x px, y px, altura en m]; walls 3 = muros que tapan bajan solos
+const isoShotPx = (eye, tg, fov, w, h, tall = false) => { doorsTall = tall; try { return capture(w, h, new THREE.Vector3(wx(eye[0]), eye[2], wz(eye[1])), new THREE.Vector3(wx(tg[0]), tg[2], wz(tg[1])), fov, 3, false); } finally { doorsTall = false; applyWalls(true); } };
+window.__app = { setView, items: () => items, select, camera, controls, shopRows, totals, ROOMDEF, buildPrompt, describe, shotPx, isoShotPx, planShot, aerialShot, EXTRAS, PRODUCTS, CATALOG, STYLES, money, shopText };

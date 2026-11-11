@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { PRODUCTS, EXTRAS, JAPANDI } from './shop.js';
 
 /* ============================================================
    Plano IMIX Suite 10C — reconstruido desde la imagen (px -> m)
@@ -17,8 +18,8 @@ const rectOf = ([x1, y1, x2, y2]) => ({ cx: wx((x1 + x2) / 2), cz: wz((y1 + y2) 
 const WALL_H = 2.5, LOW_H = 0.55;
 
 const WALLS = [
-  [262, 758, 277, 1378], [262, 1355, 750, 1378], [738, 1225, 750, 1378],
-  [645, 1225, 680, 1240], [628, 758, 645, 1182], [585, 1182, 645, 1225],
+  [262, 758, 277, 1378], [262, 1355, 750, 1378], [738, 1225, 750, 1252], [738, 1340, 750, 1378],
+  [645, 1225, 738, 1240], [628, 758, 645, 1182], [585, 1182, 645, 1225],
   [277, 978, 372, 986], [425, 980, 433, 1135], [277, 1080, 433, 1100],
   [277, 1190, 380, 1197], [445, 810, 455, 921], [445, 915, 492, 921],
   [518, 1197, 525, 1300], [620, 615, 645, 758],
@@ -96,11 +97,15 @@ const CATALOG = {
   plant:      { n: 'Planta', cat: 'Deco', w: .4, d: .4, h: 1.2, c: '#5f9d4c', em: '🌿', b: 'plant' },
   lamp:       { n: 'Lámpara pie', cat: 'Deco', w: .35, d: .35, h: 1.6, c: '#f2d9a0', em: '💡', b: 'lamp' },
 };
-const CATS = ['Recámara', 'Sala', 'Comedor', 'Oficina', 'Deco'];
+// Productos de tienda (shop.js) como piezas del catálogo
+PRODUCTS.forEach(p => { CATALOG['p_' + p.id] = { n: p.name, cat: 'Tienda', w: p.w, d: p.d, h: p.h, c: p.color, em: p.em, b: p.b, rug: p.rug, air: p.air, elev: p.elev, duvet: p.duvet, shop: p }; });
+const CATS = ['Tienda', 'Recámara', 'Sala', 'Comedor', 'Oficina', 'Deco'];
+const floats = k => k.rug || k.air;   // alfombras y piezas colgadas no chocan con el piso
 const PALETTE = ['#6b7a8f', '#8fa3b8', '#c97b4a', '#b08968', '#e8e2d8', '#3b3f46', '#5f9d4c', '#c75b5b', '#d9b44a'];
 
 // Layout sugerido (px del plano, rotación en grados). Cabecera/respaldo mira a -Z local.
 const px = (x, y) => [wx(x), wz(y)];
+const JAPANDI_ITEMS = JAPANDI.map(([id, x, y, deg, elev], i) => ({ id: i + 1, type: 'p_' + id, x: wx(x), z: wz(y), rot: deg * Math.PI / 180, color: CATALOG['p_' + id].c, ...(elev ? { elev } : {}) }));
 const SUGGESTED = [
   ['bed_queen', ...px(344, 878), 90], ['nightstand', ...px(291, 806), 90], ['nightstand', ...px(291, 950), 90],
   ['sofa3', ...px(598, 845), -90], ['coffee_r', ...px(525, 848), 0], ['rug', ...px(535, 850), 90],
@@ -311,12 +316,58 @@ function cyl(g, rt, rb, h, x, y, z, m, seg = 20) {
 const shade = (c, k) => new THREE.Color(c).offsetHSL(0, 0, k);
 
 const BUILD = {
+  glowdisc(g, it, { w, d }, c) {
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(w / 2, w / 2, d, 32), mat(c, { emissive: c, emissiveIntensity: .9, roughness: .3 }));
+    m.rotation.x = Math.PI / 2; m.position.set(0, w / 2, 0); g.add(m);
+  },
+  arclamp(g, it, { h }, c) {
+    const dark = mat('#26292e', { metalness: .4 });
+    cyl(g, .16, .17, .04, 0, .02, 0, dark, 24);
+    const pts = [[0, .04, 0], [0, 1.0, 0], [0, 1.7, 0], [0, 1.95, .35], [0, 1.9, .8], [0, 1.68, 1.2]].map(p => new THREE.Vector3(...p));
+    const tube = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 40, .013, 8), dark); tube.castShadow = true; g.add(tube);
+    const sh = new THREE.Mesh(new THREE.SphereGeometry(.22, 28, 12, 0, Math.PI * 2, 0, Math.PI / 2), mat(c, { emissive: c, emissiveIntensity: .8, side: THREE.DoubleSide }));
+    sh.position.set(0, 1.55, 1.2); g.add(sh);
+  },
+  mirror(g, it, { w, d, h }, c) {      // espejo de piso con LED cálido
+    part(g, w + .05, h + .05, .008, 0, h / 2, -d / 2 - .002, mat('#ffb067', { emissive: '#ffa550', emissiveIntensity: 1.3 }));
+    part(g, w, h, d, 0, h / 2, 0, mat(c));
+    part(g, w - .05, h - .05, d + .004, 0, h / 2, .002, mat('#dfe8f2', { roughness: .08, metalness: .85 }));
+  },
+  mirrorround(g, it, { w, d, h }, c) {
+    const f = new THREE.Mesh(new THREE.CylinderGeometry(w / 2, w / 2, d, 40), mat(c)); f.rotation.x = Math.PI / 2; f.position.set(0, h / 2, 0); f.castShadow = true; g.add(f);
+    const i = new THREE.Mesh(new THREE.CylinderGeometry(w / 2 - .02, w / 2 - .02, d + .004, 40), mat('#dfe8f2', { roughness: .08, metalness: .85 })); i.rotation.x = Math.PI / 2; i.position.set(0, h / 2, .002); g.add(i);
+    part(g, .02, .3, .01, 0, h + .12, -d / 2, mat('#6b4a32'));
+  },
+  ledge(g, it, { w, d, h }, c) {
+    part(g, w, h, d, 0, h / 2, 0, mat(c));
+    part(g, .22, .28, .02, -.12, h + .14, -d / 2 + .03, mat('#3b3f46')); part(g, .18, .24, .022, -.12, h + .14, -d / 2 + .031, mat('#e4dccd'));
+    cyl(g, .035, .03, .12, .17, h + .06, 0, mat('#c9a77c'));
+  },
+  sconce(g, it, { w, d, h }, c) {
+    const dark = mat('#26292e');
+    part(g, .06, .14, .02, 0, .16, -d / 2 + .01, dark); part(g, .012, .012, .3, 0, .24, -d / 2 + .16, dark);
+    const l = new THREE.Mesh(new THREE.SphereGeometry(.15, 22, 14), mat(c, { emissive: '#ffd9a0', emissiveIntensity: .9, roughness: .9 }));
+    l.scale.set(1, 1.1, 1); l.position.set(0, .12, -d / 2 + .3); l.castShadow = false; g.add(l);
+  },
+  pendant(g, it, { w }, c) {
+    cyl(g, .004, .004, .6, 0, .75, 0, mat('#26292e'), 6);
+    const l = new THREE.Mesh(new THREE.SphereGeometry(w / 2, 26, 16), mat(c, { emissive: '#ffd9a0', emissiveIntensity: .85, roughness: .9 })); l.position.set(0, w / 2, 0); g.add(l);
+  },
+  hooks(g, it, { w, d }, c) {
+    part(g, w, .07, .02, 0, 0, -d / 2 + .01, mat('#b08968'));
+    for (let i = 0; i < 5; i++) { const p = cyl(g, .012, .012, .05, -w / 2 + .08 + i * (w - .16) / 4, 0, -d / 2 + .04, mat(c), 8); p.rotation.x = Math.PI / 2; }
+    [['#6b3b2a', -.28, .3], ['#2b2e33', -.04, .24], ['#cbbfae', .2, .34]].forEach(([col, x, hh]) => part(g, .2, hh, .07, x, -hh / 2 - .03, .0, mat(col, { roughness: 1 })));
+  },
+  frame(g, it, { w, d, h }, c) {
+    part(g, w, h, d, 0, h / 2, 0, mat('#3a2a20')); part(g, w - .06, h - .06, d + .004, 0, h / 2, .003, mat('#efe7d8', { roughness: 1 }));
+    [[-.18, .52, .3, .45], [.12, .45, .35, .5], [.0, .75, .28, .25]].forEach(([x, y, ww, hh]) => part(g, w * ww, h * hh, d + .008, w * x, h * y, .004, mat(c, { roughness: 1 })));
+  },
   bed(g, it, { w, d }, c) {
     const wood = mat('#8a6a4a'), main = mat(c), white = mat('#f4f1eb');
     part(g, w, .28, d, 0, .14, 0, wood);
     part(g, w - .04, .2, d - .08, 0, .38, .03, white);
     part(g, w, .95, .08, 0, .475, -d / 2 + .04, main);
-    part(g, w - .02, .07, d * .62, 0, .52, d * .17, main);
+    part(g, w - .02, .07, d * .62, 0, .52, d * .17, mat(CATALOG[it.type].duvet || c));
     const pw = w > 1.2 ? w / 2 - .12 : w - .2;
     (w > 1.2 ? [-1, 1] : [0]).forEach(s => part(g, pw, .13, .36, s * (w / 4), .58, -d / 2 + .38, white));
   },
@@ -394,7 +445,7 @@ const BUILD = {
 /* ============================================================
    Estado + muebles
    ============================================================ */
-const STORE = 'imix10c-layout-v1';
+const STORE = 'imix10c-layout-v2';
 let items = [];
 let nextId = 1;
 const groups = new Map();
@@ -412,7 +463,7 @@ function buildGroup(it) {
   place(g, it);
   return g;
 }
-function place(g, it) { g.position.set(it.x, 0, it.z); g.rotation.y = it.rot; }
+function place(g, it) { g.position.set(it.x, it.elev ?? CATALOG[it.type].elev ?? 0, it.z); g.rotation.y = it.rot; }
 
 function addGroup(it) {
   const g = buildGroup(it);
@@ -457,16 +508,16 @@ function checkCollisions() {
   const polys = items.map(it => { const k = CATALOG[it.type]; return corners(it.x, it.z, k.w, k.d, it.rot); });
   const bad = new Set();
   items.forEach((it, i) => {
-    if (CATALOG[it.type].rug) return;
+    if (floats(CATALOG[it.type])) return;
     if (COLL_POLYS.some(p => overlap(polys[i], p))) bad.add(it.id);
-    items.forEach((o, j) => { if (j > i && !CATALOG[o.type].rug && overlap(polys[i], polys[j])) { bad.add(it.id); bad.add(o.id); } });
+    items.forEach((o, j) => { if (j > i && !floats(CATALOG[o.type]) && overlap(polys[i], polys[j])) { bad.add(it.id); bad.add(o.id); } });
   });
   items.forEach(it => {
     const g = groups.get(it.id), on = bad.has(it.id);
     g.userData.mats.forEach(m => { m.emissive.set(on ? '#ff2d2d' : (m.userData.baseEm || '#000000')); m.emissiveIntensity = on ? .55 : (m.userData.baseI ?? 0); });
     it.hit = on;
   });
-  updateSelUI(); updateGaps();
+  updateSelUI(); updateGaps(); updateCart();
 }
 
 function rayHit(ox, oz, dx, dz, poly) {
@@ -483,7 +534,7 @@ function rayHit(ox, oz, dx, dz, poly) {
 function clearances(it) {
   const k = CATALOG[it.type], c = Math.cos(it.rot), s = Math.sin(it.rot);
   const obst = [...COLL_POLYS];
-  items.forEach(o => { if (o !== it && !CATALOG[o.type].rug) obst.push(corners(o.x, o.z, CATALOG[o.type].w, CATALOG[o.type].d, o.rot)); });
+  items.forEach(o => { if (o !== it && !floats(CATALOG[o.type])) obst.push(corners(o.x, o.z, CATALOG[o.type].w, CATALOG[o.type].d, o.rot)); });
   const W = (x, z) => [x * c + z * s, -x * s + z * c];
   return [['back', 0, -1], ['front', 0, 1], ['left', -1, 0], ['right', 1, 0]].map(([name, lx, lz]) => {
     const half = lx ? k.w / 2 : k.d / 2, span = lx ? k.d : k.w, [dx, dz] = W(lx, lz);
@@ -510,7 +561,7 @@ function updateGaps() {
   const it = byId(selectedId);
   gapObjs.forEach(g => { g.line.visible = g.sp.visible = false; });
   const box = $('#selGaps');
-  if (!it) { box.textContent = ''; return; }
+  if (!it || CATALOG[it.type].air) { box.textContent = ''; return; }
   const gaps = clearances(it);
   box.innerHTML = gaps.map(g => `<span class="${g.d < .6 ? 'tight' : ''}">${GAPNAMES[g.name]} ${g.d >= 9.9 ? '—' : fmt(g.d)}</span>`).join('');
   gaps.forEach((g, i) => {
@@ -769,7 +820,7 @@ function buildCards() {
   const box = $('#cards'); box.innerHTML = '';
   Object.entries(CATALOG).filter(([, k]) => k.cat === tab).forEach(([type, k]) => {
     const b = document.createElement('button'); b.className = 'card';
-    b.innerHTML = `<span class="em">${k.em}</span><b>${k.n}</b><small>${fmt(k.w)} × ${fmt(k.d)}</small>`;
+    b.innerHTML = `<span class="em">${k.em}</span><b>${k.n}</b><small>${fmt(k.w)} × ${fmt(k.d)}</small>` + (k.shop ? `<small class="pr">${money(k.shop.price)}</small>` : '');
     b.onclick = () => addItem(type); box.appendChild(b);
   });
 }
@@ -886,7 +937,8 @@ $('#unitsBtn').onclick = () => { units = units === 'm' ? 'ft' : 'm'; $('#unitsBt
 $('#dimsBtn').onclick = () => { showDims = !showDims; $('#dimsBtn').textContent = 'Cotas de cuartos: ' + (showDims ? 'sí' : 'no'); drawRoomLabels(); };
 $('#calInfo').textContent = `Huella ${footArea().toFixed(1)} m² = ${Math.round(footArea() / 0.09290304)} ft² · escala ${(S * 100).toFixed(2)} cm/px`;
 $('#snapBtn').onclick = () => { snap = snap ? 0 : .05; $('#snapBtn').textContent = 'Imán: ' + (snap ? '5 cm' : 'libre'); };
-$('#resetBtn').onclick = () => { pushHist(); loadItems(SUGGESTED); menu.hidden = true; };
+$('#resetBtn').onclick = () => { pushHist(); loadItems(JAPANDI_ITEMS); menu.hidden = true; };
+$('#baseBtn').onclick = () => { pushHist(); loadItems(SUGGESTED); menu.hidden = true; };
 $('#clearBtn').onclick = () => { pushHist(); loadItems([]); menu.hidden = true; };
 function download(name, href) { const a = document.createElement('a'); a.href = href; a.download = name; a.click(); }
 $('#shotBtn').onclick = () => {
@@ -918,7 +970,9 @@ const EN = { bed_queen: 'queen bed', bed_king: 'king bed', bed_single: 'twin bed
   sofa3: '3-seat sofa', sofa2: '2-seat sofa', armchair: 'armchair', coffee: 'rectangular coffee table', coffee_r: 'round coffee table',
   side: 'round side table', tv: 'low TV console with a flat-screen TV', shelf: 'bookshelf', dining: 'rectangular dining table', round: 'round dining table',
   chair: 'dining chair', stool: 'counter stool', desk: 'desk', deskchair: 'desk chair', rug: 'area rug', rug_s: 'small area rug', plant: 'potted plant', lamp: 'floor lamp' };
+for (const p of PRODUCTS) EN['p_' + p.id] = p.en;
 const STYLES = {
+  japandi: ['Japandi alternativo (tus fotos)', 'Alternative Japandi mood from the attached inspiration photos: cozy evening atmosphere with warm amber accent lighting (glowing orange glass lamp, paper lanterns, LED-backlit mirror, LED strip under shelves), natural jute rugs, light pine and oak wood, matte black metal accents, linen bedding in charcoal, oat and rust, trailing pothos and potted plants, framed abstract art, dim warm lamp light mixed with soft window light. Reproduce the mood of the inspiration photos but keep the exact furniture list, sizes and positions below.'],
   modern: ['Moderno neutro', 'Contemporary modern decor: cream bouclé and linen textiles, charcoal-black accents, sage-green plants, light wool rugs, soft warm lighting.'],
   scandi: ['Escandinavo', 'Scandinavian decor: light oak, white and soft grey textiles, linen, simple ceramics, bright airy natural light.'],
   warm: ['Cálido orgánico', 'Warm organic-modern decor: terracotta and olive accents, walnut wood, rattan, chunky knit textiles, warm lamp light.'],
@@ -940,7 +994,7 @@ function roomOf(it) {
 function describe(it, n) {
   const k = CATALOG[it.type], r = roomOf(it), gaps = clearances(it);
   const poly = corners(it.x, it.z, k.w, k.d, it.rot), xs = poly.map(p => p[0]), zs = poly.map(p => p[1]);
-  const base = `${n}. ${EN[it.type]} in ${colorName(it.color)}, ${k.w} × ${k.d}${k.h && !k.rug ? ' × ' + k.h : ''} m (W × D${k.h && !k.rug ? ' × H' : ''})`;
+  const base = `${n}. ${EN[it.type]}${k.shop ? '' : ' in ' + colorName(it.color)}, ${k.w} × ${k.d}${k.h && !k.rug ? ' × ' + k.h : ''} m (W × D${k.h && !k.rug ? ' × H' : ''})`;
   if (!r) return base + ', outside the rooms';
   const q = rectOf(r.r), cx = it.x - (q.cx - q.w / 2), cz = it.z - (q.cz - q.d / 2);
   const edge = { west: Math.min(...xs) - (q.cx - q.w / 2), east: (q.cx + q.w / 2) - Math.max(...xs), north: Math.min(...zs) - (q.cz - q.d / 2), south: (q.cz + q.d / 2) - Math.max(...zs) };
@@ -949,7 +1003,7 @@ function describe(it, n) {
   const face = Math.abs(f.x) > Math.abs(f.z) ? (f.x > 0 ? 'east' : 'west') : (f.z > 0 ? 'south' : 'north');
   const front = gaps.find(g => g.name === 'front').d;
   return `${base}; ${r.en.toLowerCase()}: centre ${cx.toFixed(2)} m from the west wall and ${cz.toFixed(2)} m from the north wall` +
-    (against.length ? `; pushed against the ${against.join(' and ')} wall` : '') + `; front faces ${face}` + (front < 9.9 ? `; ${front.toFixed(2)} m free in front` : '');
+    (against.length ? `; pushed against the ${against.join(' and ')} wall` : '') + `; front faces ${face}` + (it.elev ?? k.elev ? `; mounted ${(it.elev ?? k.elev).toFixed(2)} m above the floor` : '') + (!k.air && front < 9.9 ? `; ${front.toFixed(2)} m free in front` : '');
 }
 function buildPrompt(shot, style) {
   const room = ROOMDEF.find(r => r.k === shot);
@@ -1024,12 +1078,14 @@ function renderShots(shot) {
   return out;
 }
 
+const INSPO = [1, 2, 3, 4].map(i => `./reference/inspo-${i}.jpg`);
 let shotImgs = [];
 function refreshPhoto(renderImgs = true) {
   const shot = $('#shotSel').value, style = $('#styleSel').value;
   if (renderImgs) {
     shotImgs = renderShots(shot);
-    $('#shots').innerHTML = shotImgs.map(([t, u]) => `<figure><img alt="${t}" src="${u}"><figcaption>${t}</figcaption></figure>`).join('');
+    $('#shots').innerHTML = shotImgs.map(([t, u]) => `<figure><img alt="${t}" src="${u}"><figcaption>${t}</figcaption></figure>`).join('') +
+      INSPO.map((u, i) => `<figure><img alt="Inspiración ${i + 1}" src="${u}"><figcaption>Inspiración ${i + 1} (estilo)</figcaption></figure>`).join('');
   }
   $('#promptTxt').value = buildPrompt(shot, style);
   const bad = items.filter(i => i.hit).length;
@@ -1064,6 +1120,46 @@ if (navigator.canShare) {
 }
 
 /* ============================================================
+   Lista de compras + presupuesto
+   ============================================================ */
+const money = v => 'CA$' + Math.round(v).toLocaleString('en-CA');
+const BASIS = { CA: 'precio visto en IKEA Canadá', INT: 'convertido de otro país', EST: 'estimado' };
+function shopRows() {
+  const counts = {}; items.forEach(it => { const k = CATALOG[it.type]; if (k.shop) counts[k.shop.id] = (counts[k.shop.id] || 0) + 1; });
+  return PRODUCTS.filter(p => counts[p.id]).map(p => ({ p, qty: counts[p.id], hit: items.some(i => i.type === 'p_' + p.id && i.hit) }));
+}
+function totals() {
+  let mid = 0, lo = 0, hi = 0;
+  shopRows().forEach(({ p, qty }) => { mid += p.price * qty; lo += p.lo * qty; hi += p.hi * qty; });
+  EXTRAS.forEach(e => { mid += e.price * e.qty; lo += e.lo * e.qty; hi += e.hi * e.qty; });
+  return { mid, lo, hi };
+}
+function updateCart() { $('#cartTotal').textContent = money(totals().mid); }
+function renderShop() {
+  const rows = shopRows(), t = totals(), byRoom = {};
+  rows.forEach(r => (byRoom[r.p.room] = byRoom[r.p.room] || []).push(r));
+  const row = (name, qty, store, url, price, dimTxt, note, basis, extra = '') => `<li><div class="sh1"><b>${name}</b><span class="sh-price">${money(price * qty)}</span></div>
+    <div class="sh2">${qty > 1 ? `<span class="tag">×${qty}</span>` : ''}<span class="tag">${store}</span>${dimTxt}<span class="tag basis-${basis}">${BASIS[basis]}</span>${extra}</div>
+    ${note ? `<p class="sh3">${note}</p>` : ''}<a class="shlink" href="${url}" target="_blank" rel="noopener">Ver en tienda ↗</a></li>`;
+  $('#shopList').innerHTML = Object.entries(byRoom).map(([room, rs]) => `<h3>${room}</h3><ul>` + rs.map(({ p, qty, hit }) =>
+    row(p.name, qty, p.store, p.url, p.price, `<span class="tag ${p.dims === 'V' ? 'ok' : 'warn'}">${fmt(p.w)} × ${fmt(p.d)}${p.h && !p.rug ? ' × ' + fmt(p.h) : ''} ${p.dims === 'V' ? '✓' : '(confirmar)'}</span>`, p.note, p.basis, hit ? '<span class="tag bad">⚠ choca</span>' : '')).join('') + '</ul>').join('') +
+    `<h3>Complementos sin figura 3D</h3><ul>` + EXTRAS.map(e => row(e.name, e.qty, e.store, e.url, e.price, '', e.note, e.basis)).join('') + '</ul>';
+  $('#shopTotal').innerHTML = `<b>${money(t.mid)}</b><span>rango ${money(t.lo)} – ${money(t.hi)} · precios en CAD, impuestos no incluidos</span>`;
+}
+function shopText() {
+  const t = totals();
+  return ['LISTA DE COMPRAS · IMIX 10C (Japandi)', ...shopRows().map(({ p, qty }) => `- ${qty}× ${p.name} (${p.store}) ${p.w}×${p.d}×${p.h} m · ~${money(p.price)} c/u · ${p.url}`),
+    ...EXTRAS.map(e => `- ${e.qty}× ${e.name} (${e.store}) · ~${money(e.price)} c/u · ${e.url}`), `TOTAL estimado: ${money(t.mid)} (rango ${money(t.lo)} – ${money(t.hi)}), CAD sin impuestos`].join('\n');
+}
+$('#cartBtn').onclick = () => { menu.hidden = true; select(null); renderShop(); document.body.classList.add('photo'); $('#shop').hidden = false; $('#shopBody').scrollTop = 0; };
+$('#shopClose').onclick = () => { $('#shop').hidden = true; document.body.classList.remove('photo'); redraw(); };
+$('#copyShop').onclick = async () => {
+  const b = $('#copyShop');
+  try { await navigator.clipboard.writeText(shopText()); b.textContent = '¡Copiada!'; } catch { b.textContent = 'No se pudo copiar'; }
+  setTimeout(() => { b.textContent = 'Copiar lista'; }, 1600);
+};
+
+/* ============================================================
    Loop
    ============================================================ */
 function resize() {
@@ -1094,11 +1190,11 @@ resize();
 applyWalls(); drawRoomLabels(); drawChips();
 $('#unitsBtn').textContent = 'Unidades: ' + units;
 buildTabs(); buildCards();
-loadItems(saved || SUGGESTED);
+loadItems(saved || JAPANDI_ITEMS);
 setView('3d');
 if (location.hash === '#top') setView('top');
 if (location.hash === '#eye') setView('eye');
 tween && (tween.ms = 1);
 requestAnimationFrame(frame);
 setTimeout(hideHint, 9000);
-window.__app = { setView, items: () => items, select, camera, controls };
+window.__app = { setView, items: () => items, select, camera, controls, shopRows, totals };

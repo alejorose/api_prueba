@@ -44,3 +44,9 @@ La escala sale de medir el plano contra el área publicada. Ver `docs/calibratio
 Fondo azul marino, base de maqueta, luz cálida por cuarto y muros automáticos que bajan
 los que tapan la vista (Muros: auto). Etiquetas flotantes por cuarto (toca una para acercarte),
 minimapa arriba a la derecha (toca un cuarto para ir a él) y botones 3D / Planta / Persona.
+
+## Estilo Japandi + lista de compras
+
+El layout por defecto usa productos reales de IKEA y Amazon (medidas de ficha, precios estimados en CAD):
+botón 🛒 para la lista y el presupuesto, pestaña "Tienda" para agregar piezas. Ver `docs/shopping.md`
+(investigación de APIs, supuestos de precio) y `shop.js` (catálogo y layout).

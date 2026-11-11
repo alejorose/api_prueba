@@ -41,6 +41,18 @@
   <button id="zFit" aria-label="Ajustar vista">⌖</button>
 </div>
 
+<button id="cartBtn" class="cart" aria-label="Lista de compras">🛒 <span id="cartTotal">—</span></button>
+
+<div id="shop" hidden>
+  <div class="sheet" id="shopBody">
+    <div class="selrow"><b>Lista de compras · Japandi</b><button id="shopClose" class="ico sm" aria-label="Cerrar">✕</button></div>
+    <div id="shopTotal" class="shoptotal"></div>
+    <div id="shopList"></div>
+    <div class="row"><button id="copyShop" class="primary">Copiar lista</button></div>
+    <p class="fine">IKEA no ofrece API pública oficial y la API de Amazon exige una cuenta de afiliado con ventas, por eso los precios son estimados y los enlaces abren la tienda para confirmar precio, color y existencias. ✓ = medidas vistas en la ficha del producto.</p>
+  </div>
+</div>
+
 <div id="menu" hidden>
   <button id="wallsBtn">Muros: bajos</button>
   <button id="unitsBtn">Unidades: m</button>
@@ -48,7 +60,8 @@
   <button id="snapBtn">Imán: 5 cm</button>
   <small id="calInfo" class="cal"></small>
   <hr>
-  <button id="resetBtn">Layout sugerido</button>
+  <button id="resetBtn">Layout Japandi (tienda)</button>
+  <button id="baseBtn">Layout base (sin tienda)</button>
   <button id="clearBtn">Vaciar espacio</button>
   <hr>
   <button id="shotBtn">Guardar captura PNG</button>
@@ -90,7 +103,7 @@
     <div class="selrow"><b>Foto-realista con ChatGPT</b><button id="photoClose" class="ico sm" aria-label="Cerrar">✕</button></div>
     <ol class="steps">
       <li>Elige la toma y el estilo.</li>
-      <li>Guarda las imágenes (mantén presionado cada una) o toca Compartir.</li>
+      <li>Guarda las imágenes, incluidas las fotos de inspiración (mantén presionado cada una) o toca Compartir.</li>
       <li>Abre ChatGPT, adjunta las imágenes en este orden, pega el prompt y envía.</li>
     </ol>
     <div class="row"><select id="shotSel" aria-label="Toma"></select><select id="styleSel" aria-label="Estilo"></select></div>

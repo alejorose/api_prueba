@@ -87,6 +87,7 @@ const ROOMS = {
   const master = fs.readFileSync(path.join(__dirname, 'render-pack-master.md'), 'utf8');
   const table = '| Toma | Prompt | Archivos que adjuntas |\n|---|---|---|\n' + promptFiles.map(p => `| ${p.es}${p.n ? ' · toma ' + p.n : ''} | \`03-prompts/${p.name}\` | ${p.attach.map(a => '`' + a.replace('01-referencias/', '').replace('02-tomas/', '') + '`').join(', ')} |`).join('\n');
   write('00-LEEME-chatgpt.md', master.replace('{{TABLA_TOMAS}}', table));
+  write('INSTRUCCIONES-PROYECTO.txt', fs.readFileSync(path.join(__dirname, 'render-pack-instrucciones.txt'), 'utf8'));
 
   await browser.close();
   console.log('listo', promptFiles.length, 'prompts,', shots.length + 2, 'imágenes generadas');

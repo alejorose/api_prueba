@@ -7,7 +7,8 @@ Este paquete convierte a ChatGPT en tu "motor de render": le das el plano numera
 ## Qué hay en la carpeta
 
 ```
-00-LEEME-chatgpt.md              ← esta guía
+00-LEEME-chatgpt.md              ← esta guía (NO la pegues en ChatGPT; es para ti)
+INSTRUCCIONES-PROYECTO.txt       ← lo único que pegas en las instrucciones del Proyecto (≈2,200 caracteres)
 01-referencias/
   plano-numerado.jpg             plano de planta con cada mueble numerado
   vista-aerea.jpg                vista 3D de todo el departamento
@@ -23,41 +24,22 @@ layout.json                      posiciones de los muebles (datos)
 ## Antes de empezar
 
 - Necesitas **ChatGPT con generación de imágenes** (Plus o superior). Cada mensaje admite hasta 10 archivos; cada prompt de este paquete usa 5 a 7.
+- El campo de instrucciones de un Proyecto admite **máximo 8,000 caracteres**. Por eso las instrucciones están en un archivo aparte, corto (`INSTRUCCIONES-PROYECTO.txt`). No pegues esta guía ahí.
 - Orientación del plano: **arriba = norte = lado de las ventanas y el balcón; derecha = este**.
 - Las fotos del tour son de **otra unidad amueblada distinto**. Úsalas solo por los acabados (pisos, paredes, gabinetes, puertas), no por los muebles.
 
 ## Opción A (recomendada): un Proyecto de ChatGPT
 
 1. En ChatGPT crea un **Proyecto** nuevo llamado "IMIX 10C render".
-2. En *Instrucciones del proyecto* pega el **Mensaje de arranque** (más abajo).
+2. En *Instrucciones del proyecto* pega **solo** el contenido de `INSTRUCCIONES-PROYECTO.txt`.
 3. En *Archivos del proyecto* sube todo `01-referencias/` y `04-muebles-medidas-y-precios.md`. Así no los repites en cada toma.
 4. Para cada toma, abre un chat dentro del proyecto, **adjunta** `02-tomas/toma-….jpg` y pega el prompt de `03-prompts/`.
 
-## Opción B: chat suelto
+## Opción B: chat suelto (sin Proyecto)
 
-1. Abre un chat nuevo y pega el **Mensaje de arranque**.
+1. Abre un chat nuevo y pega primero el contenido de `INSTRUCCIONES-PROYECTO.txt` como primer mensaje.
 2. Para cada toma, abre `03-prompts/prompt-….md`: adjunta los archivos que enumera (en ese orden) y pega el prompt.
 3. Pide **una imagen por mensaje**.
-
-## Mensaje de arranque (pégalo primero)
-
-```text
-You are my interior-visualization render engine. I will send you one shot at a time. For each shot I attach:
-(1) a numbered top-down plan of a real 664 sq ft condo (Suite 10C, 2 bedrooms, 2 bathrooms) with every furniture piece numbered,
-(2) a plain, untextured 3D camera reference that shows the exact viewpoint and framing I want,
-(3) screenshots of the real unit's virtual tour (finishes only),
-(4) inspiration photos (mood only).
-A text prompt lists every piece with real dimensions and its position.
-
-For every shot, generate ONE photorealistic interior photograph. Rules:
-- The layout is ground truth. Place exactly the listed furniture, with the listed proportions, at the listed positions. Do not add, remove or move furniture, walls, windows, doors or built-ins.
-- Reproduce the camera viewpoint and framing of the 3D camera reference (eye height about 1.5 m, wide-angle, vertical lines straight).
-- Use the tour screenshots for the real finishes: grey-brown wood-look vinyl plank floor, white walls and ceiling, floor-to-ceiling windows, dark grey flat-panel kitchen cabinets with grey backsplash and stainless appliances, white panel doors.
-- Use the inspiration photos only for mood: warm amber lamp light mixed with soft window light, jute rugs, light pine/oak with matte black accents, linen bedding, paper lanterns, trailing plants. Never copy their furniture.
-- Keep the whole series consistent: same floor colour, same wall white, same light temperature (early evening, lamps on), same textiles.
-- No people, no text, no watermarks, no extra decor that blocks the furniture list.
-- Output landscape 3:2 (1536x1024) unless I say otherwise. After each image add one short line: anything you could not place exactly as listed.
-```
 
 ## Tomas disponibles
 
@@ -90,7 +72,7 @@ Responde en el mismo chat (una corrección a la vez):
 
 ## Consejos
 
-- Una toma por mensaje; los prompts largos con varias imágenes funcionan mejor si pides una sola salida.
+- Una toma por mensaje; los prompts con varias imágenes funcionan mejor si pides una sola salida.
 - Si ChatGPT inventa muebles, repite el prompt con: `Use ONLY the furniture in the list. Nothing else.`
 - Para variar el estilo sin tocar la distribución cambia solo el bloque `STYLE` del prompt.
 - Guarda las imágenes que te gusten de cada cuarto y súbelas como referencia en la siguiente toma para mantener consistencia.

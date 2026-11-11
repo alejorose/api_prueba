@@ -52,6 +52,9 @@ export const PRODUCTS = [
   { id: 'tarva', name: 'Cama TARVA queen (pino)', en: 'IKEA TARVA solid pine queen bed frame in natural pine with charcoal linen bedding and oat pillows', store: 'IKEA', room: 'Recámaras',
     url: 'https://www.ikea.com/ca/en/p/tarva-bed-frame-pine-90249949/', w: 1.6, d: 2.09, h: .92, b: 'bed', color: '#cfa970', duvet: '#4a4f57', em: '🛏️',
     price: 159, lo: 149, hi: 159, basis: 'CA', dims: 'V', note: '160×209×92 cm. Sin base de tablillas ni colchón (ver extras).' },
+  { id: 'tarva_full', name: 'Cama TARVA full (pino)', en: 'IKEA TARVA solid pine full (double) bed frame in natural pine with charcoal linen bedding and oat pillows', store: 'IKEA', room: 'Recámara 2',
+    url: 'https://www.ikea.com/ca/en/p/tarva-bed-frame-pine-s49930100', w: 1.43, d: 1.98, h: .92, b: 'bed', color: '#cfa970', duvet: '#4a4f57', em: '🛏️',
+    price: 139, lo: 119, hi: 139, basis: 'CA', dims: 'V', note: '≈143×198×92 cm (56×78 in; las fichas difieren 1–2 cm). Colchón full 135×189 cm. CA$139.' },
   { id: 'gra', name: 'Buró flotante GRÅFJÄLLET', en: 'IKEA GRÅFJÄLLET wall-mounted bedside shelf in black steel', store: 'IKEA', room: 'Recámaras',
     url: 'https://www.ikea.com/ca/en/search/?q=GRAFJALLET', w: .42, d: .29, h: .31, elev: .3, b: 'cabinet', color: '#2b2e33', em: '🗄️',
     price: 49, lo: 39, hi: 55, basis: 'INT', dims: 'V', note: '42×29×31 cm, se cuelga a 30 cm del piso.' },
@@ -78,9 +81,11 @@ export const PRODUCTS = [
 
 // Complementos sin figura 3D: suman al presupuesto.
 export const EXTRAS = [
-  { name: 'Colchón queen', qty: 2, store: 'IKEA / otra', url: 'https://www.ikea.com/ca/en/search/?q=queen+mattress', price: 399, lo: 299, hi: 599, basis: 'EST', note: 'Elige según firmeza. 152×203 cm.' },
-  { name: 'Base de tablillas LURÖY queen', qty: 2, store: 'IKEA', url: 'https://www.ikea.com/ca/en/search/?q=LUROY+queen', price: 50, lo: 50, hi: 50, basis: 'CA', note: 'CA$50 por unidad.' },
-  { name: 'Ropa de cama de lino (carbón / avena)', qty: 2, store: 'IKEA / Amazon', url: 'https://www.amazon.ca/s?k=linen+duvet+cover+queen+charcoal', price: 130, lo: 90, hi: 180, basis: 'EST', note: 'Funda de edredón y fundas de almohada.' },
+  { name: 'Colchón queen (recámara principal)', qty: 1, store: 'IKEA / otra', url: 'https://www.ikea.com/ca/en/search/?q=queen+mattress', price: 399, lo: 299, hi: 599, basis: 'EST', note: 'Elige según firmeza. 152×203 cm.' },
+  { name: 'Colchón full (recámara 2)', qty: 1, store: 'IKEA / otra', url: 'https://www.ikea.com/ca/en/search/?q=full+mattress', price: 329, lo: 249, hi: 499, basis: 'EST', note: '135×189 cm. Mide el hueco de la cama antes de comprar: algunas reseñas dicen que es algo angosto.' },
+  { name: 'Base de tablillas LURÖY queen', qty: 1, store: 'IKEA', url: 'https://www.ikea.com/ca/en/search/?q=LUROY+queen', price: 50, lo: 50, hi: 50, basis: 'CA', note: 'CA$50.' },
+  { name: 'Base de tablillas LURÖY full', qty: 1, store: 'IKEA', url: 'https://www.ikea.com/ca/en/search/?q=LUROY+full', price: 45, lo: 40, hi: 50, basis: 'EST', note: 'Para la cama full.' },
+  { name: 'Ropa de cama de lino (carbón / avena), queen y full', qty: 2, store: 'IKEA / Amazon', url: 'https://www.amazon.ca/s?k=linen+duvet+cover+queen+charcoal', price: 130, lo: 90, hi: 180, basis: 'EST', note: 'Funda de edredón y fundas de almohada.' },
   { name: 'Tira LED cálida 5 m con enchufe', qty: 1, store: 'Amazon', url: 'https://www.amazon.ca/s?k=warm+white+led+strip+5m+plug+in', price: 30, lo: 20, hi: 45, basis: 'EST', note: 'Bajo repisas y espejo, como en tu inspiración.' },
   { name: 'Láminas / cuadros pequeños para repisas', qty: 1, store: 'IKEA / Etsy', url: 'https://www.ikea.com/ca/en/search/?q=picture+frame', price: 90, lo: 60, hi: 140, basis: 'EST', note: '3 a 4 piezas.' },
   { name: 'Manta tejida y cojines', qty: 1, store: 'IKEA / Amazon', url: 'https://www.amazon.ca/s?k=chunky+knit+throw+blanket+cream', price: 60, lo: 40, hi: 90, basis: 'EST', note: 'Textiles de la sala.' },
@@ -99,7 +104,7 @@ export const JAPANDI = [
   ['tarva', 344.5, 878, 90], ['gra', 286.3, 808, 90], ['gra', 286.3, 948, 90], ['lantern', 281, 808, 90], ['lantern', 281, 948, 90],
   ['art', 279, 878, 90], ['lohals_s', 423, 878, 90], ['plant', 436, 786, 0],
   // Recámara 2
-  ['tarva', 418, 1286, 180], ['gra', 338, 1345, 180], ['gra', 498, 1345, 180], ['lantern', 338, 1352, 180], ['lantern', 498, 1352, 180],
+  ['tarva_full', 418, 1291, 180], ['gra', 350, 1345, 180], ['gra', 486, 1345, 180], ['lantern', 350, 1352, 180], ['lantern', 486, 1352, 180],
   ['art', 418, 1353, 180], ['desk', 501, 1255, -90], ['plant', 345, 1215, 0],
   // Entrada
   ['tjusig', 692, 1251, 0], ['hooks', 692, 1243, 0], ['ledge', 692, 1246, 0, 1.9], ['mirror_led', 640, 1353, 180], ['lohals_s', 660, 1300, 90],

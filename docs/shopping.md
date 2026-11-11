@@ -23,9 +23,9 @@ la app ya guarda `url`, `price`, `lo` y `hi` por producto, así que bastaría un
 
 ## Presupuesto estimado (CAD, sin impuestos)
 
-Total del layout propuesto: **≈ CA$5,200** (rango ≈ CA$4,200 – 6,700), incluyendo ~CA$1,380 de complementos sin
-figura 3D (colchones, bases, ropa de cama, LED, láminas, textiles). Lo más caro: sofá LANDSKRONA (~1,200) y
-2 colchones queen (~800). Los precios exactos están en la app (🛒) y en `shop.js`.
+Total del layout propuesto: **≈ CA$5,100** (rango ≈ CA$4,100 – 6,500), incluyendo ~CA$1,350 de complementos sin
+figura 3D (colchones queen y full, bases, ropa de cama, LED, láminas, textiles). Lo más caro: sofá LANDSKRONA (~1,200)
+y los colchones (~730). Los precios exactos están en la app (🛒) y en `shop.js`.
 
 ## Medidas verificadas (fichas de IKEA)
 
@@ -38,5 +38,6 @@ TJUSIG banca 108×34×50 cm (CA$89.99) · MOSSLANDA 55×12 cm · REGOLIT 45 cm (
 - Sala (2.70 m de ancho): sofá 0.89 + mesa 0.88 + mueble TV 0.40 deja ~27 cm de paso a cada lado de la mesa
   (ajustado). Alternativa: mesa de centro de ~70 cm.
 - Comedor: IKEA DOCKSTA (Ø103) queda justo; se propone una mesa redonda de 90 cm de Amazon (por confirmar).
-- Recámaras: cama TARVA queen mide 160×209 cm (más grande que una queen genérica de 152×203).
+- Recámaras: recámara principal con TARVA queen (160×209 cm, más grande que una queen genérica de 152×203);
+  recámara 2 con TARVA full (≈143×198 cm, CA$139), que deja más paso junto al clóset y al escritorio.
 - Entrada: se corrigió el plano (la puerta está en el muro este); banca, ganchos, repisa, espejo con LED y tapete.

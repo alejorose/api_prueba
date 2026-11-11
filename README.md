@@ -56,3 +56,9 @@ botón 🛒 para la lista y el presupuesto, pestaña "Tienda" para agregar pieza
 `render-pack/` (y `render-pack.zip`): plano numerado, tomas de cámara de cada cuarto (2 ángulos), fotos del tour
 e inspiración, un prompt por toma y la guía `00-LEEME-chatgpt.md`. Se regenera con
 `NODE_PATH=$(npm root -g) node tools/make_pack.js` (necesita `python3 -m http.server 8123` y Playwright).
+
+## Modo Tomas (🎥 / 📷)
+
+Cámara libre para encuadrar tú mismo: botones para moverte (▲▼◀▶), girar y mirar arriba/abajo, sliders de altura y lente
+(14–70 mm), presets por cuarto y vistas isométricas, marco 3:2 u 2:3 y botón 📸. Al capturar muestra la imagen, el plano
+numerado y un prompt editable que describe tu cámara (cuarto, altura, dirección, lente) y lista los muebles dentro del encuadre.

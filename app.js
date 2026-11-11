@@ -709,6 +709,7 @@ canvas.addEventListener('pointerdown', e => {
   pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
   document.body.classList.add('touching');   // las etiquetas/minimapa no deben robar el segundo dedo
   hideHint();
+  if (shooting) return;                    // en modo Tomas solo se mueve la cámara
   if (pointers.size >= 2) {
     if (drag && !drag.none) {              // el primer dedo estaba sobre un mueble: tomamos el pellizco nosotros
       e.stopImmediatePropagation(); cancelItemDrag(); controls.enabled = false; gesture = { d: 0, m: null }; pinchStep();
@@ -1018,9 +1019,11 @@ function buildPrompt(shot, style, opts = {}) {
   const refs = opts.files
     ? 'ATTACHED FILES (use each one for the purpose stated):\n' + opts.files.map(([f, d]) => `- ${f}: ${d}`).join('\n') + '\nThe numbered plan is the ground truth for layout; the camera reference shows the framing I want; the tour photos show the real finishes; the inspiration photos set the mood only (never copy their furniture).'
     : 'REFERENCE IMAGES (attached): image 1 is a numbered top-down plan: the numbers match the furniture list below. The next image(s) show the room geometry and furniture positions from the camera angle I want. Treat them as exact ground truth for architecture, proportions and furniture placement.';
-  const list = items.map((it, i) => ({ it, n: i + 1, r: roomOf(it) })).filter(o => !room || (o.r && o.r.k === shot));
+  const cu = opts.custom;   // toma libre: solo lo que se ve en el encuadre
+  const list = cu ? cu.ids.map(id => ({ it: byId(id), n: items.findIndex(i => i.id === id) + 1 })).filter(o => o.it)
+    : items.map((it, i) => ({ it, n: i + 1, r: roomOf(it) })).filter(o => !room || (o.r && o.r.k === shot));
   const lines = list.map(o => describe(o.it, o.n));
-  const dims = ROOMDEF.filter(r => !room || r.k === shot || shot === 'all').map(r => { const q = rectOf(r.r); return `- ${r.en}: ${mm(q.w)} wide (east-west) × ${mm(q.d)} deep (north-south)`; });
+  const dims = (cu ? ROOMDEF.filter(r => cu.rooms.includes(r.k)) : ROOMDEF.filter(r => !room || r.k === shot || shot === 'all')).map(r => { const q = rectOf(r.r); return `- ${r.en}: ${mm(q.w)} wide (east-west) × ${mm(q.d)} deep (north-south)`; });
   return `Create a photorealistic interior photograph of a furnished condo suite in a Toronto high-rise (IMIX by Quadreal, Suite 10C, 664 sq ft, 2 bedrooms, 2 bathrooms).
 
 ${refs}
@@ -1036,7 +1039,7 @@ ${room ? 'ROOM' : 'ROOMS'} (interior dimensions)
 ${dims.join('\n')}
 
 FIXED FINISHES (from the real unit)
-Grey-brown wood-look vinyl plank floors, white walls and ceiling, floor-to-ceiling windows with sliding balcony door, dark grey flat-panel kitchen cabinets with grey stone-look backsplash and stainless steel appliances, bathrooms with large dark grey floor tile and white fixtures, white panel doors, mirrored sliding closet doors in the entry${!room || room.k === 'bed2' ? '; a built-in closet in the second bedroom along the whole west wall, 0.62 m deep × 2.46 m long, with three white sliding doors (already excluded from the bedroom dimensions above)' : ''}.
+Grey-brown wood-look vinyl plank floors, white walls and ceiling, floor-to-ceiling windows with sliding balcony door, dark grey flat-panel kitchen cabinets with grey stone-look backsplash and stainless steel appliances, bathrooms with large dark grey floor tile and white fixtures, white panel doors, mirrored sliding closet doors in the entry${(cu ? cu.closet : !room || room.k === 'bed2') ? '; a built-in closet in the second bedroom along the whole west wall, 0.62 m deep × 2.46 m long, with three white sliding doors (already excluded from the bedroom dimensions above)' : ''}.
 
 FURNITURE (measured, numbers match the plan)
 ${lines.length ? lines.join('\n') : 'None'}
@@ -1059,6 +1062,7 @@ function numberSprite(n) {
 }
 function capture(w, h, pos, target, fov, walls, numbers) {
   const bg = scene.background; scene.background = new THREE.Color('#e6e9ee');
+  const pv = camera.view && camera.view.enabled ? { ...camera.view } : null; if (pv) camera.clearViewOffset();   // la captura usa el eje óptico centrado
   const prev = { p: camera.position.clone(), q: camera.quaternion.clone(), fov: camera.fov, asp: camera.aspect, wm: wallMode, ring: ring.visible };
   const sprites = numbers ? items.map((it, i) => { const sp = numberSprite(i + 1); sp.position.set(it.x - (CATALOG[it.type].rug ? .55 : 0), 2.2, it.z); scene.add(sp); return sp; }) : [];
   gapObjs.forEach(g => { g.line.visible = g.sp.visible = false; }); ring.visible = false; roomLabels.forEach(m => { m.visible = !!numbers; });
@@ -1071,6 +1075,7 @@ function capture(w, h, pos, target, fov, walls, numbers) {
   scene.background = bg; wallMode = prev.wm; applyWalls(); ring.visible = prev.ring;
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.setSize(innerWidth, innerHeight, false);
   camera.fov = prev.fov; camera.aspect = prev.asp; camera.position.copy(prev.p); camera.quaternion.copy(prev.q); camera.updateProjectionMatrix();
+  if (pv) { camera.setViewOffset(pv.fullWidth, pv.fullHeight, pv.offsetX, pv.offsetY, pv.width, pv.height); camera.updateProjectionMatrix(); }
   roomLabels.forEach(m => { m.visible = view === 'top'; }); applyWalls(true);
   updateGaps(); redraw();
   return url;
@@ -1171,6 +1176,184 @@ $('#copyShop').onclick = async () => {
 };
 
 /* ============================================================
+   Modo Tomas: cámara libre, captura con marco 3:2 / 2:3 y prompt según lo que encuadres
+   ============================================================ */
+let shooting = false, shootPrev = null, portrait = false, curShot = -1, planCache = null;
+const myShots = [];
+const TOUR_BY_ROOM = { liv: ['tour-sala.jpg'], prim: ['tour-recamara-principal.jpg', 'tour-bano-principal.jpg'], kit: ['tour-cocina.jpg', 'tour-pasillo.jpg'],
+  bed2: ['tour-recamara2-closet.jpg', 'tour-cocina-hacia-recamara2.jpg'], entry: ['tour-entrada.jpg', 'tour-pasillo.jpg'] };
+const INSPO_BY_ROOM = { liv: [2, 4], prim: [3, 2], kit: [2, 1], bed2: [3, 4], entry: [1] };
+const COMPASS = ['north', 'north-east', 'east', 'south-east', 'south', 'south-west', 'west', 'north-west'];
+const deg = r => THREE.MathUtils.radToDeg(r), rad = d => THREE.MathUtils.degToRad(d);
+const vfovToMM = v => 18 / (Math.tan(rad(v / 2)) * 4 / 3);          // lente equivalente (35 mm) de una toma 4:3
+const toPx = v => [v.x / S + X0, v.z / S + Y0];
+
+// lente: mm equivalentes (formato 35 mm) <-> campo de visión horizontal de la pantalla
+function setLens(mm) { const tH = 18 / mm; camera.fov = deg(2 * Math.atan(tH / camera.aspect)); camera.updateProjectionMatrix(); }
+function getLens() { return 18 / (Math.tan(rad(camera.fov / 2)) * camera.aspect); }
+const camDir = () => camera.getWorldDirection(new THREE.Vector3());
+function setDir(d) { controls.target.copy(camera.position).addScaledVector(d.normalize(), .1); camera.lookAt(controls.target); controls.update(); }
+function moveCam(f, r, u) {
+  const d = camDir(), fh = new THREE.Vector3(d.x, 0, d.z).normalize(), rh = new THREE.Vector3(-fh.z, 0, fh.x);
+  const delta = fh.multiplyScalar(f).addScaledVector(rh, r); delta.y += u;
+  camera.position.add(delta); controls.target.add(delta); controls.update(); syncCamUI(); redraw();
+}
+function turnCam(yawD, pitchD) {
+  const d = camDir(); let yaw = Math.atan2(d.x, -d.z) + rad(yawD), pitch = THREE.MathUtils.clamp(Math.asin(d.y) + rad(pitchD), rad(-85), rad(60));
+  setDir(new THREE.Vector3(Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), -Math.cos(yaw) * Math.cos(pitch))); syncCamUI(); redraw();
+}
+const PRESETS = [];
+ROOMDEF.forEach(r => {
+  if (r.eye) PRESETS.push({ label: title(r.n) + (r.alt ? ' · 1' : ''), eye: [...r.eye, 1.5], tg: [...r.tg, 1.0], mm: vfovToMM(r.fov) });
+  if (r.alt) PRESETS.push({ label: title(r.n) + ' · 2', eye: [...r.alt.eye, 1.5], tg: [...r.alt.tg, 1.0], mm: vfovToMM(r.alt.fov) });
+});
+PRESETS.push({ label: 'Rec. 2 · iso escritorio', eye: [290, 1405, 3.7], tg: [485, 1262, .5], mm: vfovToMM(48) },
+  { label: 'Rec. 2 · iso clóset', eye: [585, 1335, 4.2], tg: [340, 1288, .7], mm: vfovToMM(54), tall: true },
+  { label: 'Aérea (todo)', eye: [(CENTER.x + 4.5) / S + X0, 12.1, (CENTER.z + 12.2) / S + Y0], tg: [CENTER.x / S + X0, 0, (CENTER.z - .3) / S + Y0], mm: vfovToMM(42) });
+function applyPreset(p) {
+  const pos = new THREE.Vector3(wx(p.eye[0]), p.eye[2], wz(p.eye[1])), tg = new THREE.Vector3(wx(p.tg[0]), p.tg[2], wz(p.tg[1]));
+  doorsTall = !!p.tall; camera.position.copy(pos); setDir(tg.sub(pos)); setLens(p.mm); syncCamUI(); redraw();
+}
+function buildPresetChips() {
+  const box = $('#camPresets'); box.innerHTML = '';
+  PRESETS.forEach((p, i) => { const b = document.createElement('button'); b.textContent = p.label; b.onclick = () => { applyPreset(p); box.querySelectorAll('button').forEach(x => x.classList.remove('on')); b.classList.add('on'); }; box.appendChild(b); });
+}
+function camRoom() { const [X, Y] = toPx(camera.position); return ROOMDEF.find(r => X >= r.r[0] && X <= r.r[2] && Y >= r.r[1] && Y <= r.r[3]) || null; }
+function syncCamUI() {
+  if (!shooting) return;
+  const d = camDir(), room = camRoom(), yaw = (deg(Math.atan2(d.x, -d.z)) + 360) % 360;
+  const h = camera.position.y, outside = !room || h > 2.3;
+  const wm = outside ? 3 : 0; if (wm !== wallMode) { wallMode = wm; applyWalls(false); }
+  $('#camInfo').textContent = `${room ? title(room.n) : 'Fuera'} · mira ${COMPASS[Math.round(yaw / 45) % 8].replace('north', 'N').replace('south', 'S').replace('east', 'E').replace('west', 'O')} · ${h.toFixed(1)} m · ${Math.round(getLens())} mm`;
+  if (document.activeElement !== $('#camH')) $('#camH').value = h; if (document.activeElement !== $('#camMM')) $('#camMM').value = getLens();
+  $('#camHv').textContent = h.toFixed(2) + ' m'; $('#camMMv').textContent = Math.round(getLens()) + ' mm';
+}
+const availH = () => Math.max(220, innerHeight - ($('#cam').hidden ? 0 : $('#cam').offsetHeight) - 8);
+function frameSize() { const ar = portrait ? 2 / 3 : 3 / 2, fw = Math.min(innerWidth, availH() * .96 * ar); return { ar, fw, fh: fw / ar }; }
+function layoutFrame() {
+  // el marco se centra en el área visible sobre el panel; el eje óptico de la cámara pasa por su centro
+  const { fw, fh } = frameSize(), b = $('#frameBox'), yc = availH() / 2 + 4;
+  b.style.width = fw + 'px'; b.style.height = fh + 'px'; b.style.top = yc + 'px';
+  camera.setViewOffset(innerWidth, innerHeight, 0, innerHeight / 2 - yc, innerWidth, innerHeight); camera.updateProjectionMatrix();
+  $('#camAspect').textContent = portrait ? 'Vertical 2:3' : 'Horizontal 3:2'; redraw();
+}
+function enterShoot() {
+  if (shooting) return;
+  select(null); menu.hidden = true; tween = null;
+  shootPrev = { wm: wallMode, maxP: controls.maxPolarAngle, minP: controls.minPolarAngle };
+  shooting = true; document.body.classList.add('shoot'); view = 'eye';
+  controls.minDistance = .05; controls.maxPolarAngle = Math.PI * .97; controls.minPolarAngle = .03; controls.enableRotate = true;
+  controls.touches.ONE = THREE.TOUCH.ROTATE; controls.mouseButtons.LEFT = THREE.MOUSE.ROTATE;
+  roomLabels.forEach(m => { m.visible = false; });
+  $('#cam').hidden = false; $('#frameGuide').hidden = false; buildPresetChips(); layoutFrame();
+  applyPreset(PRESETS.find(p => p.label.startsWith('Sala')) || PRESETS[0]);
+  $('#camPresets').firstChild && null;
+}
+function exitShoot() {
+  if (!shooting) return;
+  shooting = false; doorsTall = false; document.body.classList.remove('shoot'); camera.clearViewOffset(); camera.updateProjectionMatrix();
+  $('#cam').hidden = true; $('#frameGuide').hidden = true;
+  controls.maxPolarAngle = shootPrev.maxP; controls.minPolarAngle = shootPrev.minP; wallMode = shootPrev.wm;
+  view = '3d'; setView('3d'); applyWalls(false);
+}
+function holdBtn(id, fn) {
+  const b = $(id); let raf = 0, t = 0;
+  const loop = ts => { const dt = Math.min(.05, (ts - t) / 1000); t = ts; fn(dt); raf = requestAnimationFrame(loop); };
+  b.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); t = performance.now(); fn(.016); raf = requestAnimationFrame(loop); });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => b.addEventListener(ev, () => cancelAnimationFrame(raf)));
+}
+holdBtn('#mvF', dt => moveCam(dt * 1.0, 0, 0)); holdBtn('#mvB', dt => moveCam(-dt * 1.0, 0, 0));
+holdBtn('#mvL', dt => moveCam(0, -dt * 1.0, 0)); holdBtn('#mvR', dt => moveCam(0, dt * 1.0, 0));
+holdBtn('#tnL', dt => turnCam(-dt * 55, 0)); holdBtn('#tnR', dt => turnCam(dt * 55, 0));
+holdBtn('#tlU', dt => turnCam(0, dt * 35)); holdBtn('#tlD', dt => turnCam(0, -dt * 35));
+$('#camH').oninput = e => { const dy = +e.target.value - camera.position.y; moveCam(0, 0, dy); };
+$('#camMM').oninput = e => { setLens(+e.target.value); syncCamUI(); redraw(); };
+$('#camAspect').onclick = () => { portrait = !portrait; layoutFrame(); };
+$('#camExit').onclick = exitShoot;
+$('#photoBtn').onclick = enterShoot;
+$('#shootBtn').onclick = enterShoot;
+$('#packBtn').onclick = openPhoto;
+addEventListener('resize', () => { if (shooting) { layoutFrame(); syncCamUI(); } });
+
+// --- captura ---
+function captureView() {
+  const { ar, fw } = frameSize(), w = portrait ? 1024 : 1536, h = portrait ? 1536 : 1024;
+  const tH = Math.tan(rad(camera.fov / 2)) * camera.aspect * fw / innerWidth, vf = deg(2 * Math.atan(tH / ar));
+  const pos = camera.position.clone(), tgt = pos.clone().addScaledVector(camDir(), 5);
+  const url = capture(w, h, pos, tgt, vf, wallMode, false);
+  // metadatos de la cámara y qué se ve en el encuadre
+  const cam2 = new THREE.PerspectiveCamera(vf, ar, .1, 100); cam2.position.copy(pos); cam2.lookAt(tgt); cam2.updateMatrixWorld(); cam2.updateProjectionMatrix();
+  const inFrame = p => { const v = p.clone().project(cam2); return v.z < 1 && Math.abs(v.x) <= 1 && Math.abs(v.y) <= 1; };
+  const ids = items.filter(it => {
+    const k = CATALOG[it.type], y = (it.elev ?? k.elev ?? 0) + (k.rug ? .01 : (k.h || .5) / 2);
+    const pts = [[0, 0], ...corners(it.x, it.z, k.w, k.d, it.rot).map(c => [c[0] - it.x, c[1] - it.z])].map(([dx, dz]) => new THREE.Vector3(it.x + dx, y, it.z + dz));
+    return pts.some(inFrame);
+  }).map(it => it.id);
+  const rooms = new Set(); const cr = camRoom(); if (cr && cr.k !== 'patio') rooms.add(cr.k);
+  ROOMDEF.forEach(r => { const q = rectOf(r.r); if (inFrame(new THREE.Vector3(q.cx, .8, q.cz))) rooms.add(r.k); });
+  ids.forEach(id => { const r = roomOf(byId(id)); if (r) rooms.add(r.k); });
+  const closet = rooms.has('bed2') || inFrame(new THREE.Vector3(wx(298), 1.2, wz(1276)));
+  const d = camDir(), yaw = (deg(Math.atan2(d.x, -d.z)) + 360) % 360, pitch = deg(Math.asin(d.y)), hdg = COMPASS[Math.round(yaw / 45) % 8];
+  const mmEq = 18 / tH, hf = deg(2 * Math.atan(tH)), ph = camera.position.y;
+  let pos1 = 'outside the suite';
+  if (cr) { const q = rectOf(cr.r); pos1 = `${cr.en.toLowerCase()}, about ${(camera.position.x - (q.cx - q.w / 2)).toFixed(1)} m from its west wall and ${(camera.position.z - (q.cz - q.d / 2)).toFixed(1)} m from its north wall`; }
+  const tilt = Math.abs(pitch) < 4 ? 'level' : pitch < 0 ? `tilted down ${Math.round(-pitch)} degrees` : `tilted up ${Math.round(pitch)} degrees`;
+  const tail = ` Reproduce exactly the viewpoint and framing of the camera reference image: everything visible in it must appear, and nothing that is outside it.`;
+  const camFull = ph <= 2.3 && cr
+    ? `Eye-level interior photograph from the ${pos1}, camera ${ph.toFixed(2)} m above the floor, looking ${hdg}, ${tilt}, about ${Math.round(mmEq)} mm lens equivalent (${Math.round(hf)} degrees horizontal field of view), vertical lines straight.${tail}`
+    : `High-angle isometric-style view with the ceiling removed and the near walls cut away: camera ${ph.toFixed(1)} m above the floor, ${cr ? 'above the ' + pos1 : 'outside the suite'}, looking ${hdg}, ${tilt}, about ${Math.round(mmEq)} mm lens equivalent (${Math.round(hf)} degrees horizontal field of view).${tail}`;
+  return { url, w, h, ids, rooms: [...rooms], closet, camFull, label: `${cr ? title(cr.n) : 'Exterior'} · ${hdg} · ${ph.toFixed(1)} m` };
+}
+function planImage() {
+  const key = snapshot(); if (planCache && planCache.key === key) return planCache.url;
+  const url = planShot(1200, 1600, true); planCache = { key, url }; return url;
+}
+$('#shotNow').onclick = () => {
+  const btn = $('#shotNow'); btn.disabled = true; btn.textContent = 'Capturando…';
+  setTimeout(() => {
+    try { const s = captureView(); s.n = myShots.length + 1; myShots.push(s); curShot = myShots.length - 1; $('#shotModal').hidden = false; document.body.classList.add('photo'); renderShotModal(); }
+    finally { btn.disabled = false; btn.textContent = '📸 Capturar'; redraw(); }
+  }, 30);
+};
+function renderShotModal() {
+  const s = myShots[curShot]; if (!s) return;
+  const style = $('#mstyle').value || Object.keys(STYLES)[0];
+  $('#shotThumbs').innerHTML = myShots.map((m, i) => `<button class="${i === curShot ? 'on' : ''}" data-i="${i}">Toma ${m.n}</button>`).join('');
+  $('#shotThumbs').querySelectorAll('button').forEach(b => { b.onclick = () => { curShot = +b.dataset.i; renderShotModal(); }; });
+  const plan = $('#mPlan').checked, tour = $('#mTour').checked, insp = $('#mInspo').checked;
+  const name = `mi-toma-${s.n}.jpg`;
+  $('#shotImgs').innerHTML = `<figure><img alt="${name}" src="${s.url}"><figcaption>${name} · ${s.label}</figcaption></figure>` + (plan ? `<figure><img alt="plano-numerado.jpg" src="${planImage()}"><figcaption>plano-numerado.jpg</figcaption></figure>` : '');
+  const tourF = tour ? [...new Set(s.rooms.flatMap(r => TOUR_BY_ROOM[r] || []))].slice(0, 3) : [];
+  const inspF = insp ? [...new Set(s.rooms.flatMap(r => INSPO_BY_ROOM[r] || [2]))].slice(0, 3).map(n => `inspo-${n}.jpg`) : [];
+  const files = [[name, 'camera reference captured from the 3D app: reproduce this exact viewpoint and framing'],
+    ...(plan ? [['plano-numerado.jpg', 'top-down plan of the furnished suite; the numbers match the furniture list (ground truth for the layout)']] : []),
+    ...tourF.map(f => [f, 'real finishes of this unit (virtual-tour screenshot). Ignore the app buttons and text, and ignore its staged furniture: only copy floors, walls, doors, windows, cabinets, ceiling and light']),
+    ...inspF.map(f => [f, 'inspiration photo: mood, lighting and styling only; never copy its furniture or layout'])];
+  $('#shotAttach').innerHTML = '<b>Adjunta en este orden:</b> ' + files.map(([f], i) => `${i + 1}. ${f}`).join(' · ') + (tourF.length || inspF.length ? '<br>Las fotos del tour y de inspiración están en la carpeta <code>01-referencias</code> del paquete.' : '');
+  $('#shotPrompt').value = buildPrompt('all', style, { files, camFull: s.camFull, custom: { ids: s.ids, rooms: s.rooms, closet: s.closet } });
+  $('#shotWarn').textContent = s.ids.length ? '' : '⚠ No hay muebles dentro del encuadre. Mueve la cámara para que se vean.';
+}
+$('#mstyle').innerHTML = Object.entries(STYLES).map(([k, v]) => `<option value="${k}">${v[0]}</option>`).join('');
+['#mstyle', '#mPlan', '#mTour', '#mInspo'].forEach(id => { $(id).onchange = renderShotModal; });
+$('#shotClose').onclick = () => { $('#shotModal').hidden = true; if (!shooting) document.body.classList.remove('photo'); else document.body.classList.remove('photo'); redraw(); };
+$('#shotMore').onclick = () => { $('#shotModal').hidden = true; document.body.classList.remove('photo'); redraw(); };
+$('#shotCopy').onclick = async () => {
+  const t = $('#shotPrompt'), b = $('#shotCopy');
+  try { await navigator.clipboard.writeText(t.value); } catch { t.select(); try { document.execCommand('copy'); } catch { } }
+  b.textContent = '¡Copiado!'; setTimeout(() => { b.textContent = 'Copiar prompt'; }, 1600);
+};
+if (navigator.canShare) {
+  $('#shotShare').hidden = false;
+  $('#shotShare').onclick = async () => {
+    try {
+      const s = myShots[curShot], urls = [[`mi-toma-${s.n}.jpg`, s.url], ...($('#mPlan').checked ? [['plano-numerado.jpg', planImage()]] : [])];
+      const fs = await Promise.all(urls.map(async ([n, u]) => new File([await (await fetch(u)).blob()], n, { type: 'image/jpeg' })));
+      if (navigator.canShare({ files: fs })) await navigator.share({ files: fs, text: $('#shotPrompt').value });
+    } catch { }
+  };
+}
+
+/* ============================================================
    Loop
    ============================================================ */
 function resize() {
@@ -1179,7 +1362,7 @@ function resize() {
   layoutTray(); redraw();
 }
 addEventListener('resize', resize);
-controls.addEventListener('change', () => { if (wallMode === 3) applyWalls(false); redraw(); });
+controls.addEventListener('change', () => { if (shooting) syncCamUI(); if (wallMode === 3) applyWalls(false); redraw(); });
 
 function frame(now) {
   if (tween) {

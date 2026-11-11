@@ -35,6 +35,56 @@
 <aside id="mini" aria-label="Mapa de cuartos"></aside>
 <div id="stats"><span>2 hab</span><span>2 baños</span><span>664 ft²</span></div>
 
+<button id="shootBtn" class="cart shoot-btn" aria-label="Modo tomas">🎥 Tomas</button>
+
+<div id="frameGuide" hidden><div id="frameBox"></div></div>
+
+<section id="cam" hidden>
+  <div class="camhead"><span id="camInfo"></span><button id="camExit" class="done">Salir</button></div>
+  <div class="presets" id="camPresets"></div>
+  <div class="camgrid">
+    <div class="cluster"><small>Moverme</small>
+      <div class="pad4">
+        <span></span><button id="mvF" aria-label="Avanzar">▲</button><span></span>
+        <button id="mvL" aria-label="Mover a la izquierda">◀</button><button id="mvB" aria-label="Retroceder">▼</button><button id="mvR" aria-label="Mover a la derecha">▶</button>
+      </div>
+    </div>
+    <div class="cluster"><small>Mirar</small>
+      <div class="pad4 look">
+        <button id="tlU" aria-label="Mirar arriba">⤒</button><button id="tlD" aria-label="Mirar abajo">⤓</button>
+        <button id="tnL" aria-label="Girar a la izquierda">⟲</button><button id="tnR" aria-label="Girar a la derecha">⟳</button>
+      </div>
+    </div>
+  </div>
+  <label class="sl">Altura <input type="range" id="camH" min="0.3" max="6" step="0.05"><output id="camHv"></output></label>
+  <label class="sl">Lente <input type="range" id="camMM" min="14" max="70" step="1"><output id="camMMv"></output></label>
+  <div class="camrow"><button id="camAspect">Horizontal 3:2</button><button id="shotNow" class="primary big">📸 Capturar</button></div>
+</section>
+
+<div id="shotModal" hidden>
+  <div class="sheet" id="shotBody">
+    <div class="selrow"><b>Tu toma</b><button id="shotClose" class="ico sm" aria-label="Cerrar">✕</button></div>
+    <div class="shotthumbs" id="shotThumbs"></div>
+    <p class="fine">Guarda las imágenes: mantén presionada cada una (o toca Compartir). Luego adjúntalas en ChatGPT con los archivos que se indican y pega el prompt. El prompt lista lo que cae en tu encuadre sin calcular qué tapa un muro: si algo no se ve en tu toma, bórralo del texto.</p>
+    <div id="shotImgs" class="shots"></div>
+    <p id="shotWarn" class="warnline"></p>
+    <div class="row"><select id="mstyle" aria-label="Estilo"></select></div>
+    <div class="checks">
+      <label><input type="checkbox" id="mPlan" checked> Plano numerado</label>
+      <label><input type="checkbox" id="mTour" checked> Fotos del tour</label>
+      <label><input type="checkbox" id="mInspo" checked> Inspiración</label>
+    </div>
+    <p id="shotAttach" class="fine"></p>
+    <textarea id="shotPrompt" rows="12" aria-label="Prompt para ChatGPT (editable)"></textarea>
+    <div class="row">
+      <button id="shotCopy" class="primary">Copiar prompt</button>
+      <a id="shotGpt" class="btn" href="https://chatgpt.com/" target="_blank" rel="noopener">Abrir ChatGPT</a>
+      <button id="shotShare" hidden>Compartir imágenes</button>
+      <button id="shotMore">Otra toma</button>
+    </div>
+  </div>
+</div>
+
 <div id="zoom">
   <button id="zIn" aria-label="Acercar">+</button>
   <button id="zOut" aria-label="Alejar">−</button>
@@ -60,6 +110,7 @@
   <button id="snapBtn">Imán: 5 cm</button>
   <small id="calInfo" class="cal"></small>
   <hr>
+  <button id="packBtn">Paquete automático (tomas fijas)</button>
   <button id="resetBtn">Layout Japandi (tienda)</button>
   <button id="baseBtn">Layout base (sin tienda)</button>
   <button id="clearBtn">Vaciar espacio</button>

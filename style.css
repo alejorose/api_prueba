@@ -148,3 +148,44 @@ body.sel .cart,body.photo .cart{display:none}
 .card b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.2}
 .card small{display:block}
 .card small.pr{color:#b6e48a;font-weight:600}
+
+/* ===== Modo Tomas ===== */
+.shoot-btn{top:calc(env(safe-area-inset-top) + 200px)}
+body.shoot #top,body.shoot #tray,body.shoot #sel,body.shoot #mini,body.shoot #stats,body.shoot .cart,body.shoot #zoom,body.shoot #chips,body.shoot #hint{display:none!important}
+body.sel .shoot-btn,body.photo .shoot-btn{display:none}
+#frameGuide{position:fixed;inset:0;z-index:1;pointer-events:none}
+#frameGuide[hidden]{display:none}
+#frameBox{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);border:1.5px solid rgba(255,255,255,.85);box-shadow:0 0 0 100vmax rgba(0,0,0,.42);border-radius:2px}
+#frameBox::before,#frameBox::after{content:"";position:absolute;background:rgba(255,255,255,.35)}
+#frameBox::before{left:33.3%;right:33.3%;top:0;bottom:0;border-left:1px solid rgba(255,255,255,.3);border-right:1px solid rgba(255,255,255,.3);background:none}
+#frameBox::after{top:33.3%;bottom:33.3%;left:0;right:0;border-top:1px solid rgba(255,255,255,.3);border-bottom:1px solid rgba(255,255,255,.3);background:none}
+#cam{position:fixed;left:0;right:0;bottom:0;z-index:3;background:var(--panel);border-top:1px solid var(--line);backdrop-filter:blur(12px);border-radius:18px 18px 0 0;
+  padding:8px max(10px,env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 10px) max(10px,env(safe-area-inset-left));display:flex;flex-direction:column;gap:8px}
+#cam[hidden]{display:none}
+.camhead{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#camInfo{font-size:13px;color:var(--muted);min-width:0}
+.presets{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.presets button{flex:none;min-height:36px;border-radius:999px;padding:0 12px;font-size:13px}
+.presets button.on{background:var(--accent);border-color:transparent;font-weight:700}
+.camgrid{display:flex;gap:12px;justify-content:space-between}
+.cluster{display:flex;flex-direction:column;gap:3px}
+.cluster small{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.pad4{display:grid;grid-template-columns:repeat(3,52px);gap:5px}
+.pad4.look{grid-template-columns:repeat(2,52px)}
+.pad4 button{min-height:46px;padding:0;font-size:20px;touch-action:none}
+.sl{display:grid;grid-template-columns:56px 1fr 64px;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.sl input{width:100%;height:30px;accent-color:var(--accent)}
+.sl output{color:var(--text);font-variant-numeric:tabular-nums;text-align:right}
+.camrow{display:flex;gap:8px}
+.camrow button{flex:1}
+button.big{min-height:52px;font-size:17px;flex:1.4}
+#shotModal{position:fixed;inset:0;z-index:20;background:rgba(8,10,14,.72);display:flex;align-items:flex-end;justify-content:center;-webkit-user-select:text;user-select:text}
+#shotModal[hidden]{display:none}
+#shotModal .sheet{width:min(720px,100%);max-height:94%;overflow-y:auto;background:var(--bg);border:1px solid var(--line);border-radius:18px 18px 0 0;padding:14px 14px calc(env(safe-area-inset-bottom) + 16px);display:flex;flex-direction:column;gap:10px}
+.shotthumbs{display:flex;gap:6px;overflow-x:auto}
+.shotthumbs button{flex:none;min-height:36px;border-radius:999px;padding:0 14px}
+.shotthumbs button.on{background:var(--accent);border-color:transparent;font-weight:700}
+.checks{display:flex;flex-wrap:wrap;gap:10px 16px;font-size:14px}
+.checks label{display:flex;align-items:center;gap:6px;min-height:36px}
+.checks input{width:20px;height:20px;accent-color:var(--accent)}
+#shotPrompt{width:100%;background:rgba(255,255,255,.06);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:10px;font:12.5px/1.45 ui-monospace,Menlo,monospace;resize:vertical}

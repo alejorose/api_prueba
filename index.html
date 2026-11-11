@@ -37,10 +37,22 @@
 
 <button id="shootBtn" class="cart shoot-btn" aria-label="Modo tomas">🎥 Tomas</button>
 
+<div id="keyHint"><b>Teclado y mouse</b>
+  <span>W A S D mover · Q / E bajar / subir</span>
+  <span>Shift rápido · Alt lento · [ ] velocidad</span>
+  <span>Clic + arrastrar: mirar · Botón central: deslizar</span>
+  <span>Rueda: acercar / alejar · Enter: capturar · H: ocultar</span></div>
+
 <div id="frameGuide" hidden><div id="frameBox"></div></div>
 
 <section id="cam" hidden>
-  <div class="camhead"><span id="camInfo"></span><button id="camExit" class="done">Salir</button></div>
+  <div class="camhead"><span id="camInfo"></span>
+    <span class="camtools">
+      <button id="lockBtn" class="ico sm" title="Mouse libre (Esc para soltar)" aria-label="Mouse libre">🖱</button>
+      <button id="camToggle" class="ico sm" title="Minimizar controles" aria-label="Minimizar controles">▾</button>
+      <button id="camExit" class="done">Salir</button>
+    </span>
+  </div>
   <div class="presets" id="camPresets"></div>
   <div class="camgrid">
     <div class="cluster"><small>Moverme</small>
@@ -77,7 +89,9 @@
     <p id="shotAttach" class="fine"></p>
     <textarea id="shotPrompt" rows="12" aria-label="Prompt para ChatGPT (editable)"></textarea>
     <div class="row">
-      <button id="shotCopy" class="primary">Copiar prompt</button>
+      <button id="shotCopy" class="primary">Copiar prompt + toma</button>
+      <button id="shotCopyTxt">Solo prompt</button>
+      <button id="shotCopyImg">Solo imagen</button>
       <a id="shotGpt" class="btn" href="https://chatgpt.com/" target="_blank" rel="noopener">Abrir ChatGPT</a>
       <button id="shotShare" hidden>Compartir imágenes</button>
       <button id="shotMore">Otra toma</button>

@@ -1224,7 +1224,7 @@ function syncCamUI() {
   const d = camDir(), room = camRoom(), yaw = (deg(Math.atan2(d.x, -d.z)) + 360) % 360;
   const h = camera.position.y, outside = !room || h > 2.3;
   const wm = outside ? 3 : 0; if (wm !== wallMode) { wallMode = wm; applyWalls(false); }
-  $('#camInfo').textContent = `${room ? title(room.n) : 'Fuera'} · mira ${COMPASS[Math.round(yaw / 45) % 8].replace('north', 'N').replace('south', 'S').replace('east', 'E').replace('west', 'O')} · ${h.toFixed(1)} m · ${Math.round(getLens())} mm`;
+  $('#camInfo').textContent = `${room ? title(room.n) : 'Fuera'} · mira ${COMPASS[Math.round(yaw / 45) % 8].replace('north', 'N').replace('south', 'S').replace('east', 'E').replace('west', 'O')} · ${h.toFixed(1)} m · ${Math.round(getLens())} mm${speedMul !== 1 ? ' · vel ×' + speedMul.toFixed(1) : ''}`;
   if (document.activeElement !== $('#camH')) $('#camH').value = h; if (document.activeElement !== $('#camMM')) $('#camMM').value = getLens();
   $('#camHv').textContent = h.toFixed(2) + ' m'; $('#camMMv').textContent = Math.round(getLens()) + ' mm';
 }
@@ -1240,7 +1240,10 @@ function layoutFrame() {
 function enterShoot() {
   if (shooting) return;
   select(null); menu.hidden = true; tween = null;
-  shootPrev = { wm: wallMode, maxP: controls.maxPolarAngle, minP: controls.minPolarAngle };
+  shootPrev = { wm: wallMode, maxP: controls.maxPolarAngle, minP: controls.minPolarAngle, mb: { ...controls.mouseButtons } };
+  controls.mouseButtons = { LEFT: null, MIDDLE: null, RIGHT: null };   // el mouse lo manejo yo (mirar / deslizar)
+  keys.clear(); cancelAnimationFrame(keyRaf); keyT = performance.now(); keyRaf = requestAnimationFrame(keyLoop);
+  $('#keyHint').classList.remove('off');
   shooting = true; document.body.classList.add('shoot'); view = 'eye';
   controls.minDistance = .05; controls.maxPolarAngle = Math.PI * .97; controls.minPolarAngle = .03; controls.enableRotate = true;
   controls.touches.ONE = THREE.TOUCH.ROTATE; controls.mouseButtons.LEFT = THREE.MOUSE.ROTATE;
@@ -1253,7 +1256,8 @@ function exitShoot() {
   if (!shooting) return;
   shooting = false; doorsTall = false; document.body.classList.remove('shoot'); camera.clearViewOffset(); camera.updateProjectionMatrix();
   $('#cam').hidden = true; $('#frameGuide').hidden = true;
-  controls.maxPolarAngle = shootPrev.maxP; controls.minPolarAngle = shootPrev.minP; wallMode = shootPrev.wm;
+  controls.maxPolarAngle = shootPrev.maxP; controls.minPolarAngle = shootPrev.minP; wallMode = shootPrev.wm; controls.mouseButtons = shootPrev.mb;
+  cancelAnimationFrame(keyRaf); keys.clear(); if (document.pointerLockElement) document.exitPointerLock();
   view = '3d'; setView('3d'); applyWalls(false);
 }
 function holdBtn(id, fn) {
@@ -1274,6 +1278,65 @@ $('#photoBtn').onclick = enterShoot;
 $('#shootBtn').onclick = enterShoot;
 $('#packBtn').onclick = openPhoto;
 addEventListener('resize', () => { if (shooting) { layoutFrame(); syncCamUI(); } });
+
+/* ---------- Teclado + mouse (convenciones de Unity/Unreal, Blender e Inventor) ----------
+   Unity: mantener botón derecho = volar con WASD, Q/E bajar/subir, Shift rápido, rueda = velocidad.
+   Blender: botón central orbita, Shift+central desliza, rueda acerca; fly/walk: Shift rápido, Alt lento.
+   Inventor: rueda acerca, botón central desliza.  Aquí: clic (izq. o der.) + arrastrar = mirar, central = deslizar. */
+const keys = new Set(); let keyRaf = 0, keyT = 0, speedMul = 1, locked = false, mlook = null;
+const typing = t => t && t.matches && t.matches('textarea, select, input[type="text"], input[type="checkbox"]');
+function keyLoop(ts) {
+  const dt = Math.min(.1, (ts - keyT) / 1000); keyT = ts;
+  if (shooting && $('#shotModal').hidden) {
+    const sp = 1.5 * speedMul * (keys.has('ShiftLeft') || keys.has('ShiftRight') ? 3 : 1) * (keys.has('AltLeft') || keys.has('AltRight') ? .3 : 1);
+    const f = (keys.has('KeyW') ? 1 : 0) - (keys.has('KeyS') ? 1 : 0), r = (keys.has('KeyD') ? 1 : 0) - (keys.has('KeyA') ? 1 : 0), u = (keys.has('KeyE') ? 1 : 0) - (keys.has('KeyQ') ? 1 : 0);
+    if (f || r || u) moveCam(f * sp * dt, r * sp * dt, u * sp * dt * .7);
+    const yw = (keys.has('ArrowRight') ? 1 : 0) - (keys.has('ArrowLeft') ? 1 : 0), pt = (keys.has('ArrowUp') ? 1 : 0) - (keys.has('ArrowDown') ? 1 : 0);
+    if (yw || pt) turnCam(yw * 70 * dt, pt * 45 * dt);
+  }
+  keyRaf = requestAnimationFrame(keyLoop);
+}
+const MOVE_KEYS = new Set(['KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyQ', 'KeyE', 'ShiftLeft', 'ShiftRight', 'AltLeft', 'AltRight', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']);
+addEventListener('keydown', e => {
+  if (!shooting || typing(e.target) || e.ctrlKey || e.metaKey) return;
+  if (MOVE_KEYS.has(e.code)) { keys.add(e.code); e.preventDefault(); }
+  else if (e.code === 'Enter' && $('#shotModal').hidden) { e.preventDefault(); $('#shotNow').click(); }
+  else if (e.code === 'BracketRight' || e.key === '+') { speedMul = Math.min(4, speedMul * 1.25); syncCamUI(); }
+  else if (e.code === 'BracketLeft' || e.key === '-') { speedMul = Math.max(.25, speedMul / 1.25); syncCamUI(); }
+  else if (e.code === 'KeyH') $('#keyHint').classList.toggle('off');
+  else if (e.code === 'Escape' && !$('#shotModal').hidden) $('#shotMore').click();
+});
+addEventListener('keyup', e => { keys.delete(e.code); });
+addEventListener('blur', () => keys.clear());
+
+canvas.addEventListener('pointerdown', e => {
+  if (!shooting || e.pointerType !== 'mouse') return;
+  if (e.button === 0 || e.button === 2) mlook = { id: e.pointerId, mode: 'look' };
+  else if (e.button === 1) { mlook = { id: e.pointerId, mode: 'pan' }; e.preventDefault(); }
+  if (mlook) { try { canvas.setPointerCapture(e.pointerId); } catch { } }
+});
+canvas.addEventListener('pointermove', e => {
+  if (!shooting || e.pointerType !== 'mouse') return;
+  if (locked) { turnCam(e.movementX * .1, -e.movementY * .1); return; }
+  if (!mlook || e.pointerId !== mlook.id) return;
+  if (mlook.mode === 'look') turnCam(e.movementX * .12, -e.movementY * .12);
+  else moveCam(0, -e.movementX * .004, e.movementY * .004);
+});
+const endLook = e => { if (mlook && e.pointerId === mlook.id) mlook = null; };
+canvas.addEventListener('pointerup', endLook); canvas.addEventListener('pointercancel', endLook);
+canvas.addEventListener('wheel', e => {
+  if (!shooting) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  if (mlook && mlook.mode === 'look') { speedMul = THREE.MathUtils.clamp(speedMul * (e.deltaY < 0 ? 1.15 : 1 / 1.15), .25, 4); syncCamUI(); }   // como Unity: rueda con clic = velocidad
+  else { const d = camDir().multiplyScalar(-Math.sign(e.deltaY) * .4 * speedMul * (e.shiftKey ? 3 : 1)); camera.position.add(d); controls.target.add(d); controls.update(); syncCamUI(); redraw(); }
+}, { capture: true, passive: false });
+
+// mouse bloqueado (como un juego en primera persona); puede no estar permitido dentro del visor
+$('#lockBtn').onclick = () => { try { if (locked) document.exitPointerLock(); else canvas.requestPointerLock(); } catch { lockFail(); } };
+function lockFail() { const el = $('#camInfo'), t = el.textContent; el.textContent = 'Aquí no se puede bloquear el mouse: usa clic + arrastrar'; setTimeout(() => { if (el.textContent.startsWith('Aquí')) el.textContent = t; syncCamUI(); }, 2800); }
+document.addEventListener('pointerlockchange', () => { locked = document.pointerLockElement === canvas; $('#lockBtn').classList.toggle('on', locked); });
+document.addEventListener('pointerlockerror', lockFail);
+$('#camToggle').onclick = () => { const m = $('#cam').classList.toggle('mini'); $('#camToggle').textContent = m ? '▴' : '▾'; layoutFrame(); };
 
 // --- captura ---
 function captureView() {
@@ -1337,11 +1400,29 @@ $('#mstyle').innerHTML = Object.entries(STYLES).map(([k, v]) => `<option value="
 ['#mstyle', '#mPlan', '#mTour', '#mInspo'].forEach(id => { $(id).onchange = renderShotModal; });
 $('#shotClose').onclick = () => { $('#shotModal').hidden = true; if (!shooting) document.body.classList.remove('photo'); else document.body.classList.remove('photo'); redraw(); };
 $('#shotMore').onclick = () => { $('#shotModal').hidden = true; document.body.classList.remove('photo'); redraw(); };
-$('#shotCopy').onclick = async () => {
-  const t = $('#shotPrompt'), b = $('#shotCopy');
-  try { await navigator.clipboard.writeText(t.value); } catch { t.select(); try { document.execCommand('copy'); } catch { } }
-  b.textContent = '¡Copiado!'; setTimeout(() => { b.textContent = 'Copiar prompt'; }, 1600);
-};
+// Portapapeles: prompt + imagen de la toma (el portapapeles solo admite PNG para imágenes)
+const pngFromUrl = url => new Promise((res, rej) => {
+  const im = new Image();
+  im.onload = () => { const c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight; c.getContext('2d').drawImage(im, 0, 0); c.toBlob(b => b ? res(b) : rej(new Error('png')), 'image/png'); };
+  im.onerror = rej; im.src = url;
+});
+async function copyShot(mode) {
+  const btn = { both: $('#shotCopy'), txt: $('#shotCopyTxt'), img: $('#shotCopyImg') }[mode], label = btn.textContent, s = myShots[curShot], text = $('#shotPrompt').value;
+  const say = m => { btn.textContent = m; setTimeout(() => { btn.textContent = label; }, 2200); };
+  try {
+    if (mode === 'txt') { await navigator.clipboard.writeText(text); return say('¡Prompt copiado!'); }
+    const item = { 'image/png': pngFromUrl(s.url) };
+    if (mode === 'both') item['text/plain'] = new Blob([text], { type: 'text/plain' });
+    await navigator.clipboard.write([new ClipboardItem(item)]);
+    say(mode === 'both' ? '¡Copiados! Pega en ChatGPT' : '¡Imagen copiada!');
+  } catch {
+    if (mode !== 'img') { try { await navigator.clipboard.writeText(text); } catch { const t = $('#shotPrompt'); t.select(); try { document.execCommand('copy'); } catch { } } }
+    say(mode === 'img' ? 'No se pudo: mantén presionada la imagen' : 'Prompt copiado (la imagen no se pudo: guárdala con clic largo)');
+  }
+}
+$('#shotCopy').onclick = () => copyShot('both');
+$('#shotCopyTxt').onclick = () => copyShot('txt');
+$('#shotCopyImg').onclick = () => copyShot('img');
 if (navigator.canShare) {
   $('#shotShare').hidden = false;
   $('#shotShare').onclick = async () => {

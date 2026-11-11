@@ -62,3 +62,5 @@ e inspiración, un prompt por toma y la guía `00-LEEME-chatgpt.md`. Se regenera
 Cámara libre para encuadrar tú mismo: botones para moverte (▲▼◀▶), girar y mirar arriba/abajo, sliders de altura y lente
 (14–70 mm), presets por cuarto y vistas isométricas, marco 3:2 u 2:3 y botón 📸. Al capturar muestra la imagen, el plano
 numerado y un prompt editable que describe tu cámara (cuarto, altura, dirección, lente) y lista los muebles dentro del encuadre.
+
+Navegación con teclado y mouse (WASD, Q/E, Shift, mirar con clic + arrastrar, rueda, botón central): ver `docs/navigation.md`.

@@ -50,3 +50,9 @@ minimapa arriba a la derecha (toca un cuarto para ir a él) y botones 3D / Plant
 El layout por defecto usa productos reales de IKEA y Amazon (medidas de ficha, precios estimados en CAD):
 botón 🛒 para la lista y el presupuesto, pestaña "Tienda" para agregar piezas. Ver `docs/shopping.md`
 (investigación de APIs, supuestos de precio) y `shop.js` (catálogo y layout).
+
+## Paquete para ChatGPT
+
+`render-pack/` (y `render-pack.zip`): plano numerado, tomas de cámara de cada cuarto (2 ángulos), fotos del tour
+e inspiración, un prompt por toma y la guía `00-LEEME-chatgpt.md`. Se regenera con
+`NODE_PATH=$(npm root -g) node tools/make_pack.js` (necesita `python3 -m http.server 8123` y Playwright).

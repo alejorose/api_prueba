@@ -33,16 +33,21 @@ const FLOORS = [
 
 const ROOMDEF = [
   { k: 'prim', n: 'RECÁMARA PRINCIPAL', en: 'Primary bedroom', r: [277, 768, 445, 980], lab: [368, 800], eye: [435, 790], tg: [320, 905], fov: 70,
-    cam: 'standing in the north-east corner of the room (window side), looking south-west toward the bed' },
+    cam: 'standing in the north-east corner of the room (window side), looking south-west toward the bed',
+    alt: { eye: [440, 965], tg: [300, 850], fov: 72, cam: 'standing at the room entrance (south-east corner), looking north-west toward the bed head, the wall art above it and the wall lamps' } },
   { k: 'liv', n: 'SALA', en: 'Living room', r: [455, 768, 628, 980], lab: [545, 800], eye: [505, 975], tg: [545, 790], fov: 66,
-    cam: 'standing at the south edge of the living room (kitchen side), looking north toward the floor-to-ceiling balcony windows' },
+    cam: 'standing at the south edge of the living room (kitchen side), looking north toward the floor-to-ceiling balcony windows',
+    alt: { eye: [470, 790], tg: [585, 900], fov: 70, cam: 'standing by the balcony windows next to the TV console, looking south-east across the room toward the sofa, the round mirror and the picture ledges on the east wall' } },
   { k: 'kit', n: 'COCINA / COMEDOR', en: 'Kitchen and dining area', r: [433, 980, 592, 1190], lab: [510, 1160], eye: [540, 1215], tg: [500, 1000], fov: 66,
-    cam: 'standing in the hallway at the south end, looking north along the kitchen counter (on the right) and the dining table' },
+    cam: 'standing in the hallway at the south end, looking north along the kitchen counter (on the right) and the dining table',
+    alt: { eye: [450, 1000], tg: [540, 1120], fov: 70, cam: 'standing at the living-room end of the kitchen, looking south-east at the round dining table with the paper pendant above it and the kitchen counter on the left' } },
   { k: 'bath1', n: 'BAÑO PRINCIPAL', en: 'Primary bathroom', r: [277, 986, 425, 1080], lab: [352, 1010] },
   { k: 'bath2', n: 'BAÑO 2', en: 'Second bathroom', r: [277, 1100, 433, 1190], lab: [352, 1170] },
   { k: 'bed2', n: 'RECÁMARA 2', en: 'Second bedroom', r: [320, 1197, 518, 1355], lab: [430, 1214], eye: [505, 1210], tg: [360, 1300], fov: 70,
-    cam: 'standing in the north-east corner of the room by the door, looking south-west toward the bed' },
-  { k: 'entry', n: 'ENTRADA', en: 'Entry hall', r: [525, 1240, 738, 1355], lab: [650, 1270] },
+    cam: 'standing in the north-east corner of the room by the door, looking south-west toward the bed',
+    alt: { eye: [440, 1215], tg: [420, 1350], fov: 66, cam: 'standing by the room door at the north end, looking south straight at the bed head with the wall art, the two wall lamps and the floating bedside shelves' } },
+  { k: 'entry', n: 'ENTRADA', en: 'Entry hall', r: [525, 1240, 738, 1355], lab: [650, 1270], eye: [548, 1286], tg: [705, 1296], fov: 74,
+    cam: 'standing at the west end of the entry hall (next to the washer/dryer) looking east toward the front door: the bench with the hook rail and shelf on the left (north wall), the LED-backlit floor mirror on the right (south wall), the jute rug on the floor' },
   { k: 'patio', n: 'PATIO', en: 'Balcony', r: [268, 615, 628, 758], lab: [440, 740] },
 ];
 
@@ -1005,14 +1010,18 @@ function describe(it, n) {
   return `${base}; ${r.en.toLowerCase()}: centre ${cx.toFixed(2)} m from the west wall and ${cz.toFixed(2)} m from the north wall` +
     (against.length ? `; pushed against the ${against.join(' and ')} wall` : '') + `; front faces ${face}` + (it.elev ?? k.elev ? `; mounted ${(it.elev ?? k.elev).toFixed(2)} m above the floor` : '') + (!k.air && front < 9.9 ? `; ${front.toFixed(2)} m free in front` : '');
 }
-function buildPrompt(shot, style) {
+function buildPrompt(shot, style, opts = {}) {
   const room = ROOMDEF.find(r => r.k === shot);
+  const camTxt = room && (opts.alt && room.alt ? room.alt.cam : room.cam);
+  const refs = opts.files
+    ? 'ATTACHED FILES (use each one for the purpose stated):\n' + opts.files.map(([f, d]) => `- ${f}: ${d}`).join('\n') + '\nThe numbered plan is the ground truth for layout; the camera reference shows the framing I want; the tour photos show the real finishes; the inspiration photos set the mood only (never copy their furniture).'
+    : 'REFERENCE IMAGES (attached): image 1 is a numbered top-down plan: the numbers match the furniture list below. The next image(s) show the room geometry and furniture positions from the camera angle I want. Treat them as exact ground truth for architecture, proportions and furniture placement.';
   const list = items.map((it, i) => ({ it, n: i + 1, r: roomOf(it) })).filter(o => !room || (o.r && o.r.k === shot));
   const lines = list.map(o => describe(o.it, o.n));
   const dims = ROOMDEF.filter(r => !room || r.k === shot || shot === 'all').map(r => { const q = rectOf(r.r); return `- ${r.en}: ${mm(q.w)} wide (east-west) × ${mm(q.d)} deep (north-south)`; });
   return `Create a photorealistic interior photograph of a furnished condo suite in a Toronto high-rise (IMIX by Quadreal, Suite 10C, 664 sq ft, 2 bedrooms, 2 bathrooms).
 
-REFERENCE IMAGES (attached): image 1 is a numbered top-down plan: the numbers match the furniture list below. The next image(s) show the room geometry and furniture positions from the camera angle I want. Treat them as exact ground truth for architecture, proportions and furniture placement.
+${refs}
 
 PLAN ORIENTATION: in the plan, up = north = the window/balcony side, right = east.
 
@@ -1034,8 +1043,8 @@ STYLE (decor and textiles only; keep the furniture colours above)
 ${STYLES[style][1]}
 
 CAMERA
-${room && room.cam ? 'Eye level at 1.5 m, 24 mm wide-angle lens, vertical lines straight, ' + room.cam + '.' : 'High three-quarter aerial view of the whole suite with the ceiling removed, as in the second reference image.'}
-Natural daylight from the windows, soft realistic shadows, 4K architectural photography, interior magazine quality.`;
+${camTxt ? 'Eye level at 1.5 m, 24 mm wide-angle lens, vertical lines straight, ' + camTxt + '.' : 'High three-quarter aerial view of the whole suite with the ceiling removed, as in the aerial reference image.'}
+${style === 'japandi' ? 'Lighting: follow the STYLE section (warm lamps on, plus soft window light). ' : 'Natural daylight from the windows. '}Soft realistic shadows, 4K architectural photography, interior magazine quality.`;
 }
 
 function numberSprite(n) {
@@ -1050,7 +1059,7 @@ function capture(w, h, pos, target, fov, walls, numbers) {
   const bg = scene.background; scene.background = new THREE.Color('#e6e9ee');
   const prev = { p: camera.position.clone(), q: camera.quaternion.clone(), fov: camera.fov, asp: camera.aspect, wm: wallMode, ring: ring.visible };
   const sprites = numbers ? items.map((it, i) => { const sp = numberSprite(i + 1); sp.position.set(it.x - (CATALOG[it.type].rug ? .55 : 0), 2.2, it.z); scene.add(sp); return sp; }) : [];
-  gapObjs.forEach(g => { g.line.visible = g.sp.visible = false; }); ring.visible = false; roomLabels.forEach(m => { m.visible = true; });
+  gapObjs.forEach(g => { g.line.visible = g.sp.visible = false; }); ring.visible = false; roomLabels.forEach(m => { m.visible = !!numbers; });
   renderer.setPixelRatio(1); renderer.setSize(w, h, false);
   camera.fov = fov; camera.aspect = w / h; camera.position.copy(pos); camera.lookAt(target); camera.updateProjectionMatrix();
   wallMode = walls; applyWalls();
@@ -1197,4 +1206,8 @@ if (location.hash === '#eye') setView('eye');
 tween && (tween.ms = 1);
 requestAnimationFrame(frame);
 setTimeout(hideHint, 9000);
-window.__app = { setView, items: () => items, select, camera, controls, shopRows, totals };
+// Utilidades para generar el paquete de render (tools/make_pack.js)
+const shotPx = (eye, tg, fov, w, h) => capture(w, h, new THREE.Vector3(wx(eye[0]), 1.5, wz(eye[1])), new THREE.Vector3(wx(tg[0]), 1.0, wz(tg[1])), fov, 0, false);
+const planShot = (w, h, numbers) => { const tf = Math.tan(THREE.MathUtils.degToRad(21)), top = Math.max(12.6 / 2 / tf, 8.4 / 2 / (tf * (w / h))) * 1.04; return capture(w, h, new THREE.Vector3(wx(505), top, wz(996) + .01), new THREE.Vector3(wx(505), 0, wz(996)), 42, 1, numbers); };
+const aerialShot = (w, h) => capture(w, h, new THREE.Vector3(CENTER.x + 4.5, 15.5 * .78, CENTER.z + 15.5 * .72 + 1), new THREE.Vector3(CENTER.x, 0, CENTER.z - .3), 42, 1, false);
+window.__app = { setView, items: () => items, select, camera, controls, shopRows, totals, ROOMDEF, buildPrompt, describe, shotPx, planShot, aerialShot, EXTRAS, PRODUCTS, CATALOG, STYLES, money, shopText };

@@ -11,36 +11,20 @@
    (verdict, house map, coldest-night chart, checks, what-if, price). Presenting mode enlarges type
    and hides the engineering panels. Hot = vermilion, cold = blue, status = green / amber / red. */
 :root{
-  --bg:#EDF1F4; --surface:#FFFFFF; --surface2:#F4F7F9; --ink:#12202B; --ink2:#445668; --line:#D2DBE3;
-  --accent:#0A5AAB; --accent-ink:#FFFFFF; --accent-soft:#DCEBF8;
-  --heat:#C2410C; --heat-soft:#FBE5D9; --cool:#1565B5; --cool-soft:#DCEAF7;
-  --good:#13744A; --good-soft:#DAF0E4; --warn:#8F5A00; --warn-soft:#FAEBC8; --bad:#B3261E; --bad-soft:#F9DAD6;
-  --info:#1B5E9B; --info-soft:#DCEAF7;
-  --c-win:#D55E00; --c-wall:#E69F00; --c-air:#56B4E9; --c-ceil:#009E73; --c-floor:#8F6BB3; --c-door:#7C8A97; --c-sky:#CC79A7;
-  --s1:#0072B2; --s2:#D55E00; --s3:#009E73; --s4:#CC79A7; --s5:#B8860B;
-  --fs:16px; --radius:14px;
+  --bg:#0A1122; --surface:#131D33; --surface2:#1A2640; --ink:#E8EEFA; --ink2:#9FB0CC; --line:#2A3A5C;
+  --accent:#5B84E8; --accent-ink:#FFFFFF; --accent-soft:#1D2D55;
+  --heat:#FF8A5B; --heat-soft:#3A2218; --cool:#6DB3F2; --cool-soft:#162B3E;
+  --good:#4CC38A; --good-soft:#123227; --warn:#E8B04A; --warn-soft:#3A2E12; --bad:#FF7B72; --bad-soft:#3D1B19;
+  --info:#6DB3F2; --info-soft:#162B3E;
+  --c-win:#FF8A3D; --c-wall:#F2C14E; --c-air:#6EC6F5; --c-ceil:#3DD6A0; --c-floor:#A98BE0; --c-door:#9AA8B5; --c-sky:#E58BBF;
+  --s1:#5AB0F0; --s2:#FF8A5B; --s3:#3DD6A0; --s4:#E58BBF; --s5:#F2C14E;
+  --fs:16px; --radius:16px; color-scheme:dark;
   --font:"Atkinson Hyperlegible Next","Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
 }
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#0E151B; --surface:#16202A; --surface2:#1B2733; --ink:#E6EDF3; --ink2:#A7B6C4; --line:#2B3A48;
-    --accent:#5BA8F0; --accent-ink:#0B1A28; --accent-soft:#16304A;
-    --heat:#FF8A5B; --heat-soft:#3A2218; --cool:#6DB3F2; --cool-soft:#162B3E;
-    --good:#4CC38A; --good-soft:#143325; --warn:#E8B04A; --warn-soft:#3A2E12; --bad:#FF7B72; --bad-soft:#3D1B19;
-    --info:#6DB3F2; --info-soft:#162B3E; --c-door:#9AA8B5; color-scheme:dark;
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#0E151B; --surface:#16202A; --surface2:#1B2733; --ink:#E6EDF3; --ink2:#A7B6C4; --line:#2B3A48;
-  --accent:#5BA8F0; --accent-ink:#0B1A28; --accent-soft:#16304A;
-  --heat:#FF8A5B; --heat-soft:#3A2218; --cool:#6DB3F2; --cool-soft:#162B3E;
-  --good:#4CC38A; --good-soft:#143325; --warn:#E8B04A; --warn-soft:#3A2E12; --bad:#FF7B72; --bad-soft:#3D1B19;
-  --info:#6DB3F2; --info-soft:#162B3E; --c-door:#9AA8B5; color-scheme:dark;
-}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:var(--fs);line-height:1.45;margin:0;
+body{background:var(--bg) radial-gradient(90% 60% at 50% -10%,#16264d 0%,transparent 70%) no-repeat;color:var(--ink);font-family:var(--font);font-size:var(--fs);line-height:1.45;margin:0;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--surface)}
 body.present{--fs:19px}
@@ -59,7 +43,7 @@ button{cursor:pointer}
 body.present .tech{display:none!important}
 
 /* top bar */
-.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line);
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--surface) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);
   margin-inline:calc(-1*max(16px,env(safe-area-inset-left,0px)));padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));
   display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
 .brand{display:flex;flex-direction:column;line-height:1.1;margin-right:auto;min-width:0}
@@ -211,6 +195,57 @@ td select,td input[type=number],td input[type=text]{min-height:38px;padding:4px 
 .copied{color:var(--good);font-weight:700;font-size:.9rem}
 @media print{.bar,.tools,.xbtn,.addrow,#editor{display:none!important}.grid{display:block}body{background:#fff}}
 @media (prefers-reduced-motion:reduce){.room.flash{animation:none}}
+
+/* stage + glass panels + drawer */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,410px);gap:18px;padding-top:18px;align-items:start}
+@media (max-width:1000px){.hero{grid-template-columns:minmax(0,1fr)}}
+.stage{position:relative;border-radius:22px;border:1px solid var(--line);background:radial-gradient(110% 80% at 50% 25%,#1d2d5c 0%,#10193a 55%,#0a1124 100%);padding:16px;overflow:hidden;min-width:0}
+.stage-top{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:flex-start;justify-content:space-between}
+.utabs{display:inline-flex;gap:2px;padding:4px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid var(--line)}
+.utabs button{border:0;background:transparent;color:var(--ink2);min-height:40px;padding:6px 16px;border-radius:9px;font-weight:700}
+.utabs button[aria-pressed="true"]{background:rgba(255,255,255,.14);color:#fff}
+.btuinfo{margin-top:10px}
+.btuinfo .k{font-size:.78rem;color:var(--ink2)}
+.btuinfo .v2{font-size:1.5rem;font-weight:800;letter-spacing:-.01em}
+.thumb{text-align:right;font-size:.78rem;color:var(--ink2)}
+.thumb svg{display:block;margin-left:auto;margin-top:4px}
+.iso{width:100%;height:auto;display:block;margin-top:-6px}
+.iso .wall{fill:rgba(255,255,255,.11);stroke:rgba(255,255,255,.5);stroke-width:1}
+.iso .wall2{fill:rgba(255,255,255,.05);stroke:rgba(255,255,255,.28);stroke-width:1}
+.iso .glassp{fill:rgba(120,205,255,.38);stroke:rgba(190,230,255,.9);stroke-width:1}
+.iso .unit{fill:#fff;filter:url(#glow)}
+.iso .floor{stroke:rgba(255,255,255,.4);stroke-width:1}
+.iso .rl{fill:#fff;font-weight:800;font-size:14px;paint-order:stroke;stroke:rgba(5,10,25,.75);stroke-width:3.5px;stroke-linejoin:round;text-anchor:middle}
+.iso .rs{fill:#e5ecfa;font-weight:700;font-size:12px;paint-order:stroke;stroke:rgba(5,10,25,.75);stroke-width:3px;stroke-linejoin:round;text-anchor:middle}
+.iso .tubeg{fill:none;stroke:rgba(255,255,255,.2);stroke-width:10;stroke-linecap:round;filter:url(#glow)}
+.iso .tube{fill:none;stroke-width:2.6;stroke-linecap:round;opacity:.95}
+.iso .od{fill:#1b2a4d;stroke-width:1.5}
+.iso .odt{fill:#2a3d6b}
+.iso g[role=button]{cursor:pointer}
+.iso g[role=button]:hover .floor{filter:brightness(1.3)}
+.stage-bot{display:flex;flex-wrap:wrap;gap:8px 16px;justify-content:space-between;align-items:center;margin-top:6px}
+.panels{display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel{background:color-mix(in srgb,var(--surface) 88%,transparent);border:1px solid var(--line);border-radius:18px;padding:16px;backdrop-filter:blur(8px);min-width:0}
+.bk{font-size:.74rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);margin-bottom:10px}
+.bk::before{content:"[ "}.bk::after{content:" ]"}
+.stat4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0}
+.stat4>div{border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:rgba(255,255,255,.03)}
+.stat4 b{display:block;font-size:1.25rem}.stat4 span{font-size:.78rem;color:var(--ink2)}
+.chipline{display:flex;flex-wrap:wrap;gap:8px}
+.cl{background:rgba(255,255,255,.07);border-radius:8px;padding:6px 10px;font-size:.84rem;font-weight:700}
+.finrow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.finout{display:flex;justify-content:space-between;gap:12px;margin:10px 0 4px}
+.finout b{font-size:1.4rem;display:block}.finout span{font-size:.78rem;color:var(--ink2)}
+input[type=range]{width:100%;accent-color:var(--accent);min-height:30px}
+.alt{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.alt:last-child{border-bottom:0}
+.alt b{font-size:.98rem}.alt .s{font-size:.86rem;color:var(--ink2)}.alt .r{text-align:right;font-weight:800}
+.below{padding-top:18px;max-width:1240px;margin-inline:auto}
+.drawer{position:fixed;top:0;bottom:0;left:0;width:min(470px,100%);z-index:35;overflow:auto;background:var(--bg);border-right:1px solid var(--line);padding:max(14px,env(safe-area-inset-top,0px)) 14px 40px max(14px,env(safe-area-inset-left,0px));transform:translateX(-104%);transition:transform .25s ease;box-shadow:12px 0 40px rgba(0,0,0,.45)}
+.drawer.open{transform:none}
+.drawer-head{display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--bg);padding:6px 0 10px;z-index:2}
+.scrim{position:fixed;inset:0;background:rgba(3,7,16,.55);z-index:34}
+@media (prefers-reduced-motion:reduce){.drawer{transition:none}}
 </style>
 </head>
 <body>
@@ -222,17 +257,19 @@ td select,td input[type=number],td input[type=text]{min-height:38px;padding:4px 
       <button id="modeCons" aria-pressed="true" data-act="mode" data-v="consult">Consultant</button>
       <button id="modePres" aria-pressed="false" data-act="mode" data-v="present">Presenting</button>
     </div>
+    <button class="btn primary" id="btnEdit" data-act="drawer">Edit home</button>
     <button class="btn" id="btnDemo" data-act="demo">Load demo home</button>
     <button class="btn tech" id="btnSettings" data-act="settings">Equipment</button>
-    <button class="btn primary" id="btnCopy" data-act="copy">Copy summary</button>
+    <button class="btn" id="btnCopy" data-act="copy">Copy summary</button>
   </div>
 </header>
 
-<main class="grid">
-  <aside id="editor" class="stack" aria-label="Home inputs"></aside>
-  <section id="viz" class="stack" aria-label="Results">
-    <div id="sec-verdict"></div>
-    <div id="sec-map" class="card"></div>
+<main>
+  <section class="hero">
+    <div class="stage" id="sec-map" aria-label="3D view of the home"></div>
+    <aside class="panels" id="sec-panels" aria-label="Summary"></aside>
+  </section>
+  <section class="below stack" id="viz" aria-label="Details">
     <div id="sec-systems" class="card"></div>
     <div id="sec-checks" class="card"></div>
     <div id="sec-whatif" class="card"></div>
@@ -240,6 +277,8 @@ td select,td input[type=number],td input[type=text]{min-height:38px;padding:4px 
     <div id="sec-tech" class="card tech"></div>
   </section>
 </main>
+<div id="scrim" class="scrim" hidden role="button" tabindex="-1" aria-label="Close editor" data-act="closeDrawer"></div>
+<aside id="editor" class="drawer stack" aria-label="Edit the home"></aside>
 <div id="overlay" class="overlay" hidden></div>
 
 <script>
@@ -395,7 +434,7 @@ const DEFAULT_CATALOG=()=>({
   heads:[9000,12000,18000,24000]
 });
 function blankModel(){
-  return {v:1,job:'',demo:false,mode:'consult',mapBy:'cover',
+  return {v:1,job:'',demo:false,mode:'consult',mapBy:'fit',fin:{years:10,apr:7,downPct:0},
     climate:{label:'Berkshire County, MA',winterOut:1,summerOut:87,winterIn:70,summerIn:75,grains:30,alt:.988},
     house:{walls:'std',attic:'std',floor:'crawl_std',winType:'single',leak:'avg'},
     catalog:DEFAULT_CATALOG(),rooms:[],systems:[],wi:{},wiCost:{},
@@ -429,6 +468,7 @@ function load(){
   try{const s=localStorage.getItem(KEY);if(s){const o=JSON.parse(s);if(o&&o.v===1&&o.rooms) return o}}catch(e){}
   return demoModel();
 }
+
 let saveT=0;
 function save(){clearTimeout(saveT);saveT=setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify(M))}catch(e){}},300)}
 
@@ -536,7 +576,7 @@ function roomCard(r){
 }
 function renderEditor(){
   const ed=$('#editor');
-  ed.innerHTML=houseCard()+`<section class="card"><header><h2>Rooms <span class="muted small">${M.rooms.length}</span></h2></header>
+  ed.innerHTML=`<div class="drawer-head"><h2>Edit home</h2><button class="btn primary" data-act="closeDrawer">Done</button></div>`+houseCard()+`<section class="card"><header><h2>Rooms <span class="muted small">${M.rooms.length}</span></h2></header>
    <div class="stack" id="roomList" style="gap:12px">${M.rooms.map(roomCard).join('')||'<p class="muted">No rooms yet. Add the first one below.</p>'}</div>
    <div class="addrow" style="margin-top:14px"><div class="eyebrow" style="margin-bottom:6px">Add a room</div>
    <div class="add-types">${Object.entries(ROOM_TYPES).map(([k,t])=>`<button class="chip" data-act="addRoom" data-v="${k}">+ ${t.label}</button>`).join('')}</div></div></section>`;
@@ -568,7 +608,7 @@ function renderVerdict(){
   const rs=nRooms===0?'info':(bad.length===0&&!e.unassigned.length?'good':(bad.length<=1&&!e.unassigned.length?'warn':'bad'));
   const cs=e.coolRatio<.9?'bad':e.coolRatio<1?'warn':e.coolRatio>2.5?'info':'good';
   const cWord={good:'Plenty for summer',warn:'Close on the hottest days',bad:'Short on the hottest days',info:'Large for summer'}[cs];
-  $('#sec-verdict').innerHTML=`<div class="verdict">
+  return `<div class="verdict">
    <article class="v ${hs}"><div class="eyebrow">Coldest night · ${c.winterOut}°F outside</div>
     <div class="big num">${e.homeHeat?Math.min(999,Math.round(e.cov*100)):0}%</div>
     <div><span class="pill ${hs}">${sLabel[hs]}</span></div>
@@ -592,34 +632,108 @@ function treemap(items,x,y,w,h){
   const A=items.slice(0,best),B=items.slice(best),f=sum(A.map(i=>i.a))/total;
   return w>=h?[...treemap(A,x,y,w*f,h),...treemap(B,x+w*f,y,w*(1-f),h)]:[...treemap(A,x,y,w,h*f),...treemap(B,x,y+h*f,w,h*(1-f))];
 }
+const MAP_MODES=[['fit','Fit'],['heat','Heat'],['cool','Cool'],['sys','Systems']];
 function renderMap(){
-  const e=EV.cur, by=M.mapBy;
+  const e=EV.cur; let by=M.mapBy; if(!MAP_MODES.some(m=>m[0]===by)) by='fit';
   const rooms=M.rooms.filter(r=>r.cond!==false);
+  const FW=100,FD=70,S=5,X0=343,Y0=92,H=18;
+  const P=(x,y,z)=>[X0+(x-y)*.866*S,Y0+(x+y)*.5*S-z];
+  const pts=a=>a.map(q=>P(...q).map(v=>v.toFixed(1)).join(',')).join(' ');
   const items=rooms.map(r=>({r,a:Math.max(60,r.sqft)})).sort((a,b)=>(sysIndex(a.r.sys)+(a.r.sys?0:99))-(sysIndex(b.r.sys)+(b.r.sys?0:99))||b.a-a.a);
-  const tiles=items.length?treemap(items,0,0,100,100):[];
-  const maxD=Math.max(1,...rooms.map(r=>e.loads[r.id].heat/Math.max(1,r.sqft)));
-  const tileHtml=tiles.map(t=>{
-    const r=t.r,L=e.loads[r.id],sys=e.systems.find(s=>s.sys.id===r.sys);
-    let cls='none',l3='No unit assigned',style='';
-    if(sys){
-      if(sys.single){const cv=sys.cov;cls=statusCov(cv,.9);l3=`${sys.sys.name} · shared ${k1(sys.out.btu)} unit`}
-      else{const h=sys.heads.find(h=>h.room.id===r.id);cls=statusCov(h.cov,.8);l3=`${k1(h.btu)} unit · ${pc(h.cov)} of need`}
-    }
-    if(by==='sys'){cls='';style=sys?`style="background:color-mix(in srgb,${sysColor(r.sys)} 22%,var(--surface));border-color:${sysColor(r.sys)}"`:''}
-    if(by==='density'){cls='';const p=Math.round(12+60*(L.heat/Math.max(1,r.sqft))/maxD);style=`style="background:color-mix(in srgb,var(--heat) ${p}%,var(--surface));border-color:var(--heat)"`}
-    return `<div class="tile ${cls}" style="left:${t.x}%;top:${t.y}%;width:${t.w}%;height:${t.h}%"><button data-act="gotoRoom" data-v="${r.id}" ${style}>
-      <b>${esc(r.name)}</b><span class="l2 num">Needs ${fmt(L.heat)} BTU/h</span><span class="l3">${by==='density'?Math.round(L.heat/r.sqft)+' BTU/h per ft²':esc(l3)}</span></button></div>`;
-  }).join('');
-  const legend=by==='cover'?`<span class="legend"><span><s style="background:var(--good)"></s>Unit covers the room</span><span><s style="background:var(--warn)"></s>Close</span><span><s style="background:var(--bad)"></s>Undersized</span><span><s style="background:var(--line)"></s>Not assigned</span></span>`
+  const tiles=items.length?treemap(items,0,0,FW,FD):[];
+  const dens=r=>(by==='cool'?e.loads[r.id].cool:e.loads[r.id].heat)/Math.max(1,r.sqft);
+  const maxD=Math.max(1,...rooms.map(dens)), minD=Math.min(...rooms.map(dens),maxD);
+  const stat=r=>{const sys=e.systems.find(s=>s.sys.id===r.sys);if(!sys) return {cls:'none',txt:'No unit',h:null,sys:null};
+    if(sys.single) return {cls:statusCov(sys.cov,.9),txt:'shared '+k1(sys.out.btu),h:null,sys};
+    const h=sys.heads.find(h=>h.room.id===r.id);return {cls:statusCov(h.cov,.8),txt:k1(h.btu)+' unit · '+pc(h.cov),h,sys}};
+  const fillOf=(r,st)=>{
+    if(by==='fit') return st.cls==='none'?'var(--surface2)':`color-mix(in srgb,var(--${st.cls}) 52%,#0c1530)`;
+    if(by==='sys') return st.sys?`color-mix(in srgb,${sysColor(r.sys)} 55%,#0c1530)`:'var(--surface2)';
+    const pcnt=Math.round(22+62*(dens(r)-minD)/Math.max(.001,maxD-minD));
+    return `color-mix(in srgb,var(${by==='cool'?'--cool':'--heat'}) ${pcnt}%,#0c1530)`;
+  };
+  const sorted=tiles.slice().sort((a,b)=>(a.x+a.w/2+a.y+a.h/2)-(b.x+b.w/2+b.y+b.h/2));
+  const anchors={}, bySys={};
+  let rm='';
+  sorted.forEach(t=>{
+    const r=t.r,L=e.loads[r.id],st=stat(r),pad=.5,x0=t.x+pad,x1=t.x+t.w-pad,y0=t.y+pad,y1=t.y+t.h-pad;
+    const f=Math.min(.8,L.glassTot/Math.max(20,(x1-x0)*3.2));
+    const xs=x0+(x1-x0)*(1-f)/2,xe=xs+(x1-x0)*f;
+    const hasUnit=st.h||(st.sys&&st.sys.single&&st.sys.rooms.slice().sort((a,b)=>b.sqft-a.sqft)[0].id===r.id);
+    const xu=x0+(x1-x0)*.25;
+    if(hasUnit){const A=P(xu+2,y0,H-5);anchors[r.id]=A;(bySys[r.sys]=bySys[r.sys]||[]).push(A)}
+    const c=P((x0+x1)/2,(y0+y1)/2,0), small=Math.min(t.w,t.h)*S<30;
+    const sub=by==='fit'?st.txt:by==='sys'?(st.sys?st.sys.sys.name:'No unit'):Math.round(dens(r))+' BTU/h per ft²';
+    rm+=`<g role="button" tabindex="0" data-act="gotoRoom" data-v="${r.id}" aria-label="${esc(r.name)}: needs ${fmt(L.heat)} BTU per hour">
+     <polygon class="floor" points="${pts([[x0,y0,0],[x1,y0,0],[x1,y1,0],[x0,y1,0]])}" style="fill:${fillOf(r,st)}"/>
+     <polygon class="wall" points="${pts([[x0,y0,0],[x1,y0,0],[x1,y0,H],[x0,y0,H]])}"/>
+     <polygon class="wall" points="${pts([[x0,y0,0],[x0,y1,0],[x0,y1,H],[x0,y0,H]])}"/>
+     <polygon class="wall2" points="${pts([[x0,y1,0],[x1,y1,0],[x1,y1,4],[x0,y1,4]])}"/>
+     <polygon class="wall2" points="${pts([[x1,y0,0],[x1,y1,0],[x1,y1,4],[x1,y0,4]])}"/>
+     ${L.glassTot>0?`<polygon class="glassp" points="${pts([[xs,y0,4],[xe,y0,4],[xe,y0,H-3],[xs,y0,H-3]])}"/>`:''}
+     ${hasUnit?`<polygon class="unit" points="${pts([[xu,y0,H-9],[xu+4,y0,H-9],[xu+4,y0,H-2],[xu,y0,H-2]])}"/>`:''}
+     <text class="rl" x="${c[0].toFixed(1)}" y="${(c[1]+(small?2:-2)).toFixed(1)}" style="font-size:${small?11:14}px">${esc(r.name)}</text>
+     ${small?'':`<text class="rs" x="${c[0].toFixed(1)}" y="${(c[1]+13).toFixed(1)}">${fmt(by==='cool'?L.cool:L.heat)} BTU/h</text><text class="rs" x="${c[0].toFixed(1)}" y="${(c[1]+26).toFixed(1)}" style="font-size:11px;font-weight:600">${esc(sub)}</text>`}</g>`;
+  });
+  const n=Math.max(1,e.systems.length); let od='',tubes='';
+  e.systems.forEach((s,i)=>{
+    const yb=(i+.5)*FD/n-4,xb=FW+4,dx=8,dy=8,dz=11,col=sysColor(s.sys.id);
+    const C=P(xb+dx/2,yb+dy/2,dz), top=P(xb+dx/2,yb+dy/2,dz);
+    (bySys[s.sys.id]||[]).forEach(A=>{const mx=(A[0]+C[0])/2,my=Math.min(A[1],C[1])-38;const d=`M${A[0].toFixed(1)} ${A[1].toFixed(1)} Q${mx.toFixed(1)} ${my.toFixed(1)} ${C[0].toFixed(1)} ${C[1].toFixed(1)}`;tubes+=`<path class="tubeg" d="${d}"/><path class="tube" d="${d}" style="stroke:${col}"/>`});
+    od+=`<g><polygon class="od" style="stroke:${col}" points="${pts([[xb,yb+dy,0],[xb+dx,yb+dy,0],[xb+dx,yb+dy,dz],[xb,yb+dy,dz]])}"/>
+      <polygon class="od" style="stroke:${col}" points="${pts([[xb+dx,yb,0],[xb+dx,yb+dy,0],[xb+dx,yb+dy,dz],[xb+dx,yb,dz]])}"/>
+      <polygon class="odt" style="stroke:${col};stroke-width:1.5" points="${pts([[xb,yb,dz],[xb+dx,yb,dz],[xb+dx,yb+dy,dz],[xb,yb+dy,dz]])}"/>
+      <ellipse cx="${top[0].toFixed(1)}" cy="${top[1].toFixed(1)}" rx="15" ry="8.5" fill="none" stroke="${col}" stroke-width="1.5"/>
+      <text class="rs" x="${top[0].toFixed(1)}" y="${(top[1]+38).toFixed(1)}" style="font-size:11px">${esc(outName(s.out))} · ${k1(s.out.btu)}</text></g>`;
+  });
+  const vals=rooms.map(r=>by==='cool'?e.loads[r.id].cool:e.loads[r.id].heat);
+  const range=by==='sys'?`${e.systems.length} system${e.systems.length===1?'':'s'}`:by==='fit'?(()=>{const cv=sum([0])||0;return `${Math.round(e.cov*100)}% of coldest-night need`})():`${fmt(Math.min(...vals,0)||0)} – ${fmt(Math.max(...vals,0))}`;
+  const rk=by==='fit'?'Heating covered at '+M.climate.winterOut+'°F':by==='sys'?'Outdoor units':by==='cool'?'Room cooling load, BTU/h':'Room heating load, BTU/h';
+  const thumb=tiles.map(t=>`<rect x="${(t.x*1.1+2).toFixed(1)}" y="${(t.y*1.1+2).toFixed(1)}" width="${(t.w*1.1).toFixed(1)}" height="${(t.h*1.1).toFixed(1)}" fill="none" stroke="currentColor" stroke-width="1.2"/>`).join('');
+  const legend=by==='fit'?`<span class="legend"><span><s style="background:var(--good)"></s>Unit covers the room</span><span><s style="background:var(--warn)"></s>Close</span><span><s style="background:var(--bad)"></s>Undersized</span><span><s style="background:var(--surface2)"></s>No unit</span></span>`
     :by==='sys'?`<span class="legend">${M.systems.map(s=>`<span><s style="background:${sysColor(s.id)}"></s>${esc(s.name)}</span>`).join('')}</span>`
-    :`<span class="legend"><span>Darker = more heat needed per square foot</span></span>`;
-  $('#sec-map').innerHTML=`<header><h2>Your home, room by room</h2><p>Room sizes are drawn in proportion to floor area. Tap a room to edit it.</p></header>
-   <div class="maptools"><div class="seg sm" role="group" aria-label="Map colors">
-     ${[['cover','Does the unit fit?'],['density','Heat needed'],['sys','Which system']].map(([k,l])=>`<button data-act="mapBy" data-v="${k}" aria-pressed="${by===k}">${l}</button>`).join('')}</div>${legend}</div>
-   <div class="map">${tileHtml||'<p class="muted" style="padding:20px">Add rooms to draw the map.</p>'}</div>
-   <p class="hint" style="margin-top:8px">Schematic, not a floor plan: it shows sizes and fit, not where walls actually are.</p>`;
+    :`<span class="legend"><span>Brighter = more ${by==='cool'?'cooling':'heat'} per square foot</span></span>`;
+  $('#sec-map').innerHTML=`<div class="stage-top"><div><div class="utabs" role="group" aria-label="What to show">${MAP_MODES.map(([k,l])=>`<button data-act="mapBy" data-v="${k}" aria-pressed="${by===k}">${l}</button>`).join('')}</div>
+    <div class="btuinfo"><div class="k">${rk}</div><div class="v2 num">${range}</div></div></div>
+    <div class="thumb">Floor plan<svg width="124" height="90" viewBox="0 0 124 90" aria-hidden="true">${thumb}</svg></div></div>
+   ${tiles.length?`<svg class="iso" viewBox="0 0 840 560" role="group" aria-label="Isometric cutaway of the home, rooms sized by floor area">
+    <defs><filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3.5"/></filter></defs>${rm}${tubes}${od}</svg>`:'<p class="muted" style="padding:60px 20px;text-align:center">Tap Edit home and add rooms to build the 3D view.</p>'}
+   <div class="stage-bot">${legend}<span class="hint">Schematic: sizes and fit, not exact wall positions. Tap a room to edit it.</span></div>`;
 }
-
+function altSetups(){
+  const defs=[['As planned',M.wi],['With new Low-E windows',Object.assign({},M.wi,{win:true})],['Windows + attic + air sealing',Object.assign({},M.wi,{win:true,attic:true,air:true})]];
+  return defs.map(([n,wi])=>{
+    const ev=evalModel(M,wi);let eq=0,cnt=0;
+    try{autoDesign(Object.assign({},M,{wi})).forEach(s=>{const o=M.catalog.outdoors.find(o=>o.id===s.out);if(o){eq+=o.btu;cnt++}})}catch(_){}
+    return {n,heat:ev.homeHeat,cov:ev.cov,eq,cnt};
+  });
+}
+function finCalc(){
+  const t=quoteTotals(),f=M.fin||{years:10,apr:7,downPct:0},price=t.net,down=price*f.downPct/100,Pp=price-down,n=f.years*12,r=(f.apr/100)/12;
+  return {price,down,mo:!Pp?0:(r?Pp*r/(1-Math.pow(1+r,-n)):Pp/n)};
+}
+function updateFin(){
+  const c=finCalc(),set=(id,v)=>{const el=$(id);if(el)el.textContent=v};
+  set('#finAmt',money(c.price));set('#finDown',money(c.down));set('#finMo',money(c.mo));set('#finPct',(M.fin.downPct)+'%');
+}
+function renderPanels(){
+  const e=EV.cur,c=M.climate,f=M.fin,alts=altSetups(),sq=sum(M.rooms.map(r=>r.sqft));
+  $('#sec-panels').innerHTML=`
+  <div class="panel"><div class="bk">Your home</div><h2 style="font-size:1.5rem">${esc(M.job||'New home')}</h2><div class="muted small">${esc(c.label)}</div>
+   <div class="stat4"><div><b class="num">${M.rooms.length}</b><span>Rooms</span></div><div><b class="num">${fmt(sq)}</b><span>ft²</span></div><div><b class="num">${M.systems.length}</b><span>Systems</span></div><div><b class="num">${fmt(e.nameplate/12000*1)/1>0?(e.nameplate/12000).toFixed(1):'0'}</b><span>Tons</span></div></div>
+   <div class="chipline"><span class="cl">${c.winterOut}°F coldest</span><span class="cl">${c.summerOut}°F hottest</span><span class="cl">${esc(WINDOWS[M.house.winType].name)}</span><span class="cl">${esc(LEAK[M.house.leak].name)} air</span></div></div>
+  ${renderVerdict()}
+  <div class="panel"><div class="bk">Payment calculator</div>
+   <div class="finrow"><label class="field"><span>Term</span><select id="fin-y" data-act="finYears">${[3,5,7,10,12,15].map(y=>`<option value="${y}"${f.years===y?' selected':''}>${y} years</option>`).join('')}</select></label>
+    <label class="field"><span>Interest rate % (example)</span><input type="number" id="fin-a" data-act="finApr" step="0.1" min="0" value="${f.apr}"></label></div>
+   <label class="field"><span>Down payment <b id="finPct" class="num">${f.downPct}%</b></span><input type="range" id="fin-d" data-act="finDown" min="0" max="50" step="5" value="${f.downPct}"></label>
+   <div class="finout"><div><span>Total price</span><b class="num" id="finAmt"></b></div><div><span>Down payment</span><b class="num" id="finDown"></b></div><div style="text-align:right"><span>Estimated per month</span><b class="num" id="finMo" style="color:var(--good)"></b></div></div>
+   <p class="hint">Example only. Enter your lender's real rate. Price comes from the section below.</p></div>
+  <div class="panel"><div class="bk">Other ways to do it</div>
+   ${alts.map((a,i)=>`<div class="alt"><div><b>${esc(a.n)}${i===0?' (current)':''}</b><div class="s num">Needs ${fmt(a.heat)} BTU/h on the coldest night</div><div class="s num">Equipment that covers it: ${a.cnt?fmt(a.eq)+' BTU in '+a.cnt+' outdoor unit'+(a.cnt>1?'s':''):'-'}</div></div><div class="r num" style="color:${a.cov>=1?'var(--good)':a.cov>=.9?'var(--warn)':'var(--bad)'}">${pc(a.cov)}<div class="s" style="font-weight:500">of need covered now</div></div></div>`).join('')}
+   <p class="hint" style="margin-top:8px">Smaller loads let the same house run on smaller equipment. Prices are entered in the What-if section.</p></div>`;
+  updateFin();
+}
 /* ---------- Viz: balance chart ---------- */
 function niceMax(v){const s=[2000,5000,10000,20000,50000];let st=s.find(x=>v/x<=6)||s[s.length-1];return Math.ceil(v/st)*st}
 function balanceChart(design,capFn,Tdes,nameplate,bp,label){
@@ -780,7 +894,7 @@ function renderQuote(){
    ${q.tbd.length?`<div class="warnbox" style="margin-top:12px"><b>Not in the price yet</b><ul style="margin:6px 0 0;padding-left:20px">${q.tbd.map((x,i)=>`<li style="list-style:none;margin-left:-20px;display:flex;gap:6px;margin-top:6px"><input type="text" id="tbd-${i}" data-act="tbdText" data-v="${i}" value="${esc(x)}" aria-label="Item still to be quoted"><button class="btn sm ghost" data-act="delTbd" data-v="${i}" aria-label="Remove item">remove</button></li>`).join('')}</ul></div>`:''}
    <div class="tools" style="margin-top:10px"><button class="btn sm" data-act="addTbd">+ Note an item still to be quoted</button></div>`;
 }
-function updateQuoteTotals(){const t=quoteTotals(),a=$('#qSub'),b=$('#qNet');if(a)a.textContent=money(t.sub);if(b)b.textContent=money(t.net)}
+function updateQuoteTotals(){const t=quoteTotals(),a=$('#qSub'),b=$('#qNet');if(a)a.textContent=money(t.sub);if(b)b.textContent=money(t.net);if(typeof updateFin==='function'&&$('#finMo'))updateFin()}
 
 /* ---------- Viz: engineering panel ---------- */
 function renderTech(){
@@ -851,7 +965,7 @@ async function copyText(txt,btn){
 /* ---------- Refresh / actions ---------- */
 function refresh(skip){
   EV=ctxEval();
-  renderVerdict();renderMap();renderSystems();renderChecks();renderWhatIf();if(skip!=='quote')renderQuote();renderTech();updateReadouts();
+  renderPanels();renderMap();renderSystems();renderChecks();renderWhatIf();if(skip!=='quote')renderQuote();renderTech();updateReadouts();
   document.body.classList.toggle('present',M.mode==='present');
   $('#modeCons').setAttribute('aria-pressed',M.mode!=='present');$('#modePres').setAttribute('aria-pressed',M.mode==='present');
   save();
@@ -877,6 +991,8 @@ function addSystem(type,name,outId){
   const s={id:sid(),type,name:name||(type+'-'+n),out:outId||o.id};M.systems.push(s);return s;
 }
 const ACTIONS={
+  drawer(){$('#editor').classList.add('open');$('#scrim').hidden=false},
+  closeDrawer(){$('#editor').classList.remove('open');$('#scrim').hidden=true},
   mode(t){M.mode=t.dataset.v;refresh()},
   demo(){M=demoModel();fullRender()},
   copy(t){copyText(summaryText(),t)},
@@ -884,9 +1000,8 @@ const ACTIONS={
   closeSettings(){$('#overlay').hidden=true;fullRender()},
   mapBy(t){M.mapBy=t.dataset.v;refresh()},
   gotoRoom(t){
-    const el=$(`#room-${t.dataset.v}`);if(!el) return;
-    if(M.mode==='present'){M.mode='consult';refresh()}
-    el.scrollIntoView({behavior:'smooth',block:'center'});el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash');
+    ACTIONS.drawer();
+    setTimeout(()=>{const el=$(`#room-${t.dataset.v}`);if(!el) return;const d=$('details',el);el.scrollIntoView({behavior:'smooth',block:'start'});el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash')},260);
   },
   addRoom(t){const r=newRoom(t.dataset.v);r.name=r.name+(M.rooms.filter(x=>x.type===r.type).length?' '+(M.rooms.filter(x=>x.type===r.type).length+1):'');M.rooms.push(r);fullRender();const el=$(`#room-${r.id}`);if(el) el.scrollIntoView({block:'center'})},
   delRoom(t){const id=t.closest('[data-rid]').dataset.rid;M.rooms=M.rooms.filter(r=>r.id!==id);fullRender()},
@@ -945,10 +1060,13 @@ function onInput(e){
     g[f]=f==='a'?(parseFloat(t.value)||0):t.value;r.glassCustom=true;r.glassPreset=null;refresh();return;
   }
   const a=t.dataset.act;
-  if(a==='sysName'){const s=M.systems.find(s=>s.id===t.dataset.sid);s.name=t.value;renderVerdict();renderMap();renderChecks();save();return}
+  if(a==='sysName'){const s=M.systems.find(s=>s.id===t.dataset.sid);s.name=t.value;renderPanels();renderMap();renderChecks();save();return}
   if(a==='sysPrice'){M.quote.sysPrice[t.dataset.sid]=t.value===''?'':parseFloat(t.value);updateQuoteTotals();save();return}
   if(a==='addonName'){M.quote.addons[+t.dataset.v].n=t.value;save();return}
   if(a==='addonPrice'){M.quote.addons[+t.dataset.v].p=t.value===''?'':parseFloat(t.value);updateQuoteTotals();save();return}
+  if(a==='finYears'){M.fin.years=+t.value;updateFin();save();return}
+  if(a==='finApr'){M.fin.apr=parseFloat(t.value)||0;updateFin();save();return}
+  if(a==='finDown'){M.fin.downPct=+t.value;updateFin();save();return}
   if(a==='tbdText'){M.quote.tbd[+t.dataset.v]=t.value;save();return}
   if(a==='rebate'){M.quote.rebate=t.value===''?'':parseFloat(t.value);updateQuoteTotals();save();return}
   if(a==='wiCost'){M.wiCost[t.dataset.v]=t.value===''?'':parseFloat(t.value);updateQuoteTotals();save();return}
@@ -973,8 +1091,11 @@ document.addEventListener('click',e=>{
   const b=e.target.closest('button[data-act],[role=button][data-act]');if(!b) return;
   const f=ACTIONS[b.dataset.act];if(f) f(b);
 });
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#overlay').hidden){$('#overlay').hidden=true;fullRender()}});
-M=load();
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){if(!$('#overlay').hidden){$('#overlay').hidden=true;fullRender()}else ACTIONS.closeDrawer()}
+  if((e.key==='Enter'||e.key===' ')&&e.target.getAttribute&&e.target.getAttribute('role')==='button'&&e.target.tagName!=='BUTTON'){e.preventDefault();e.target.dispatchEvent(new MouseEvent('click',{bubbles:true}))}
+});
+M=load();if(!M.fin)M.fin={years:10,apr:7,downPct:0};
 fullRender();
 window.__planner={get model(){return M},evalModel,roomLoads,findings};
 })();

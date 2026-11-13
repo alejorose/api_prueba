@@ -335,6 +335,19 @@ const BUILD = {
     const sh = new THREE.Mesh(new THREE.SphereGeometry(.22, 28, 12, 0, Math.PI * 2, 0, Math.PI / 2), mat(c, { emissive: c, emissiveIntensity: .8, side: THREE.DoubleSide }));
     sh.position.set(0, 1.55, 1.2); g.add(sh);
   },
+  bedup(g, it, { w, d, h }, c) {   // cama tapizada con cabecero de canales verticales y cajones (estilo VECELO)
+    const k = CATALOG[it.type], fw = k.shop?.frameW || w - .08, hb = .09;
+    const velvet = mat(c, { roughness: .95 }), dark = mat(shade(c, .05), { roughness: 1 }), white = mat('#f4f1eb');
+    part(g, fw, .215, d - hb, 0, .035 + .1075, hb / 2, velvet);                              // plataforma (25 cm con patas)
+    [-1, 1].forEach(s => part(g, .05, .035, .05, s * (fw / 2 - .08), .0175, d / 2 - .08, dark));
+    part(g, w, h - .26, hb, 0, .26 + (h - .26) / 2, -d / 2 + hb / 2, velvet);                // cabecero alto y más ancho que el marco
+    for (let i = 1; i < 10; i++) part(g, .014, h - .5, .012, -w / 2 + i * w / 10, .26 + (h - .26) / 2 - .02, -d / 2 + hb + .004, dark);   // canales verticales
+    [-1, 1].forEach(s => { [-.2, .28].forEach(z => part(g, .01, .16, d * .3, s * (fw / 2 + .003), .14, d * z, dark)); });                // frentes de cajón a los lados
+    part(g, fw * .86, .16, .01, 0, .14, d / 2 + .003, dark);                                  // y al pie
+    part(g, fw - .04, .2, d - hb - .06, 0, .35, hb / 2 + .02, white);                         // colchón
+    part(g, fw - .02, .07, d * .6, 0, .49, d * .17, mat(k.duvet || '#4a4f57'));               // edredón
+    [-1, 1].forEach(s => part(g, fw / 2 - .1, .13, .36, s * (fw / 4), .55, -d / 2 + hb + .22, white));   // almohadas
+  },
   archmirror(g, it, { w, d, h }, c) {   // espejo de piso con arco, apoyado en la pared (inclinado ~3.5°)
     const mk = (ww, hh, dep, y, m) => {
       const r = ww / 2, sh = new THREE.Shape(); sh.moveTo(-r, 0); sh.lineTo(r, 0); sh.lineTo(r, hh - r); sh.absarc(0, hh - r, r, 0, Math.PI, false); sh.lineTo(-r, 0);
@@ -1478,7 +1491,7 @@ canvas.addEventListener('pointerdown', e => {
   tp.set(e.pointerId, { x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY, t: performance.now(), lt: 0, moved: false });
   try { canvas.setPointerCapture(e.pointerId); } catch { }
   lookVel.x = lookVel.y = 0; walkAnim = null;
-  if (tp.size === 2) { const [a, b] = [...tp.values()]; pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 }; }
+  if (tp.size === 2) { const [a, b] = [...tp.values()]; pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2, a: Math.atan2(b.y - a.y, b.x - a.x) }; }
 });
 canvas.addEventListener('pointermove', e => {
   if (!shooting || e.pointerType === 'mouse') return;
@@ -1494,7 +1507,9 @@ canvas.addEventListener('pointermove', e => {
     const [a, b] = [...tp.values()], d = Math.hypot(a.x - b.x, a.y - b.y), mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
     if (pinch.d > 8 && d > 8) setLens(getLens() * d / pinch.d);                       // pellizco = lente (zoom)
     moveCam(0, (mx - pinch.mx) * .006, -(my - pinch.my) * .006);                      // dos dedos = deslizar / subir
-    pinch = { d, mx, my };
+    const ang = Math.atan2(b.y - a.y, b.x - a.x); let da = ang - (pinch.a ?? ang); if (da > Math.PI) da -= 2 * Math.PI; if (da < -Math.PI) da += 2 * Math.PI;
+    if (Math.abs(da) > .004) turnCam(-deg(da), 0);                                    // girar los dedos = girar la vista
+    pinch = { d, mx, my, a: ang };
   }
 });
 const tpEnd = e => {
@@ -1509,6 +1524,19 @@ const tpEnd = e => {
   if (!tp.size && Math.hypot(lookVel.x, lookVel.y) < 6) lookVel.x = lookVel.y = 0;
 };
 canvas.addEventListener('pointerup', tpEnd); canvas.addEventListener('pointercancel', tpEnd);
+// giro con dos dedos (como en los mapas): rotar los dedos rota la vista alrededor del punto que miras
+let TWIST_SIGN = 1, lastTwist = null;
+function twistView(d) {
+  const off = camera.position.clone().sub(controls.target); off.applyAxisAngle(new THREE.Vector3(0, 1, 0), TWIST_SIGN * d);
+  camera.position.copy(controls.target).add(off); camera.lookAt(controls.target); controls.update(); redraw();
+}
+canvas.addEventListener('pointermove', e => {
+  if (shooting || e.pointerType === 'mouse' || pointers.size !== 2) { lastTwist = null; return; }
+  const [a, b] = [...pointers.values()], ang = Math.atan2(b.y - a.y, b.x - a.x);
+  if (lastTwist != null) { let d = ang - lastTwist; if (d > Math.PI) d -= 2 * Math.PI; if (d < -Math.PI) d += 2 * Math.PI; if (Math.abs(d) > .003) twistView(d); }
+  lastTwist = ang;
+});
+['pointerup', 'pointercancel'].forEach(ev => canvas.addEventListener(ev, () => { lastTwist = null; }));
 function walkTo(x, y) {   // doble toque en el piso: caminar hasta ahí
   const rc = new THREE.Raycaster(), pt = new THREE.Vector3(); rc.setFromCamera(new THREE.Vector2(x / innerWidth * 2 - 1, -(y / innerHeight) * 2 + 1), camera);
   if (!rc.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), pt) || pt.distanceTo(camera.position) > 14) return;

@@ -19,7 +19,7 @@ Números = los del `plano-numerado.jpg`. Medidas en cm (ancho × fondo × alto).
 | 13 | [Silla ODGER](https://www.ikea.com/ca/en/search/?q=ODGER) | IKEA | 45 × 51 × 81 ✓ | — | CA$99 |
 | 14 | [Silla ODGER](https://www.ikea.com/ca/en/search/?q=ODGER) | IKEA | 45 × 51 × 81 ✓ | — | CA$99 |
 | 15 | [Lámpara colgante de papel REGOLIT 45](https://www.ikea.com/ca/en/p/regolit-pendant-lamp-shade-white-handmade-70103410) | IKEA | 45 × 45 × 45 ✓ | 175 cm | CA$15 |
-| 16 | [Cama TARVA queen (pino)](https://www.ikea.com/ca/en/p/tarva-bed-frame-pine-90249949/) | IKEA | 160 × 209 × 92 ✓ | — | CA$159 |
+| 16 | [Cama VECELO queen tapizada negra (4 cajones)](https://www.amazon.ca/s?k=VECELO+Queen+Size+Upholstered+Bed+Frame+4+Drawers+Adjustable+Headboard+Velvet+Black) | Amazon | 165 × 212 × 112 (?) | — | CA$379 |
 | 17 | [Buró flotante GRÅFJÄLLET](https://www.ikea.com/ca/en/search/?q=GRAFJALLET) | IKEA | 42 × 29 × 31 ✓ | 30 cm | CA$49 |
 | 18 | [Buró flotante GRÅFJÄLLET](https://www.ikea.com/ca/en/search/?q=GRAFJALLET) | IKEA | 42 × 29 × 31 ✓ | 30 cm | CA$49 |
 | 19 | [Lámpara de pared linterna de papel](https://www.amazon.ca/s?k=paper+lantern+plug+in+wall+sconce+black+arm) | Amazon | 32 × 38 × 32 (?) | 150 cm | CA$49 |
@@ -27,7 +27,7 @@ Números = los del `plano-numerado.jpg`. Medidas en cm (ancho × fondo × alto).
 | 21 | [Cuadro abstracto grande](https://www.ikea.com/ca/en/search/?q=BJORKSTA) | IKEA / Amazon | 100 × 4 × 70 (?) | 110 cm | CA$85 |
 | 22 | [Tapete de yute LOHALS 80×150](https://www.ikea.com/ca/en/search/?q=LOHALS) | IKEA | 80 × 150 × 2 ✓ | — | CA$39 |
 | 23 | [Planta (pothos / monstera)](https://www.ikea.com/ca/en/search/?q=plant) | IKEA / vivero | 40 × 40 × 120 (?) | — | CA$29 |
-| 24 | [Cama TARVA full (pino)](https://www.ikea.com/ca/en/p/tarva-bed-frame-pine-s49930100) | IKEA | 143 × 198 × 92 ✓ | — | CA$139 |
+| 24 | [Cama VECELO full tapizada negra (4 cajones)](https://www.amazon.ca/s?k=VECELO+Full+Size+Upholstered+Bed+Frame+4+Drawers+Adjustable+Headboard+Velvet+Black) | Amazon | 152 × 199 × 112 ✓ | — | CA$329 |
 | 25 | [Buró flotante GRÅFJÄLLET](https://www.ikea.com/ca/en/search/?q=GRAFJALLET) | IKEA | 42 × 29 × 31 ✓ | 30 cm | CA$49 |
 | 26 | [Buró flotante GRÅFJÄLLET](https://www.ikea.com/ca/en/search/?q=GRAFJALLET) | IKEA | 42 × 29 × 31 ✓ | 30 cm | CA$49 |
 | 27 | [Lámpara de pared linterna de papel](https://www.amazon.ca/s?k=paper+lantern+plug+in+wall+sconce+black+arm) | Amazon | 32 × 38 × 32 (?) | 150 cm | CA$49 |
@@ -45,15 +45,13 @@ Números = los del `plano-numerado.jpg`. Medidas en cm (ancho × fondo × alto).
 
 - 1× Colchón queen (recámara principal) (IKEA / otra) ~CA$399 c/u
 - 1× Colchón full (recámara 2) (IKEA / otra) ~CA$329 c/u
-- 1× Base de tablillas LURÖY queen (IKEA) ~CA$50 c/u
-- 1× Base de tablillas LURÖY full (IKEA) ~CA$45 c/u
 - 2× Ropa de cama de lino (carbón / avena), queen y full (IKEA / Amazon) ~CA$130 c/u
 - 1× Tira LED cálida 5 m con enchufe (Amazon) ~CA$30 c/u
 - 1× Láminas / cuadros pequeños para repisas (IKEA / Etsy) ~CA$90 c/u
 - 1× Manta tejida y cojines (IKEA / Amazon) ~CA$60 c/u
 - 1× Velas y decoración pequeña (IKEA) ~CA$40 c/u
 
-**Total estimado: CA$5,013** (rango CA$4,005 – 6,395).
+**Total estimado: CA$5,328** (rango CA$4,237 – 6,867).
 
 ## Posición exacta de cada pieza (texto del prompt)
 
@@ -72,7 +70,7 @@ Números = los del `plano-numerado.jpg`. Medidas en cm (ancho × fondo × alto).
 - 13. IKEA ODGER chair in beige, 0.45 × 0.51 × 0.81 m (W × D × H); kitchen and dining area: centre 1.78 m from the west wall and 1.09 m from the north wall; front faces west; 0.03 m free in front
 - 14. IKEA ODGER chair in beige, 0.45 × 0.51 × 0.81 m (W × D × H); kitchen and dining area: centre 1.78 m from the west wall and 1.68 m from the north wall; front faces west; 0.03 m free in front
 - 15. IKEA REGOLIT paper pendant lampshade 45 cm, glowing warm, 0.45 × 0.45 × 0.45 m (W × D × H); kitchen and dining area: centre 1.05 m from the west wall and 1.37 m from the north wall; front faces south; mounted 1.75 m above the floor
-- 16. IKEA TARVA solid pine queen bed frame in natural pine with charcoal linen bedding and oat pillows, 1.6 × 2.09 × 0.92 m (W × D × H); primary bedroom: centre 1.05 m from the west wall and 1.72 m from the north wall; pushed against the west wall; front faces east; 0.52 m free in front
+- 16. VECELO queen-size black velvet upholstered platform bed frame with a tall vertical channel-tufted headboard and 4 storage drawers, with charcoal linen bedding and oat pillows, 1.65 × 2.12 × 1.12 m (W × D × H); primary bedroom: centre 1.06 m from the west wall and 1.72 m from the north wall; pushed against the west wall; front faces east; 0.50 m free in front
 - 17. IKEA GRÅFJÄLLET wall-mounted bedside shelf in black steel, 0.42 × 0.29 × 0.31 m (W × D × H); primary bedroom: centre 0.15 m from the west wall and 0.62 m from the north wall; pushed against the west wall; front faces east; mounted 0.30 m above the floor; 1.99 m free in front
 - 18. IKEA GRÅFJÄLLET wall-mounted bedside shelf in black steel, 0.42 × 0.29 × 0.31 m (W × D × H); primary bedroom: centre 0.15 m from the west wall and 2.81 m from the north wall; pushed against the west wall; front faces east; mounted 0.30 m above the floor; 5.19 m free in front
 - 19. plug-in wall lamp with a white paper lantern shade on a black arm, 0.32 × 0.38 × 0.32 m (W × D × H); primary bedroom: centre 0.06 m from the west wall and 0.62 m from the north wall; pushed against the west wall; front faces east; mounted 1.50 m above the floor
@@ -80,13 +78,13 @@ Números = los del `plano-numerado.jpg`. Medidas en cm (ancho × fondo × alto).
 - 21. large abstract framed painting with deep red organic shapes on cream, thin dark wood frame, 1 × 0.04 × 0.7 m (W × D × H); primary bedroom: centre 0.03 m from the west wall and 1.72 m from the north wall; pushed against the west wall; front faces east; mounted 1.10 m above the floor
 - 22. IKEA LOHALS flatwoven natural jute rug 80×150 cm, 0.8 × 1.5 m (W × D); primary bedroom: centre 2.28 m from the west wall and 1.72 m from the north wall; pushed against the east wall; front faces east; 0.15 m free in front
 - 23. potted trailing pothos or monstera plant in a woven basket, 0.4 × 0.4 × 1.2 m (W × D × H); primary bedroom: centre 2.48 m from the west wall and 0.28 m from the north wall; pushed against the east and north wall; front faces south; 2.83 m free in front
-- 24. IKEA TARVA solid pine full (double) bed frame in natural pine with charcoal linen bedding and oat pillows, 1.43 × 1.98 × 0.92 m (W × D × H); second bedroom: centre 1.53 m from the west wall and 1.47 m from the north wall; pushed against the south wall; front faces north; 1.52 m free in front
+- 24. VECELO full-size black velvet upholstered platform bed frame with a tall vertical channel-tufted headboard and 4 storage drawers, with charcoal linen bedding and oat pillows, 1.52 × 1.994 × 1.12 m (W × D × H); second bedroom: centre 1.53 m from the west wall and 1.47 m from the north wall; pushed against the south wall; front faces north; 1.51 m free in front
 - 25. IKEA GRÅFJÄLLET wall-mounted bedside shelf in black steel, 0.42 × 0.29 × 0.31 m (W × D × H); second bedroom: centre 0.47 m from the west wall and 2.31 m from the north wall; pushed against the south wall; front faces north; mounted 0.30 m above the floor; 1.68 m free in front
 - 26. IKEA GRÅFJÄLLET wall-mounted bedside shelf in black steel, 0.42 × 0.29 × 0.31 m (W × D × H); second bedroom: centre 2.59 m from the west wall and 2.31 m from the north wall; pushed against the south wall; front faces north; mounted 0.30 m above the floor; 0.73 m free in front
 - 27. plug-in wall lamp with a white paper lantern shade on a black arm, 0.32 × 0.38 × 0.32 m (W × D × H); second bedroom: centre 0.47 m from the west wall and 2.42 m from the north wall; pushed against the south wall; front faces north; mounted 1.50 m above the floor
 - 28. plug-in wall lamp with a white paper lantern shade on a black arm, 0.32 × 0.38 × 0.32 m (W × D × H); second bedroom: centre 2.59 m from the west wall and 2.42 m from the north wall; pushed against the south wall; front faces north; mounted 1.50 m above the floor
 - 29. large abstract framed painting with deep red organic shapes on cream, thin dark wood frame, 1 × 0.04 × 0.7 m (W × D × H); second bedroom: centre 1.53 m from the west wall and 2.43 m from the north wall; pushed against the south wall; front faces north; mounted 1.10 m above the floor
-- 30. IKEA MICKE-style desk 105×50 cm in white, 1.05 × 0.5 × 0.75 m (W × D × H); second bedroom: centre 2.82 m from the west wall and 0.90 m from the north wall; pushed against the east wall; front faces west; 0.33 m free in front
+- 30. IKEA MICKE-style desk 105×50 cm in white, 1.05 × 0.5 × 0.75 m (W × D × H); second bedroom: centre 2.82 m from the west wall and 0.90 m from the north wall; pushed against the east wall; front faces west; 0.28 m free in front
 - 31. potted trailing pothos or monstera plant in a woven basket, 0.4 × 0.4 × 1.2 m (W × D × H); second bedroom: centre 0.39 m from the west wall and 0.28 m from the north wall; pushed against the north wall; front faces south; 1.68 m free in front
 - 32. IKEA TJUSIG bench with shoe storage in black, 1.08 × 0.34 × 0.5 m (W × D × H); entry hall: centre 2.61 m from the west wall and 0.17 m from the north wall; pushed against the north wall; front faces south; 1.45 m free in front
 - 33. IKEA TJUSIG wall hanger rail 78 cm hung with bags and a scarf, 0.78 × 0.06 × 0.12 m (W × D × H); entry hall: centre 2.61 m from the west wall and 0.05 m from the north wall; pushed against the north wall; front faces south; mounted 1.55 m above the floor

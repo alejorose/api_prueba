@@ -64,3 +64,8 @@ Al entrar a 🎥 Tomas en un teléfono aparece un HUD pensado para pulgares, con
 Notas: el lente largo gira más despacio (la sensibilidad se escala con el campo de visión); la vibración usa `navigator.vibrate` donde el
 navegador lo permite (Android; iOS Safari no lo soporta). No se usa giroscopio: pedir el sensor requiere un permiso que los visores
 embebidos suelen bloquear.
+
+## Giro con dos dedos
+
+En la vista principal (3D y Planta) y en el modo Tomas, **girar dos dedos** rota la vista, como en los mapas: el giro sigue a tus dedos.
+Funciona junto con el pellizco (zoom) y el arrastre con dos dedos (deslizar), incluso si el primer dedo cae sobre un mueble.

@@ -21,7 +21,7 @@ const WALLS = [
   [262, 758, 277, 1378], [262, 1355, 750, 1378], [738, 1225, 750, 1252], [738, 1340, 750, 1378],
   [645, 1225, 738, 1240], [628, 758, 645, 1182], [585, 1182, 645, 1225],
   [277, 978, 372, 986], [425, 980, 433, 1135], [277, 1080, 433, 1100],
-  [277, 1190, 380, 1197], [445, 810, 455, 921], [445, 915, 492, 921],
+  [277, 1190, 380, 1197], [445, 810, 455, 921], [447, 914, 495, 920], [489, 914, 495, 981], [425, 975, 495, 981],
   [518, 1197, 525, 1355], [620, 615, 645, 758],
 ];
 
@@ -70,7 +70,7 @@ const GLASS = [  // [rect px, alto, y0]
   [[277, 758, 628, 768], WALL_H, 0], [[277, 986, 325, 1080], 2.1, 0],   // ventanal, regadera
   [[262, 612, 620, 618], 1.05, 0], [[262, 612, 268, 758], 1.05, 0],      // barandal patio
 ];
-const COLLIDERS = [...WALLS, [277, 758, 628, 768], [277, 1197, 320, 1355],
+const COLLIDERS = [...WALLS, [277, 758, 628, 768], [277, 1197, 320, 1355], [447, 920, 489, 975],
   ...FIXTURES.filter(f => (f[3] || 0) === 0).map(f => f[0])].map(rectOf);
 
 /* ============================================================
@@ -270,6 +270,22 @@ for (let i = 0; i <= 5; i++) {
     const g = new THREE.Mesh(new THREE.BoxGeometry(c0.w * .55, .9, .05), mat(c, { roughness: 1 }));
     g.position.set(c0.cx, 1.3, c0.cz - c0.d / 2 + .15 + i * (c0.d - .3) / 9); g.rotation.y = (i % 3 - 1) * .08; g.castShadow = true; scene.add(g);
   });
+}
+// Clóset del cuarto principal (≈0.66 × 0.86 m por dentro), junto a la pared de la TV; puerta abatible hacia la recámara
+{
+  const c1 = rectOf([447, 920, 489, 975]);
+  const fl = floorMesh({ r: [447, 920, 489, 975], k: 'wood', y: .004 }); fl.material.color.set('#8f8579'); scene.add(fl);
+  const shelf = new THREE.Mesh(new THREE.BoxGeometry(c1.w, .03, c1.d - .04), mat('#e8e2d8')); shelf.position.set(c1.cx, 1.95, c1.cz); scene.add(shelf);
+  const rod = new THREE.Mesh(new THREE.CylinderGeometry(.014, .014, c1.d - .06, 10), mat('#9aa0a8', { metalness: .6 }));
+  rod.rotation.x = Math.PI / 2; rod.position.set(c1.cx + .1, 1.8, c1.cz); scene.add(rod);
+  ['#d9d4cc', '#5b6b82', '#2f343b', '#c9b79c', '#8a9a7b', '#e8e2d8', '#3b3f46'].forEach((c, i) => {
+    const g = new THREE.Mesh(new THREE.BoxGeometry(c1.w * .5, .9, .05), mat(c, { roughness: 1 }));
+    g.position.set(c1.cx + .1, 1.3, c1.cz - c1.d / 2 + .12 + i * (c1.d - .24) / 6); g.rotation.y = (i % 3 - 1) * .08; g.castShadow = true; scene.add(g);
+  });
+  // puerta (bisagra en la esquina sur-oeste, entreabierta como en el plano)
+  const hx = wx(447), hz = wz(975), ex = wx(433.5), ez = wz(927), L = Math.hypot(ex - hx, ez - hz);
+  const leaf = new THREE.Mesh(new THREE.BoxGeometry(.035, 2.05, L), mat('#f4f1eb', { roughness: .6 }));
+  leaf.position.set((hx + ex) / 2, 1.025, (hz + ez) / 2); leaf.rotation.y = Math.atan2(ex - hx, ez - hz); leaf.castShadow = true; scene.add(leaf); mull.push(leaf);
 }
 FIXTURES.forEach(([r, h, c, y0 = 0]) => {
   const { cx, cz, w, d } = rectOf(r);
@@ -904,7 +920,7 @@ function updateRoomCard() {
   const occ = inRoom.filter(it => !floats(CATALOG[it.type])).reduce((s, it) => s + CATALOG[it.type].w * CATALOG[it.type].d, 0);
   const hits = inRoom.filter(it => it.hit).length, areaTxt = units === 'm' ? area.toFixed(1) + ' m²' : Math.round(area * 10.7639) + ' ft²';
   $('#roomInfo').innerHTML = `<b>${title(r.n)}</b> · ${fmt(q.w)} × ${fmt(q.d)} · ${areaTxt}<br><small>${inRoom.length} piezas · muebles ocupan ${Math.round(occ / area * 100)}%` +
-    `${hits ? ` · <span class="bad">⚠ ${hits} choque${hits > 1 ? 's' : ''}</span>` : ''}${r.k === 'bed2' ? ' · clóset aparte (0.62 × 2.46 m)' : ''}</small>`;
+    `${hits ? ` · <span class="bad">⚠ ${hits} choque${hits > 1 ? 's' : ''}</span>` : ''}${r.k === 'bed2' ? ' · clóset aparte (0.62 × 2.46 m)' : r.k === 'prim' ? ' · clóset aparte (~0.6 × 0.9 m)' : ''}</small>`;
 }
 function clearRoom(k) { pushHist(); const ids = items.filter(it => roomOf(it)?.k === k).map(i => i.id); ids.forEach(removeGroup); items = items.filter(it => !ids.includes(it.id)); }
 function finishRoomEdit() { select(null); checkCollisions(); save(); applyRoomFocus(); redraw(); }
@@ -1119,7 +1135,7 @@ ${room ? 'ROOM' : 'ROOMS'} (interior dimensions)
 ${dims.join('\n')}
 
 FIXED FINISHES (from the real unit)
-Grey-brown wood-look vinyl plank floors, white walls and ceiling, floor-to-ceiling windows with sliding balcony door, dark grey flat-panel kitchen cabinets with grey stone-look backsplash and stainless steel appliances, bathrooms with large dark grey floor tile and white fixtures, white panel doors, mirrored sliding closet doors in the entry${(cu ? cu.closet : !room || room.k === 'bed2') ? '; a built-in closet in the second bedroom along the whole west wall, 0.62 m deep × 2.46 m long, with three white sliding doors (already excluded from the bedroom dimensions above)' : ''}.
+Grey-brown wood-look vinyl plank floors, white walls and ceiling, floor-to-ceiling windows with sliding balcony door, dark grey flat-panel kitchen cabinets with grey stone-look backsplash and stainless steel appliances, bathrooms with large dark grey floor tile and white fixtures, white panel doors, mirrored sliding closet doors in the entry${(cu ? cu.closet : !room || room.k === 'bed2') ? '; a built-in closet in the second bedroom along the whole west wall, 0.62 m deep × 2.46 m long, with three white sliding doors (already excluded from the bedroom dimensions above)' : ''}${(cu ? cu.rooms.includes('prim') : !room || room.k === 'prim') ? '; a small reach-in closet (about 0.6 m x 0.9 m inside, rod and shelf) with one white hinged door, slightly open, on the east side of the primary bedroom next to the TV wall' : ''}.
 
 FURNITURE (measured, numbers match the plan)
 ${lines.length ? lines.join('\n') : 'None'}

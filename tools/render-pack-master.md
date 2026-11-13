@@ -69,7 +69,7 @@ Responde en el mismo chat (una corrección a la vez):
 ## Datos clave del departamento
 
 - Huella 61.7 m² (664 sq ft, a caras exteriores de muros); área libre interior ≈ 50 m².
-- Sala 2.70 × 3.31 m · Recámara principal 2.62 × 3.31 m · Cocina/comedor 2.48 × 3.28 m · Recámara 2 3.09 × 2.46 m (+ clóset empotrado de 0.62 × 2.46 m en la pared oeste) · Entrada 3.32 × 1.79 m · Balcón 5.62 × 2.23 m.
+- Sala 2.70 × 3.31 m · Recámara principal 2.62 × 3.31 m (+ clóset de ~0.6 × 0.9 m con puerta abatible, junto a la pared de la TV) · Cocina/comedor 2.48 × 3.28 m · Recámara 2 3.09 × 2.46 m (+ clóset empotrado de 0.62 × 2.46 m en la pared oeste) · Entrada 3.32 × 1.79 m · Balcón 5.62 × 2.23 m.
 - Puerta de entrada en el muro este; corredor entre cocina y recámara 2; baños sin amueblar (acabados: loseta gris oscuro grande, muebles blancos).
 
 ## Nombres de las recámaras

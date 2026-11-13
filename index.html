@@ -45,6 +45,34 @@
 
 <div id="frameGuide" hidden><div id="frameBox"></div></div>
 
+<div id="hud">
+  <div class="hudtop">
+    <button id="hudExit" class="hbtn" aria-label="Salir del modo tomas">✕</button>
+    <span id="hudInfo"></span>
+    <button id="hudSetBtn" class="hbtn" aria-label="Ajustes de gestos">⚙</button>
+  </div>
+  <div id="hudPresets"></div>
+  <p id="gestureHint">☝ Arrastra: mirar · 🤏 Pellizca: lente · ✌ Dos dedos: deslizar / subir · Doble toque: ir ahí · Joystick: caminar</p>
+  <div id="joy" aria-label="Joystick para caminar"><div id="joyKnob"></div></div>
+  <div class="hudmid">
+    <button id="hudPre" class="hbtn" aria-label="Vistas">📍</button>
+    <button id="hudAsp" class="hbtn txt" aria-label="Formato">3:2</button>
+    <button id="hudHide" class="hbtn" aria-label="Ocultar controles">👁</button>
+  </div>
+  <div class="hudright">
+    <button id="hUp" class="hbtn" aria-label="Subir">▲</button>
+    <button id="hDn" class="hbtn" aria-label="Bajar">▼</button>
+    <button id="hudShutter" aria-label="Capturar">📸</button>
+  </div>
+  <section id="hudSet" hidden>
+    <div class="selrow"><b>Gestos y controles</b><button id="hudSetClose" class="ico sm" aria-label="Cerrar">✕</button></div>
+    <label class="sl2">Sensibilidad al mirar <input type="range" id="setSens" min="0.08" max="0.5" step="0.01"></label>
+    <label class="chk"><input type="checkbox" id="setInvert"> Invertir mirar (como "agarrar" el mundo)</label>
+    <label class="chk"><input type="checkbox" id="setLefty"> Modo zurdo (joystick a la derecha)</label>
+    <label class="chk"><input type="checkbox" id="setClassic"> Panel clásico con sliders</label>
+  </section>
+</div>
+
 <section id="cam" hidden>
   <div class="camhead"><span id="camInfo"></span>
     <span class="camtools">
@@ -69,7 +97,7 @@
     </div>
   </div>
   <label class="sl">Altura <input type="range" id="camH" min="0.3" max="6" step="0.05"><output id="camHv"></output></label>
-  <label class="sl">Lente <input type="range" id="camMM" min="14" max="70" step="1"><output id="camMMv"></output></label>
+  <label class="sl">Lente <input type="range" id="camMM" min="14" max="85" step="1"><output id="camMMv"></output></label>
   <div class="camrow"><button id="camAspect">Horizontal 3:2</button><button id="shotNow" class="primary big">📸 Capturar</button></div>
 </section>
 

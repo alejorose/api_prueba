@@ -1189,13 +1189,14 @@ const vfovToMM = v => 18 / (Math.tan(rad(v / 2)) * 4 / 3);          // lente equ
 const toPx = v => [v.x / S + X0, v.z / S + Y0];
 
 // lente: mm equivalentes (formato 35 mm) <-> campo de visión horizontal de la pantalla
-function setLens(mm) { const tH = 18 / mm; camera.fov = deg(2 * Math.atan(tH / camera.aspect)); camera.updateProjectionMatrix(); }
+function setLens(mm) { mm = THREE.MathUtils.clamp(mm, 14, 85); const tH = 18 / mm; camera.fov = deg(2 * Math.atan(tH / camera.aspect)); camera.updateProjectionMatrix(); }
 function getLens() { return 18 / (Math.tan(rad(camera.fov / 2)) * camera.aspect); }
 const camDir = () => camera.getWorldDirection(new THREE.Vector3());
 function setDir(d) { controls.target.copy(camera.position).addScaledVector(d.normalize(), .1); camera.lookAt(controls.target); controls.update(); }
 function moveCam(f, r, u) {
   const d = camDir(), fh = new THREE.Vector3(d.x, 0, d.z).normalize(), rh = new THREE.Vector3(-fh.z, 0, fh.x);
   const delta = fh.multiplyScalar(f).addScaledVector(rh, r); delta.y += u;
+  delta.y = THREE.MathUtils.clamp(camera.position.y + delta.y, .3, 6) - camera.position.y;   // altura entre 0.3 y 6 m
   camera.position.add(delta); controls.target.add(delta); controls.update(); syncCamUI(); redraw();
 }
 function turnCam(yawD, pitchD) {
@@ -1215,8 +1216,14 @@ function applyPreset(p) {
   doorsTall = !!p.tall; camera.position.copy(pos); setDir(tg.sub(pos)); setLens(p.mm); syncCamUI(); redraw();
 }
 function buildPresetChips() {
-  const box = $('#camPresets'); box.innerHTML = '';
-  PRESETS.forEach((p, i) => { const b = document.createElement('button'); b.textContent = p.label; b.onclick = () => { applyPreset(p); box.querySelectorAll('button').forEach(x => x.classList.remove('on')); b.classList.add('on'); }; box.appendChild(b); });
+  ['#camPresets', '#hudPresets'].forEach(sel => {
+    const box = $(sel); box.innerHTML = '';
+    PRESETS.forEach(p => {
+      const b = document.createElement('button'); b.textContent = p.label;
+      b.onclick = () => { applyPreset(p); buzz(8); document.querySelectorAll('#camPresets button, #hudPresets button').forEach(x => x.classList.toggle('on', x.textContent === p.label)); $('#hudPresets').classList.remove('open'); };
+      box.appendChild(b);
+    });
+  });
 }
 function camRoom() { const [X, Y] = toPx(camera.position); return ROOMDEF.find(r => X >= r.r[0] && X <= r.r[2] && Y >= r.r[1] && Y <= r.r[3]) || null; }
 function syncCamUI() {
@@ -1226,6 +1233,7 @@ function syncCamUI() {
   const wm = outside ? 3 : 0; if (wm !== wallMode) { wallMode = wm; applyWalls(false); }
   $('#camInfo').textContent = `${room ? title(room.n) : 'Fuera'} · mira ${COMPASS[Math.round(yaw / 45) % 8].replace('north', 'N').replace('south', 'S').replace('east', 'E').replace('west', 'O')} · ${h.toFixed(1)} m · ${Math.round(getLens())} mm${speedMul !== 1 ? ' · vel ×' + speedMul.toFixed(1) : ''}`;
   if (document.activeElement !== $('#camH')) $('#camH').value = h; if (document.activeElement !== $('#camMM')) $('#camMM').value = getLens();
+  $('#hudInfo').textContent = $('#camInfo').textContent;
   $('#camHv').textContent = h.toFixed(2) + ' m'; $('#camMMv').textContent = Math.round(getLens()) + ' mm';
 }
 const availH = () => Math.max(220, innerHeight - ($('#cam').hidden ? 0 : $('#cam').offsetHeight) - 8);
@@ -1235,7 +1243,7 @@ function layoutFrame() {
   const { fw, fh } = frameSize(), b = $('#frameBox'), yc = availH() / 2 + 4;
   b.style.width = fw + 'px'; b.style.height = fh + 'px'; b.style.top = yc + 'px';
   camera.setViewOffset(innerWidth, innerHeight, 0, innerHeight / 2 - yc, innerWidth, innerHeight); camera.updateProjectionMatrix();
-  $('#camAspect').textContent = portrait ? 'Vertical 2:3' : 'Horizontal 3:2'; redraw();
+  $('#camAspect').textContent = portrait ? 'Vertical 2:3' : 'Horizontal 3:2'; $('#hudAsp').textContent = portrait ? '2:3' : '3:2'; redraw();
 }
 function enterShoot() {
   if (shooting) return;
@@ -1246,16 +1254,17 @@ function enterShoot() {
   $('#keyHint').classList.remove('off');
   shooting = true; document.body.classList.add('shoot'); view = 'eye';
   controls.minDistance = .05; controls.maxPolarAngle = Math.PI * .97; controls.minPolarAngle = .03; controls.enableRotate = true;
-  controls.touches.ONE = THREE.TOUCH.ROTATE; controls.mouseButtons.LEFT = THREE.MOUSE.ROTATE;
+  controls.enabled = false;   // gestos propios: HUD táctil, mouse y teclado
   roomLabels.forEach(m => { m.visible = false; });
-  $('#cam').hidden = false; $('#frameGuide').hidden = false; buildPresetChips(); layoutFrame();
+  $('#frameGuide').hidden = false; buildPresetChips(); showShootUI();
   applyPreset(PRESETS.find(p => p.label.startsWith('Sala')) || PRESETS[0]);
-  $('#camPresets').firstChild && null;
+  if (!prefs.classic) showGestureHint();
 }
 function exitShoot() {
   if (!shooting) return;
   shooting = false; doorsTall = false; document.body.classList.remove('shoot'); camera.clearViewOffset(); camera.updateProjectionMatrix();
-  $('#cam').hidden = true; $('#frameGuide').hidden = true;
+  $('#cam').hidden = true; $('#frameGuide').hidden = true; controls.enabled = true;
+  document.body.classList.remove('hud', 'hudoff'); $('#hudSet').hidden = true; $('#hudPresets').classList.remove('open'); joy = null; walkAnim = null; tp.clear();
   controls.maxPolarAngle = shootPrev.maxP; controls.minPolarAngle = shootPrev.minP; wallMode = shootPrev.wm; controls.mouseButtons = shootPrev.mb;
   cancelAnimationFrame(keyRaf); keys.clear(); if (document.pointerLockElement) document.exitPointerLock();
   view = '3d'; setView('3d'); applyWalls(false);
@@ -1293,6 +1302,15 @@ function keyLoop(ts) {
     if (f || r || u) moveCam(f * sp * dt, r * sp * dt, u * sp * dt * .7);
     const yw = (keys.has('ArrowRight') ? 1 : 0) - (keys.has('ArrowLeft') ? 1 : 0), pt = (keys.has('ArrowUp') ? 1 : 0) - (keys.has('ArrowDown') ? 1 : 0);
     if (yw || pt) turnCam(yw * 70 * dt, pt * 45 * dt);
+    if (joy !== null && (joyV.x || joyV.y)) { const mag = Math.hypot(joyV.x, joyV.y), sp = 1.6 * speedMul * (mag > .95 ? 2 : 1); moveCam(-joyV.y * sp * dt, joyV.x * sp * dt, 0); }
+    if (walkAnim) {
+      const k = Math.min(1, (ts - walkAnim.t0) / walkAnim.dur), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+      const delta = walkAnim.from.clone().lerp(walkAnim.to, e).sub(camera.position);
+      camera.position.add(delta); controls.target.add(delta); controls.update(); syncCamUI(); redraw(); if (k >= 1) walkAnim = null;
+    }
+    if (!tp.size && (Math.abs(lookVel.x) > 3 || Math.abs(lookVel.y) > 3)) {     // inercia al soltar
+      turnCam(lookVel.x * dt, lookVel.y * dt); const f = Math.pow(.02, dt); lookVel.x *= f; lookVel.y *= f;
+    }
   }
   keyRaf = requestAnimationFrame(keyLoop);
 }
@@ -1337,6 +1355,97 @@ function lockFail() { const el = $('#camInfo'), t = el.textContent; el.textConte
 document.addEventListener('pointerlockchange', () => { locked = document.pointerLockElement === canvas; $('#lockBtn').classList.toggle('on', locked); });
 document.addEventListener('pointerlockerror', lockFail);
 $('#camToggle').onclick = () => { const m = $('#cam').classList.toggle('mini'); $('#camToggle').textContent = m ? '▴' : '▾'; layoutFrame(); };
+
+/* ---------- HUD táctil estilo juego móvil ----------
+   Joystick virtual (caminar) · arrastrar = mirar con inercia · pellizcar = lente · dos dedos = deslizar / subir ·
+   doble toque = ir ahí · obturador grande · vibración · modo zurdo · sensibilidad. */
+const PREF_KEY = 'imix-cam-prefs';
+const prefs = (() => { const d = { sens: .2, invert: false, lefty: false, classic: !matchMedia('(pointer:coarse)').matches }; try { return { ...d, ...JSON.parse(localStorage.getItem(PREF_KEY) || '{}') }; } catch { return d; } })();
+const savePrefs = () => { try { localStorage.setItem(PREF_KEY, JSON.stringify(prefs)); } catch { } };
+const buzz = ms => { try { navigator.vibrate && navigator.vibrate(ms); } catch { } };
+let joy = null, walkAnim = null, pinch = null, lastTap = { t: 0, x: 0, y: 0 };
+const joyV = { x: 0, y: 0 }, lookVel = { x: 0, y: 0 }, tp = new Map();
+function applyPrefs() { document.body.classList.toggle('lefty', prefs.lefty); $('#setSens').value = prefs.sens; $('#setInvert').checked = prefs.invert; $('#setLefty').checked = prefs.lefty; $('#setClassic').checked = prefs.classic; }
+function showShootUI() { const hud = !prefs.classic; document.body.classList.toggle('hud', hud); document.body.classList.remove('hudoff'); $('#cam').hidden = hud; layoutFrame(); }
+function showGestureHint() {
+  let seen = false; try { seen = localStorage.getItem('imix-gesture-seen') === '1'; } catch { }
+  if (seen) return;
+  const h = $('#gestureHint'); h.classList.add('show');
+  const hide = () => { h.classList.remove('show'); try { localStorage.setItem('imix-gesture-seen', '1'); } catch { } };
+  setTimeout(hide, 8000); canvas.addEventListener('pointerdown', hide, { once: true });
+}
+$('#setSens').oninput = e => { prefs.sens = +e.target.value; savePrefs(); };
+$('#setInvert').onchange = e => { prefs.invert = e.target.checked; savePrefs(); };
+$('#setLefty').onchange = e => { prefs.lefty = e.target.checked; savePrefs(); applyPrefs(); };
+$('#setClassic').onchange = e => { prefs.classic = e.target.checked; savePrefs(); if (shooting) showShootUI(); };
+$('#hudSetBtn').onclick = () => { $('#hudSet').hidden = !$('#hudSet').hidden; };
+$('#hudSetClose').onclick = () => { $('#hudSet').hidden = true; };
+$('#hudExit').onclick = exitShoot;
+$('#hudPre').onclick = () => $('#hudPresets').classList.toggle('open');
+$('#hudAsp').onclick = () => $('#camAspect').click();
+$('#hudHide').onclick = () => { document.body.classList.toggle('hudoff'); buzz(6); };
+$('#hudShutter').onclick = () => { buzz(18); $('#shotNow').click(); };
+holdBtn('#hUp', dt => moveCam(0, 0, dt * 1.0)); holdBtn('#hDn', dt => moveCam(0, 0, -dt * 1.0));
+applyPrefs();
+
+// joystick virtual: analógico con zona muerta; empujarlo al borde = correr
+const joyEl = $('#joy'), knob = $('#joyKnob');
+function joyUpdate(e) {
+  const r = joyEl.getBoundingClientRect(), R = r.width / 2 - 10;
+  let dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2); const len = Math.hypot(dx, dy);
+  if (len > R) { dx *= R / len; dy *= R / len; }
+  knob.style.transform = `translate(${dx}px,${dy}px)`;
+  const mag = Math.hypot(dx, dy) / R, sc = mag < .12 ? 0 : (mag - .12) / (.88 * mag);
+  joyV.x = dx / R * sc; joyV.y = dy / R * sc;
+}
+joyEl.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); joy = e.pointerId; walkAnim = null; try { joyEl.setPointerCapture(e.pointerId); } catch { } joyUpdate(e); });
+joyEl.addEventListener('pointermove', e => { if (joy === e.pointerId) joyUpdate(e); });
+const joyEnd = e => { if (joy === e.pointerId) { joy = null; joyV.x = joyV.y = 0; knob.style.transform = ''; } };
+joyEl.addEventListener('pointerup', joyEnd); joyEl.addEventListener('pointercancel', joyEnd);
+
+// gestos sobre la vista: 1 dedo mira (con inercia), 2 dedos pellizcan el lente y deslizan/suben, doble toque camina
+const fovScale = () => (deg(2 * Math.atan(18 / getLens()))) / 82;   // con lente largo, gira más despacio
+canvas.addEventListener('pointerdown', e => {
+  if (!shooting || e.pointerType === 'mouse') return;
+  tp.set(e.pointerId, { x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY, t: performance.now(), lt: 0, moved: false });
+  try { canvas.setPointerCapture(e.pointerId); } catch { }
+  lookVel.x = lookVel.y = 0; walkAnim = null;
+  if (tp.size === 2) { const [a, b] = [...tp.values()]; pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 }; }
+});
+canvas.addEventListener('pointermove', e => {
+  if (!shooting || e.pointerType === 'mouse') return;
+  const p = tp.get(e.pointerId); if (!p) return;
+  const dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY;
+  if (Math.hypot(p.x - p.x0, p.y - p.y0) > 8) p.moved = true;
+  if (tp.size === 1) {
+    const s = prefs.sens * fovScale() * (prefs.invert ? -1 : 1);
+    turnCam(dx * s, -dy * s);
+    const now = performance.now(), dtm = Math.max(8, now - (p.lt || now - 16)); p.lt = now;
+    lookVel.x = .6 * lookVel.x + .4 * (dx * s) / dtm * 1000; lookVel.y = .6 * lookVel.y + .4 * (-dy * s) / dtm * 1000;
+  } else if (tp.size === 2 && pinch) {
+    const [a, b] = [...tp.values()], d = Math.hypot(a.x - b.x, a.y - b.y), mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+    if (pinch.d > 8 && d > 8) setLens(getLens() * d / pinch.d);                       // pellizco = lente (zoom)
+    moveCam(0, (mx - pinch.mx) * .006, -(my - pinch.my) * .006);                      // dos dedos = deslizar / subir
+    pinch = { d, mx, my };
+  }
+});
+const tpEnd = e => {
+  if (!shooting || e.pointerType === 'mouse') return;
+  const p = tp.get(e.pointerId); if (!p) return;
+  const wasOne = tp.size === 1; tp.delete(e.pointerId); pinch = null;
+  if (wasOne && !p.moved && e.type === 'pointerup' && performance.now() - p.t < 350) {   // toque corto
+    const now = performance.now();
+    if (now - lastTap.t < 320 && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < 40) { walkTo(e.clientX, e.clientY); lastTap.t = 0; }
+    else lastTap = { t: now, x: e.clientX, y: e.clientY };
+  }
+  if (!tp.size && Math.hypot(lookVel.x, lookVel.y) < 6) lookVel.x = lookVel.y = 0;
+};
+canvas.addEventListener('pointerup', tpEnd); canvas.addEventListener('pointercancel', tpEnd);
+function walkTo(x, y) {   // doble toque en el piso: caminar hasta ahí
+  const rc = new THREE.Raycaster(), pt = new THREE.Vector3(); rc.setFromCamera(new THREE.Vector2(x / innerWidth * 2 - 1, -(y / innerHeight) * 2 + 1), camera);
+  if (!rc.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), pt) || pt.distanceTo(camera.position) > 14) return;
+  walkAnim = { from: camera.position.clone(), to: new THREE.Vector3(pt.x, camera.position.y, pt.z), t0: performance.now(), dur: 700 }; buzz(10);
+}
 
 // --- captura ---
 function captureView() {

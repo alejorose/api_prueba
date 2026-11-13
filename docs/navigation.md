@@ -43,3 +43,24 @@ En pantalla táctil: un dedo mira, dos dedos pellizcan/deslizan, y los botones d
 - Autodesk Inventor, SteeringWheels: https://help.autodesk.com/cloudhelp/2025/ENU/Inventor-Help/files/GUID-5D371AC3-EBC4-4B8D-9A9B-4B9B2B290D8B.htm y atajos F2/F3/F4: https://ukcommunity.arkance.world/hc/en-us/articles/21564498735890-Inventor-Quick-Tip-F-Key-Shortcuts
 - Unity, Scene view navigation: https://docs.unity3d.com/Manual/SceneViewNavigation.html
 - MDN, `Element.requestPointerLock()`: https://developer.mozilla.org/docs/Web/API/Element/requestPointerLock
+
+## Gestos táctiles (HUD estilo juego móvil)
+
+Al entrar a 🎥 Tomas en un teléfono aparece un HUD pensado para pulgares, con las convenciones de los juegos móviles de cámara libre
+(doble stick, pellizco para zoom, doble toque, vibración). Los controles del HUD son semitransparentes.
+
+| Gesto / control | Qué hace |
+|---|---|
+| **Joystick** (abajo, pulgar izquierdo) | Caminar; analógico (más lejos = más rápido) y al borde corre ×2 |
+| **Arrastrar con 1 dedo** en la vista | Mirar (como mirar en un shooter); sigue girando con **inercia** al soltar |
+| **Pellizcar** | Lente (zoom): 14–85 mm |
+| **Dos dedos arrastrando** | Deslizar de lado y **subir/bajar** la cámara |
+| **Doble toque en el piso** | Caminar hasta ahí (animado) |
+| ▲ ▼ (derecha) | Subir / bajar manteniendo presionado |
+| **Obturador** (grande, pulgar derecho) | Capturar, con vibración |
+| 📍 / 3:2 / 👁 | Vistas por cuarto · formato horizontal/vertical · ocultar controles |
+| ⚙ | Sensibilidad, invertir mirar, **modo zurdo**, panel clásico con sliders |
+
+Notas: el lente largo gira más despacio (la sensibilidad se escala con el campo de visión); la vibración usa `navigator.vibrate` donde el
+navegador lo permite (Android; iOS Safari no lo soporta). No se usa giroscopio: pedir el sensor requiere un permiso que los visores
+embebidos suelen bloquear.

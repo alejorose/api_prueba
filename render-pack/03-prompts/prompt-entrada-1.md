@@ -6,7 +6,8 @@
 2. `02-tomas/toma-entrada-1.jpg`
 3. `01-referencias/tour-entrada.jpg`
 4. `01-referencias/tour-pasillo.jpg`
-5. `01-referencias/inspo-1.jpg`
+5. `01-referencias/demo-cocina.jpg`
+6. `01-referencias/inspo-1.jpg`
 
 ## 2. Pega este prompt
 
@@ -18,6 +19,7 @@ ATTACHED FILES (use each one for the purpose stated):
 - toma-entrada-1.jpg: plain 3D camera reference (no textures): reproduce this exact viewpoint and framing
 - tour-entrada.jpg: real finishes of this unit (virtual-tour screenshot). Ignore the app buttons and text on it, and ignore its staged furniture: only copy floors, walls, doors, windows, cabinets, ceiling and light
 - tour-pasillo.jpg: real finishes of this unit (virtual-tour screenshot). Ignore the app buttons and text on it, and ignore its staged furniture: only copy floors, walls, doors, windows, cabinets, ceiling and light
+- demo-cocina.jpg: photo of the real demo suite (same floor plan, show-suite staging). Use it for finishes, mood, lighting and photo style; follow the furniture list for what goes where. Ignore motion blur, the person and the hand
 - inspo-1.jpg: inspiration photo 1: mood, lighting and styling only; never copy its furniture or layout
 The numbered plan is the ground truth for layout; the camera reference shows the framing I want; the tour photos show the real finishes; the inspiration photos set the mood only (never copy their furniture).
 
@@ -33,6 +35,9 @@ ROOM (interior dimensions)
 
 FIXED FINISHES (from the real unit)
 Grey-brown wood-look vinyl plank floors, white walls and ceiling, floor-to-ceiling windows with sliding balcony door, dark grey flat-panel kitchen cabinets with grey stone-look backsplash and stainless steel appliances, bathrooms with large dark grey floor tile and white fixtures, white panel doors, mirrored sliding closet doors in the entry.
+
+REAL DEMO SUITE LOOK (visual reference; where it conflicts with the furniture list, the list wins)
+Staged show-suite look: dark grey-brown matte wood-look plank floor, soft warm-white walls with plain white baseboards, white ceiling with a small smoke detector and a slim bulkhead over the window wall, white panel doors. Muted, calm, slightly dim ambience: soft overcast daylight from the glazing (window area bright, almost white) plus warm ceiling and lamp light. Neutral layered styling: cream, taupe, charcoal and sage-green, a few books, trays and small plants. Entry: same dark wood-look floor and warm-white walls, narrow corridor opening toward the bright living-room glazing, white baseboards, ceiling light track. Photo style of the references: real-estate walkthrough, eye level, shot from a doorway, natural slight wide-angle, soft exposure with bright windows. The reference photos are video frames: ignore their motion blur, grain, the person and the hand; render a sharp, clean photograph.
 
 FURNITURE (measured, numbers match the plan)
 32. IKEA TJUSIG bench with shoe storage in black, 1.08 × 0.34 × 0.5 m (W × D × H); entry hall: centre 2.61 m from the west wall and 0.17 m from the north wall; pushed against the north wall; front faces south; 1.45 m free in front

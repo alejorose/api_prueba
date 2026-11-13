@@ -14,6 +14,7 @@ INSTRUCCIONES-PROYECTO.txt       ← lo único que pegas en las instrucciones de
   vista-aerea.jpg                vista 3D de todo el departamento
   plano-original-10C.jpg         plano oficial del constructor (referencia de arquitectura)
   tour-*.jpg                     capturas del tour virtual: acabados reales
+  demo-*.jpg                     fotos del departamento demo real: ambiente, luz y estilo de foto
   inspo-1..4.jpg                 tus fotos de inspiración (solo ambiente)
 02-tomas/                        referencia de cámara de cada cuarto (2 ángulos por cuarto)
 03-prompts/                      un prompt por toma, con la lista de archivos a adjuntar
@@ -27,6 +28,7 @@ layout.json                      posiciones de los muebles (datos)
 - El campo de instrucciones de un Proyecto admite **máximo 8,000 caracteres**. Por eso las instrucciones están en un archivo aparte, corto (`INSTRUCCIONES-PROYECTO.txt`). No pegues esta guía ahí.
 - Orientación del plano: **arriba = norte = lado de las ventanas y el balcón; derecha = este**.
 - Las fotos del tour son de **otra unidad amueblada distinto**. Úsalas solo por los acabados (pisos, paredes, gabinetes, puertas), no por los muebles.
+- Las fotos `demo-*.jpg` son del **departamento demo real** (mismo plano, con su decoración). Cada prompt trae una sección *REAL DEMO SUITE LOOK* con lo que se ve ahí (piso oscuro, luz suave, textiles, espejo redondo, etc.). Sirven para ambiente, luz y estilo de foto; los muebles los manda la lista numerada. Son fotogramas de video: ChatGPT debe ignorar el desenfoque, la persona y la mano.
 
 ## Opción A (recomendada): un Proyecto de ChatGPT
 

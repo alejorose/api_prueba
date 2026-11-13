@@ -5,8 +5,9 @@
 1. `01-referencias/plano-numerado.jpg`
 2. `02-tomas/toma-sala-1.jpg`
 3. `01-referencias/tour-sala.jpg`
-4. `01-referencias/inspo-2.jpg`
-5. `01-referencias/inspo-4.jpg`
+4. `01-referencias/demo-sala.jpg`
+5. `01-referencias/inspo-2.jpg`
+6. `01-referencias/inspo-4.jpg`
 
 ## 2. Pega este prompt
 
@@ -17,6 +18,7 @@ ATTACHED FILES (use each one for the purpose stated):
 - plano-numerado.jpg: top-down plan of the furnished suite; the numbers match the furniture list (ground truth for the layout)
 - toma-sala-1.jpg: plain 3D camera reference (no textures): reproduce this exact viewpoint and framing
 - tour-sala.jpg: real finishes of this unit (virtual-tour screenshot). Ignore the app buttons and text on it, and ignore its staged furniture: only copy floors, walls, doors, windows, cabinets, ceiling and light
+- demo-sala.jpg: photo of the real demo suite (same floor plan, show-suite staging). Use it for finishes, mood, lighting and photo style; follow the furniture list for what goes where. Ignore motion blur, the person and the hand
 - inspo-2.jpg: inspiration photo 2: mood, lighting and styling only; never copy its furniture or layout
 - inspo-4.jpg: inspiration photo 4: mood, lighting and styling only; never copy its furniture or layout
 The numbered plan is the ground truth for layout; the camera reference shows the framing I want; the tour photos show the real finishes; the inspiration photos set the mood only (never copy their furniture).
@@ -33,6 +35,9 @@ ROOM (interior dimensions)
 
 FIXED FINISHES (from the real unit)
 Grey-brown wood-look vinyl plank floors, white walls and ceiling, floor-to-ceiling windows with sliding balcony door, dark grey flat-panel kitchen cabinets with grey stone-look backsplash and stainless steel appliances, bathrooms with large dark grey floor tile and white fixtures, white panel doors, mirrored sliding closet doors in the entry.
+
+REAL DEMO SUITE LOOK (visual reference; where it conflicts with the furniture list, the list wins)
+Staged show-suite look: dark grey-brown matte wood-look plank floor, soft warm-white walls with plain white baseboards, white ceiling with a small smoke detector and a slim bulkhead over the window wall, white panel doors. Muted, calm, slightly dim ambience: soft overcast daylight from the glazing (window area bright, almost white) plus warm ceiling and lamp light. Neutral layered styling: cream, taupe, charcoal and sage-green, a few books, trays and small plants. Living room: floor-to-ceiling white-framed sliding glass doors onto the balcony with a glass railing and a high-rise city view; low black TV console under a wall-mounted flat TV on the west side; low round dark coffee table with three chunky legs and a small styled tray; cream bouclé curved sofa with olive and sage-green pillows; large cream rug with a fine arc-line pattern; black dome-shade floor lamp beside the sofa. Photo style of the references: real-estate walkthrough, eye level, shot from a doorway, natural slight wide-angle, soft exposure with bright windows. The reference photos are video frames: ignore their motion blur, grain, the person and the hand; render a sharp, clean photograph.
 
 FURNITURE (measured, numbers match the plan)
 1. IKEA LANDSKRONA 3-seat sofa, light beige fabric, 2.04 × 0.89 × 0.78 m (W × D × H); living room: centre 2.25 m from the west wall and 1.47 m from the north wall; pushed against the east wall; front faces west; 0.25 m free in front

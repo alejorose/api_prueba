@@ -14,6 +14,7 @@ INSTRUCCIONES-PROYECTO.txt       ← lo único que pegas en las instrucciones de
   vista-aerea.jpg                vista 3D de todo el departamento
   plano-original-10C.jpg         plano oficial del constructor (referencia de arquitectura)
   tour-*.jpg                     capturas del tour virtual: acabados reales
+  demo-*.jpg                     fotos del departamento demo real: ambiente, luz y estilo de foto
   inspo-1..4.jpg                 tus fotos de inspiración (solo ambiente)
 02-tomas/                        referencia de cámara de cada cuarto (2 ángulos por cuarto)
 03-prompts/                      un prompt por toma, con la lista de archivos a adjuntar
@@ -27,6 +28,7 @@ layout.json                      posiciones de los muebles (datos)
 - El campo de instrucciones de un Proyecto admite **máximo 8,000 caracteres**. Por eso las instrucciones están en un archivo aparte, corto (`INSTRUCCIONES-PROYECTO.txt`). No pegues esta guía ahí.
 - Orientación del plano: **arriba = norte = lado de las ventanas y el balcón; derecha = este**.
 - Las fotos del tour son de **otra unidad amueblada distinto**. Úsalas solo por los acabados (pisos, paredes, gabinetes, puertas), no por los muebles.
+- Las fotos `demo-*.jpg` son del **departamento demo real** (mismo plano, con su decoración). Cada prompt trae una sección *REAL DEMO SUITE LOOK* con lo que se ve ahí (piso oscuro, luz suave, textiles, espejo redondo, etc.). Sirven para ambiente, luz y estilo de foto; los muebles los manda la lista numerada. Son fotogramas de video: ChatGPT debe ignorar el desenfoque, la persona y la mano.
 
 ## Opción A (recomendada): un Proyecto de ChatGPT
 
@@ -46,17 +48,17 @@ layout.json                      posiciones de los muebles (datos)
 | Toma | Prompt | Archivos que adjuntas |
 |---|---|---|
 | Vista aérea (todo el depto.) | `03-prompts/prompt-vista-aerea.md` | `plano-numerado.jpg`, `vista-aerea.jpg`, `inspo-1.jpg`, `inspo-2.jpg`, `inspo-3.jpg`, `inspo-4.jpg` |
-| Sala · toma 1 | `03-prompts/prompt-sala-1.md` | `plano-numerado.jpg`, `toma-sala-1.jpg`, `tour-sala.jpg`, `inspo-2.jpg`, `inspo-4.jpg` |
-| Sala · toma 2 | `03-prompts/prompt-sala-2.md` | `plano-numerado.jpg`, `toma-sala-2.jpg`, `tour-sala.jpg`, `inspo-2.jpg`, `inspo-4.jpg` |
-| Recámara principal · toma 1 | `03-prompts/prompt-recamara-principal-1.md` | `plano-numerado.jpg`, `toma-recamara-principal-1.jpg`, `tour-recamara-principal.jpg`, `tour-bano-principal.jpg`, `inspo-3.jpg`, `inspo-2.jpg` |
-| Recámara principal · toma 2 | `03-prompts/prompt-recamara-principal-2.md` | `plano-numerado.jpg`, `toma-recamara-principal-2.jpg`, `tour-recamara-principal.jpg`, `tour-bano-principal.jpg`, `inspo-3.jpg`, `inspo-2.jpg` |
-| Cocina y comedor · toma 1 | `03-prompts/prompt-cocina-comedor-1.md` | `plano-numerado.jpg`, `toma-cocina-comedor-1.jpg`, `tour-cocina.jpg`, `tour-pasillo.jpg`, `inspo-2.jpg`, `inspo-1.jpg` |
-| Cocina y comedor · toma 2 | `03-prompts/prompt-cocina-comedor-2.md` | `plano-numerado.jpg`, `toma-cocina-comedor-2.jpg`, `tour-cocina.jpg`, `tour-pasillo.jpg`, `inspo-2.jpg`, `inspo-1.jpg` |
-| Recámara 2 (con clóset) · toma 1 | `03-prompts/prompt-recamara-2-1.md` | `plano-numerado.jpg`, `toma-recamara-2-1.jpg`, `tour-recamara2-closet.jpg`, `tour-cocina-hacia-recamara2.jpg`, `inspo-3.jpg`, `inspo-4.jpg` |
-| Recámara 2 (con clóset) · toma 2 | `03-prompts/prompt-recamara-2-2.md` | `plano-numerado.jpg`, `toma-recamara-2-2.jpg`, `tour-recamara2-closet.jpg`, `tour-cocina-hacia-recamara2.jpg`, `inspo-3.jpg`, `inspo-4.jpg` |
-| Entrada · toma 1 | `03-prompts/prompt-entrada-1.md` | `plano-numerado.jpg`, `toma-entrada-1.jpg`, `tour-entrada.jpg`, `tour-pasillo.jpg`, `inspo-1.jpg` |
-| Recámara 2 · isométrica hacia el escritorio | `03-prompts/prompt-recamara-2-iso-escritorio.md` | `plano-numerado.jpg`, `toma-recamara-2-iso-escritorio.jpg`, `tour-recamara2-closet.jpg`, `tour-cocina-hacia-recamara2.jpg`, `inspo-3.jpg` |
-| Recámara 2 · isométrica hacia el clóset | `03-prompts/prompt-recamara-2-iso-closet.md` | `plano-numerado.jpg`, `toma-recamara-2-iso-closet.jpg`, `tour-recamara2-closet.jpg`, `tour-cocina-hacia-recamara2.jpg`, `inspo-3.jpg` |
+| Sala · toma 1 | `03-prompts/prompt-sala-1.md` | `plano-numerado.jpg`, `toma-sala-1.jpg`, `tour-sala.jpg`, `demo-sala.jpg`, `inspo-2.jpg`, `inspo-4.jpg` |
+| Sala · toma 2 | `03-prompts/prompt-sala-2.md` | `plano-numerado.jpg`, `toma-sala-2.jpg`, `tour-sala.jpg`, `demo-sala.jpg`, `inspo-2.jpg`, `inspo-4.jpg` |
+| Recámara principal · toma 1 | `03-prompts/prompt-recamara-principal-1.md` | `plano-numerado.jpg`, `toma-recamara-principal-1.jpg`, `tour-recamara-principal.jpg`, `tour-bano-principal.jpg`, `demo-recamara-2.jpg`, `demo-recamara-1.jpg`, `inspo-3.jpg`, `inspo-2.jpg` |
+| Recámara principal · toma 2 | `03-prompts/prompt-recamara-principal-2.md` | `plano-numerado.jpg`, `toma-recamara-principal-2.jpg`, `tour-recamara-principal.jpg`, `tour-bano-principal.jpg`, `demo-recamara-2.jpg`, `demo-recamara-1.jpg`, `inspo-3.jpg`, `inspo-2.jpg` |
+| Cocina y comedor · toma 1 | `03-prompts/prompt-cocina-comedor-1.md` | `plano-numerado.jpg`, `toma-cocina-comedor-1.jpg`, `tour-cocina.jpg`, `tour-pasillo.jpg`, `demo-cocina.jpg`, `inspo-2.jpg`, `inspo-1.jpg` |
+| Cocina y comedor · toma 2 | `03-prompts/prompt-cocina-comedor-2.md` | `plano-numerado.jpg`, `toma-cocina-comedor-2.jpg`, `tour-cocina.jpg`, `tour-pasillo.jpg`, `demo-cocina.jpg`, `inspo-2.jpg`, `inspo-1.jpg` |
+| Recámara 2 (con clóset) · toma 1 | `03-prompts/prompt-recamara-2-1.md` | `plano-numerado.jpg`, `toma-recamara-2-1.jpg`, `tour-recamara2-closet.jpg`, `tour-cocina-hacia-recamara2.jpg`, `demo-recamara-2.jpg`, `demo-recamara-1.jpg`, `inspo-3.jpg`, `inspo-4.jpg` |
+| Recámara 2 (con clóset) · toma 2 | `03-prompts/prompt-recamara-2-2.md` | `plano-numerado.jpg`, `toma-recamara-2-2.jpg`, `tour-recamara2-closet.jpg`, `tour-cocina-hacia-recamara2.jpg`, `demo-recamara-2.jpg`, `demo-recamara-1.jpg`, `inspo-3.jpg`, `inspo-4.jpg` |
+| Entrada · toma 1 | `03-prompts/prompt-entrada-1.md` | `plano-numerado.jpg`, `toma-entrada-1.jpg`, `tour-entrada.jpg`, `tour-pasillo.jpg`, `demo-cocina.jpg`, `inspo-1.jpg` |
+| Recámara 2 · isométrica hacia el escritorio | `03-prompts/prompt-recamara-2-iso-escritorio.md` | `plano-numerado.jpg`, `toma-recamara-2-iso-escritorio.jpg`, `tour-recamara2-closet.jpg`, `tour-cocina-hacia-recamara2.jpg`, `demo-recamara-2.jpg`, `inspo-3.jpg` |
+| Recámara 2 · isométrica hacia el clóset | `03-prompts/prompt-recamara-2-iso-closet.md` | `plano-numerado.jpg`, `toma-recamara-2-iso-closet.jpg`, `tour-recamara2-closet.jpg`, `tour-cocina-hacia-recamara2.jpg`, `demo-recamara-2.jpg`, `inspo-3.jpg` |
 
 Orden sugerido: primero **Vista aérea** (comprueba que respeta el plano), luego **Sala**, **Cocina y comedor**, **Recámara principal**, **Recámara 2** y **Entrada**.
 

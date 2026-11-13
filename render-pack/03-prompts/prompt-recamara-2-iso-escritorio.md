@@ -6,7 +6,8 @@
 2. `02-tomas/toma-recamara-2-iso-escritorio.jpg`
 3. `01-referencias/tour-recamara2-closet.jpg`
 4. `01-referencias/tour-cocina-hacia-recamara2.jpg`
-5. `01-referencias/inspo-3.jpg`
+5. `01-referencias/demo-recamara-2.jpg`
+6. `01-referencias/inspo-3.jpg`
 
 ## 2. Pega este prompt
 
@@ -18,6 +19,7 @@ ATTACHED FILES (use each one for the purpose stated):
 - toma-recamara-2-iso-escritorio.jpg: plain 3D camera reference (no textures): reproduce this exact high-angle viewpoint, framing and which walls are cut away
 - tour-recamara2-closet.jpg: real finishes of this unit (virtual-tour screenshot). Ignore the app buttons and text on it, and ignore its staged furniture: only copy floors, walls, doors, windows, cabinets, ceiling and light
 - tour-cocina-hacia-recamara2.jpg: real finishes of this unit (virtual-tour screenshot). Ignore the app buttons and text on it, and ignore its staged furniture: only copy floors, walls, doors, windows, cabinets, ceiling and light
+- demo-recamara-2.jpg: photo of the real demo suite (same floor plan, show-suite staging). Use it for finishes, mood, lighting and photo style; follow the furniture list for what goes where. Ignore motion blur, the person and the hand
 - inspo-3.jpg: inspiration photo 3: mood, lighting and styling only; never copy its furniture or layout
 The numbered plan is the ground truth for layout; the camera reference shows the framing I want; the tour photos show the real finishes; the inspiration photos set the mood only (never copy their furniture).
 
@@ -33,6 +35,9 @@ ROOM (interior dimensions)
 
 FIXED FINISHES (from the real unit)
 Grey-brown wood-look vinyl plank floors, white walls and ceiling, floor-to-ceiling windows with sliding balcony door, dark grey flat-panel kitchen cabinets with grey stone-look backsplash and stainless steel appliances, bathrooms with large dark grey floor tile and white fixtures, white panel doors, mirrored sliding closet doors in the entry; a built-in closet in the second bedroom along the whole west wall, 0.62 m deep × 2.46 m long, with three white sliding doors (already excluded from the bedroom dimensions above).
+
+REAL DEMO SUITE LOOK (visual reference; where it conflicts with the furniture list, the list wins)
+Staged show-suite look: dark grey-brown matte wood-look plank floor, soft warm-white walls with plain white baseboards, white ceiling with a small smoke detector and a slim bulkhead over the window wall, white panel doors. Muted, calm, slightly dim ambience: soft overcast daylight from the glazing (window area bright, almost white) plus warm ceiling and lamp light. Neutral layered styling: cream, taupe, charcoal and sage-green, a few books, trays and small plants. Bedroom: crisp white fitted sheets with a taupe duvet folded back, a sage-green chunky knit throw with fringe across the foot of the bed, grey-blue and beige accent pillows; matte white bedside tables with white ceramic table lamps; round black mirror with a beaded frame above the bed; large abstract artwork (muted blue-grey or charcoal-and-taupe shapes) in a thin wood frame; charcoal-and-ivory geometric rug under the foot of the bed. Photo style of the references: real-estate walkthrough, eye level, shot from a doorway, natural slight wide-angle, soft exposure with bright windows. The reference photos are video frames: ignore their motion blur, grain, the person and the hand; render a sharp, clean photograph.
 
 FURNITURE (measured, numbers match the plan)
 24. VECELO full-size black velvet upholstered platform bed frame with a tall vertical channel-tufted headboard and 4 storage drawers, with charcoal linen bedding and oat pillows, 1.52 × 1.994 × 1.12 m (W × D × H); second bedroom: centre 1.53 m from the west wall and 1.47 m from the north wall; pushed against the south wall; front faces north; 1.51 m free in front

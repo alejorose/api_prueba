@@ -11,6 +11,9 @@ const save = (url, rel) => fs.writeFileSync(path.join(OUT, rel), Buffer.from(url
 const write = (rel, txt) => fs.writeFileSync(path.join(OUT, rel), txt);
 
 const TOUR_DESC = 'real finishes of this unit (virtual-tour screenshot). Ignore the app buttons and text on it, and ignore its staged furniture: only copy floors, walls, doors, windows, cabinets, ceiling and light';
+const DEMO_DESC = 'photo of the real demo suite (same floor plan, show-suite staging). Use it for finishes, mood, lighting and photo style; follow the furniture list for what goes where. Ignore motion blur, the person and the hand';
+const BED_DEMO = ['demo-recamara-2.jpg', 'demo-recamara-1.jpg'];
+const DEMO_BY_ROOM = { liv: ['demo-sala.jpg'], kit: ['demo-cocina.jpg'], prim: BED_DEMO, bed2: BED_DEMO, entry: ['demo-cocina.jpg'] };
 const INSPO_DESC = n => `inspiration photo ${n}: mood, lighting and styling only; never copy its furniture or layout`;
 const ROOMS = {
   liv:   { slug: 'sala', es: 'Sala', tour: ['tour-sala.jpg'], inspo: [2, 4] },
@@ -50,10 +53,11 @@ const ROOMS = {
       ['plano-numerado.jpg', 'top-down plan of the furnished suite; the numbers match the furniture list (ground truth for the layout)'],
       [path.basename(s.file), 'plain 3D camera reference (no textures): reproduce this exact viewpoint and framing'],
       ...s.meta.tour.map(f => [f, TOUR_DESC]),
+      ...DEMO_BY_ROOM[s.key].map(f => [f, DEMO_DESC]),
       ...s.meta.inspo.map(n => [`inspo-${n}.jpg`, INSPO_DESC(n)]),
     ];
     const prompt = await page.evaluate(([k, f, alt]) => __app.buildPrompt(k, 'japandi', { files: f, alt }), [s.key, files, s.n === 2]);
-    const attach = [['01-referencias/plano-numerado.jpg'], [s.file], ...s.meta.tour.map(f => ['01-referencias/' + f]), ...s.meta.inspo.map(n => [`01-referencias/inspo-${n}.jpg`])].map(a => a[0]);
+    const attach = [['01-referencias/plano-numerado.jpg'], [s.file], ...s.meta.tour.map(f => ['01-referencias/' + f]), ...DEMO_BY_ROOM[s.key].map(f => ['01-referencias/' + f]), ...s.meta.inspo.map(n => [`01-referencias/inspo-${n}.jpg`])].map(a => a[0]);
     const name = `prompt-${s.meta.slug}-${s.n}.md`;
     write('03-prompts/' + name, `# ${s.meta.es} · toma ${s.n}\n\n## 1. Adjunta estos archivos (en este orden)\n\n${attach.map((a, i) => `${i + 1}. \`${a}\``).join('\n')}\n\n## 2. Pega este prompt\n\n\`\`\`text\n${prompt}\n\`\`\`\n\n## 3. Formato\n\nImagen horizontal 3:2 (1536×1024). Si el resultado no respeta la distribución, usa las frases de corrección de \`00-LEEME-chatgpt.md\`.\n`);
     promptFiles.push({ name, es: s.meta.es, n: s.n, attach });
@@ -71,10 +75,10 @@ const ROOMS = {
     const files = [
       ['plano-numerado.jpg', 'top-down plan of the furnished suite; the numbers match the furniture list (ground truth for the layout)'],
       [path.basename(file), 'plain 3D camera reference (no textures): reproduce this exact high-angle viewpoint, framing and which walls are cut away'],
-      ['tour-recamara2-closet.jpg', TOUR_DESC], ['tour-cocina-hacia-recamara2.jpg', TOUR_DESC], ['inspo-3.jpg', INSPO_DESC(3)],
+      ['tour-recamara2-closet.jpg', TOUR_DESC], ['tour-cocina-hacia-recamara2.jpg', TOUR_DESC], ['demo-recamara-2.jpg', DEMO_DESC], ['inspo-3.jpg', INSPO_DESC(3)],
     ];
     const prompt = await page.evaluate(([f, c]) => __app.buildPrompt('bed2', 'japandi', { files: f, camFull: c }), [files, v.cam + ' Natural perspective with slight wide-angle distortion only; keep verticals straight.']);
-    const attach = ['01-referencias/plano-numerado.jpg', file, '01-referencias/tour-recamara2-closet.jpg', '01-referencias/tour-cocina-hacia-recamara2.jpg', '01-referencias/inspo-3.jpg'];
+    const attach = ['01-referencias/plano-numerado.jpg', file, '01-referencias/tour-recamara2-closet.jpg', '01-referencias/tour-cocina-hacia-recamara2.jpg', '01-referencias/demo-recamara-2.jpg', '01-referencias/inspo-3.jpg'];
     const name = `prompt-recamara-2-${v.slug}.md`;
     write('03-prompts/' + name, `# ${v.es}\n\n## 1. Adjunta estos archivos (en este orden)\n\n${attach.map((a, i) => `${i + 1}. \`${a}\``).join('\n')}\n\n## 2. Pega este prompt\n\n\`\`\`text\n${prompt}\n\`\`\`\n\n## 3. Formato\n\nImagen horizontal 3:2 (1536×1024). Vista alta tipo maqueta: sin techo y con los muros cercanos cortados, como en la referencia de cámara.\n`);
     promptFiles.push({ name, es: v.es, n: '', attach });

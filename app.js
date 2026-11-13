@@ -1119,6 +1119,22 @@ function describe(it, n) {
   return `${base}; ${r.en.toLowerCase()}: centre ${cx.toFixed(2)} m from the west wall and ${cz.toFixed(2)} m from the north wall` +
     (against.length ? `; pushed against the ${against.join(' and ')} wall` : '') + `; front faces ${face}` + (it.elev ?? k.elev ? `; mounted ${(it.elev ?? k.elev).toFixed(2)} m above the floor` : '') + (!k.air && front < 9.9 ? `; ${front.toFixed(2)} m free in front` : '');
 }
+// Look del departamento demo real (fotos del recorrido). Solo ambiente, acabados y estilo de foto: la lista de muebles manda.
+const DEMO_COMMON = 'Staged show-suite look: dark grey-brown matte wood-look plank floor, soft warm-white walls with plain white baseboards, white ceiling with a small smoke detector and a slim bulkhead over the window wall, white panel doors. Muted, calm, slightly dim ambience: soft overcast daylight from the glazing (window area bright, almost white) plus warm ceiling and lamp light. Neutral layered styling: cream, taupe, charcoal and sage-green, a few books, trays and small plants.';
+const DEMO_LOOK = {
+  liv: 'Living room: floor-to-ceiling white-framed sliding glass doors onto the balcony with a glass railing and a high-rise city view; low black TV console under a wall-mounted flat TV on the west side; low round dark coffee table with three chunky legs and a small styled tray; cream bouclé curved sofa with olive and sage-green pillows; large cream rug with a fine arc-line pattern; black dome-shade floor lamp beside the sofa.',
+  kit: 'Kitchen and dining: narrow galley kitchen with flat dark blue-grey cabinets, grey stone-look backsplash, light grey countertop, stainless built-in oven and cooktop, tall panel-front fridge; ceiling with one round flush-mount light plus a straight track of round globe lights; round white dining table with black-metal chairs and cream seats, a tall green plant and framed art in the dining nook; bright balcony glazing visible at the far end.',
+  bedroom: 'Bedroom: crisp white fitted sheets with a taupe duvet folded back, a sage-green chunky knit throw with fringe across the foot of the bed, grey-blue and beige accent pillows; matte white bedside tables with white ceramic table lamps; round black mirror with a beaded frame above the bed; large abstract artwork (muted blue-grey or charcoal-and-taupe shapes) in a thin wood frame; charcoal-and-ivory geometric rug under the foot of the bed.',
+  entry: 'Entry: same dark wood-look floor and warm-white walls, narrow corridor opening toward the bright living-room glazing, white baseboards, ceiling light track.'
+};
+const DEMO_KEY = { liv: ['liv'], kit: ['kit'], prim: ['bedroom'], bed2: ['bedroom'], entry: ['entry'] };
+const DEMO_STYLE = 'Photo style of the references: real-estate walkthrough, eye level, shot from a doorway, natural slight wide-angle, soft exposure with bright windows. The reference photos are video frames: ignore their motion blur, grain, the person and the hand; render a sharp, clean photograph.';
+function demoText(rooms) {
+  const ks = [...new Set(rooms.flatMap(k => DEMO_KEY[k] || []))];
+  return `${DEMO_COMMON}${ks.map(k => ' ' + DEMO_LOOK[k]).join('')} ${DEMO_STYLE}`;
+}
+const DEMO_BY_ROOM = { liv: ['demo-sala.jpg'], kit: ['demo-cocina.jpg'], prim: ['demo-recamara-2.jpg', 'demo-recamara-1.jpg'], bed2: ['demo-recamara-2.jpg', 'demo-recamara-1.jpg'], entry: ['demo-cocina.jpg'] };
+const DEMO_DESC = 'photo of the real demo suite (same floor plan, show-suite staging). Use it for finishes, mood, lighting and photo style; follow the furniture list for what goes where. Ignore motion blur, the person and the hand';
 function buildPrompt(shot, style, opts = {}) {
   const room = ROOMDEF.find(r => r.k === shot);
   const camTxt = room && (opts.alt && room.alt ? room.alt.cam : room.cam);
@@ -1146,6 +1162,9 @@ ${dims.join('\n')}
 
 FIXED FINISHES (from the real unit)
 Grey-brown wood-look vinyl plank floors, white walls and ceiling, floor-to-ceiling windows with sliding balcony door, dark grey flat-panel kitchen cabinets with grey stone-look backsplash and stainless steel appliances, bathrooms with large dark grey floor tile and white fixtures, white panel doors, mirrored sliding closet doors in the entry${(cu ? cu.closet : !room || room.k === 'bed2') ? '; a built-in closet in the second bedroom along the whole west wall, 0.62 m deep × 2.46 m long, with three white sliding doors (already excluded from the bedroom dimensions above)' : ''}${(cu ? cu.rooms.includes('prim') : !room || room.k === 'prim') ? '; a small reach-in closet (about 0.6 m x 0.9 m inside, rod and shelf) with one white hinged door, slightly open, on the east side of the primary bedroom next to the TV wall' : ''}.
+
+REAL DEMO SUITE LOOK (visual reference; where it conflicts with the furniture list, the list wins)
+${demoText(cu ? cu.rooms : room ? [room.k] : ROOMDEF.map(r => r.k))}
 
 FURNITURE (measured, numbers match the plan)
 ${lines.length ? lines.join('\n') : 'None'}
@@ -1619,11 +1638,13 @@ function renderShotModal() {
   $('#shotImgs').innerHTML = `<figure><img alt="${name}" src="${s.url}"><figcaption>${name} · ${s.label}</figcaption></figure>` + (plan ? `<figure><img alt="plano-numerado.jpg" src="${planImage()}"><figcaption>plano-numerado.jpg</figcaption></figure>` : '');
   const tourF = tour ? [...new Set(s.rooms.flatMap(r => TOUR_BY_ROOM[r] || []))].slice(0, 3) : [];
   const inspF = insp ? [...new Set(s.rooms.flatMap(r => INSPO_BY_ROOM[r] || [2]))].slice(0, 3).map(n => `inspo-${n}.jpg`) : [];
+  const demoF = tour ? [...new Set(s.rooms.flatMap(r => DEMO_BY_ROOM[r] || []))].slice(0, 2) : [];
   const files = [[name, 'camera reference captured from the 3D app: reproduce this exact viewpoint and framing'],
     ...(plan ? [['plano-numerado.jpg', 'top-down plan of the furnished suite; the numbers match the furniture list (ground truth for the layout)']] : []),
     ...tourF.map(f => [f, 'real finishes of this unit (virtual-tour screenshot). Ignore the app buttons and text, and ignore its staged furniture: only copy floors, walls, doors, windows, cabinets, ceiling and light']),
+    ...demoF.map(f => [f, DEMO_DESC]),
     ...inspF.map(f => [f, 'inspiration photo: mood, lighting and styling only; never copy its furniture or layout'])];
-  $('#shotAttach').innerHTML = '<b>Adjunta en este orden:</b> ' + files.map(([f], i) => `${i + 1}. ${f}`).join(' · ') + (tourF.length || inspF.length ? '<br>Las fotos del tour y de inspiración están en la carpeta <code>01-referencias</code> del paquete.' : '');
+  $('#shotAttach').innerHTML = '<b>Adjunta en este orden:</b> ' + files.map(([f], i) => `${i + 1}. ${f}`).join(' · ') + (tourF.length || inspF.length || demoF.length ? '<br>Las fotos del tour, del demo y de inspiración están en la carpeta <code>01-referencias</code> del paquete.' : '');
   $('#shotPrompt').value = buildPrompt('all', style, { files, camFull: s.camFull, custom: { ids: s.ids, rooms: s.rooms, closet: s.closet } });
   $('#shotWarn').textContent = s.ids.length ? '' : '⚠ No hay muebles dentro del encuadre. Mueve la cámara para que se vean.';
 }
@@ -1709,4 +1730,4 @@ const planShot = (w, h, numbers) => { const tf = Math.tan(THREE.MathUtils.degToR
 const aerialShot = (w, h) => capture(w, h, new THREE.Vector3(CENTER.x + 4.5, 15.5 * .78, CENTER.z + 15.5 * .72 + 1), new THREE.Vector3(CENTER.x, 0, CENTER.z - .3), 42, 1, false);
 // Vista alta/isométrica: eye y tg = [x px, y px, altura en m]; walls 3 = muros que tapan bajan solos
 const isoShotPx = (eye, tg, fov, w, h, tall = false) => { doorsTall = tall; try { return capture(w, h, new THREE.Vector3(wx(eye[0]), eye[2], wz(eye[1])), new THREE.Vector3(wx(tg[0]), tg[2], wz(tg[1])), fov, 3, false); } finally { doorsTall = false; applyWalls(true); } };
-window.__app = { setView, items: () => items, select, camera, controls, shopRows, totals, ROOMDEF, buildPrompt, describe, shotPx, isoShotPx, planShot, aerialShot, EXTRAS, PRODUCTS, CATALOG, STYLES, money, shopText };
+window.__app = { DEMO_BY_ROOM, DEMO_DESC, setView, items: () => items, select, camera, controls, shopRows, totals, ROOMDEF, buildPrompt, describe, shotPx, isoShotPx, planShot, aerialShot, EXTRAS, PRODUCTS, CATALOG, STYLES, money, shopText };

@@ -712,7 +712,17 @@ function pick(e) {
   return rugHit;
 }
 
-let drag = null, gesture = null;
+let drag = null, gesture = null, viewLock = false;
+{
+  const b = document.getElementById('lockView');
+  const set = on => {
+    viewLock = on; b.classList.toggle('on', on); b.textContent = on ? '🔒' : '🔓';
+    b.setAttribute('aria-pressed', on); document.body.classList.toggle('vlock', on);
+    if (on) { select(null); const h = document.getElementById('hint'); if (h) { h.classList.remove('off'); setTimeout(() => h.classList.add('off'), 4000); } if (h) h.textContent = '🔒 Recorrer: los muebles no se mueven · arrastra para orbitar · pellizca para zoom · gira dos dedos para rotar'; }
+  };
+  b.onclick = () => set(!viewLock);
+  window.addEventListener('keydown', e => { if (e.key === 'l' || e.key === 'L') { if (!/INPUT|TEXTAREA|SELECT/.test((e.target.tagName || ''))) set(!viewLock); } });
+}
 const pointers = new Map();
 
 // zoom / pan propios (pellizco con dos dedos aunque el primero caiga sobre un mueble)
@@ -755,7 +765,7 @@ canvas.addEventListener('pointerdown', e => {
   }
   const ck = chipAt(e.clientX, e.clientY);   // toque sobre una etiqueta de cuarto
   if (ck) { drag = { none: true, chip: ck, x: e.clientX, y: e.clientY }; return; }
-  const id = pick(e);
+  const id = viewLock ? null : pick(e);       // 🔒 recorrer: los muebles no se tocan
   if (id == null) { drag = { none: true, x: e.clientX, y: e.clientY }; return; }
   e.stopImmediatePropagation();
   controls.enabled = false;

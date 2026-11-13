@@ -124,6 +124,9 @@ body.photo #mini,body.photo #stats{display:none}
 #zoom{position:fixed;z-index:2;right:max(10px,env(safe-area-inset-right));top:calc(env(safe-area-inset-top) + 170px);display:flex;flex-direction:column;gap:8px}
 #zoom button{width:48px;height:48px;min-height:0;padding:0;font-size:26px;line-height:1;border-radius:14px;background:var(--panel);backdrop-filter:blur(10px);touch-action:none}
 body.photo #zoom{display:none}
+#zoom #lockView{font-size:22px}
+#zoom #lockView.on{background:var(--accent,#e8b86a);color:#1a1d23;box-shadow:0 0 0 2px rgba(232,184,106,.5)}
+body.vlock .chip{outline:none}
 body.touching .chip,body.touching #mini,body.touching #zoom{pointer-events:none}
 body.sel #chips{display:none}
 

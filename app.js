@@ -524,7 +524,7 @@ function checkCollisions() {
     g.userData.mats.forEach(m => { m.emissive.set(on ? '#ff2d2d' : (m.userData.baseEm || '#000000')); m.emissiveIntensity = on ? .55 : (m.userData.baseI ?? 0); });
     it.hit = on;
   });
-  updateSelUI(); updateGaps(); updateCart();
+  updateSelUI(); updateGaps(); updateCart(); updateRoomCard(); applyRoomFocus();
 }
 
 function rayHit(ox, oz, dx, dz, poly) {
@@ -816,22 +816,80 @@ addEventListener('keydown', e => {
 /* ============================================================
    Catálogo (bandeja inferior)
    ============================================================ */
-let tab = CATS[0];
+let tab = CATS[0], roomSel = null;
+const THIS_ROOM = '★ Este cuarto';
+const ROOM_BAR = [['prim', 'Principal'], ['bed2', 'Recámara 2'], ['liv', 'Sala'], ['kit', 'Cocina'], ['entry', 'Entrada'], ['patio', 'Balcón']];
+const ROOM_CATS = { prim: ['Recámara', 'Deco'], bed2: ['Recámara', 'Oficina', 'Deco'], liv: ['Sala', 'Deco'], kit: ['Comedor'], entry: ['Deco'], patio: ['Deco'] };
+const ROOM_PROD = { prim: ['Recámaras', 'recámara', 'Varios'], bed2: ['Recámaras', 'Recámara 2', 'recámara', 'Varios'], liv: ['Sala', 'Varios'], kit: ['Comedor'], entry: ['Entrada', 'entrada', 'Varios'], patio: ['Varios'] };
+const roomCatalog = k => Object.entries(CATALOG).filter(([, c]) => c.shop ? (ROOM_PROD[k] || []).some(w => c.shop.room.includes(w)) : (ROOM_CATS[k] || []).includes(c.cat))
+  .sort((a, b) => (b[1].shop ? 1 : 0) - (a[1].shop ? 1 : 0));   // primero los productos de tienda
 function buildTabs() {
   const t = $('#tabs'); t.innerHTML = '';
-  CATS.forEach(c => {
+  (roomSel ? [THIS_ROOM, ...CATS] : CATS).forEach(c => {
     const b = document.createElement('button'); b.textContent = c; if (c === tab) b.className = 'on';
     b.onclick = () => { tab = c; buildTabs(); buildCards(); }; t.appendChild(b);
   });
 }
 function buildCards() {
   const box = $('#cards'); box.innerHTML = '';
-  Object.entries(CATALOG).filter(([, k]) => k.cat === tab).forEach(([type, k]) => {
+  (tab === THIS_ROOM && roomSel ? roomCatalog(roomSel) : Object.entries(CATALOG).filter(([, k]) => k.cat === tab)).forEach(([type, k]) => {
     const b = document.createElement('button'); b.className = 'card';
     b.innerHTML = `<span class="em">${k.em}</span><b>${k.n}</b><small>${fmt(k.w)} × ${fmt(k.d)}</small>` + (k.shop ? `<small class="pr">${money(k.shop.price)}</small>` : '');
     b.onclick = () => addItem(type); box.appendChild(b);
   });
 }
+/* ---------- Selector de cuartos para planear el layout ---------- */
+const roomOutline = new THREE.LineLoop(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: '#5b8cff', depthTest: false }));
+roomOutline.renderOrder = 9; roomOutline.visible = false; roomOutline.frustumCulled = false; scene.add(roomOutline);
+function updateOutline() {
+  if (!roomSel) { roomOutline.visible = false; redraw(); return; }
+  const q = rectOf(ROOMDEF.find(r => r.k === roomSel).r), hw = q.w / 2, hd = q.d / 2;
+  roomOutline.geometry.setFromPoints([[-hw, -hd], [hw, -hd], [hw, hd], [-hw, hd]].map(([x, z]) => new THREE.Vector3(q.cx + x, .035, q.cz + z)));
+  roomOutline.visible = true; redraw();
+}
+function buildRoomBar() {
+  const bar = $('#roomBar'); bar.innerHTML = '';
+  [[null, 'Todo'], ...ROOM_BAR].forEach(([k, label]) => {
+    const b = document.createElement('button'); b.textContent = label; if (k === roomSel) b.className = 'on';
+    b.onclick = () => { setRoomSel(k); buzz && buzz(6); }; bar.appendChild(b);
+  });
+}
+function setRoomSel(k, cam = 'plan') {
+  roomSel = k; document.body.classList.toggle('roomsel', !!k);
+  if (k) tab = THIS_ROOM; else if (tab === THIS_ROOM) tab = CATS[0];
+  buildRoomBar(); buildTabs(); buildCards(); applyRoomFocus(); updateOutline(); updateRoomCard(); layoutTray();
+  if (cam === 'plan') { if (k) focusRoomPlan(k); else { setView('top'); markMini(); } }
+}
+function focusRoomPlan(k) {   // vista de planta centrada en el cuarto, libre de la bandeja
+  const r = ROOMDEF.find(x => x.k === k); if (!r) return;
+  setView('top');
+  const q = rectOf(r.r), tf = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+  const dist = Math.max(q.d / (2 * tf) * 1.9, q.w / (2 * tf * camera.aspect) * 1.2) + .6, tz = q.cz + dist * tf * .24;
+  flyTo(new THREE.Vector3(q.cx, dist, tz + .01), new THREE.Vector3(q.cx, 0, tz));
+  focusK = k; markMini();
+}
+function applyRoomFocus() {   // lo que está fuera del cuarto elegido se atenúa
+  items.forEach(it => {
+    const g = groups.get(it.id); if (!g) return;
+    const r = roomOf(it), inside = !roomSel || (r && r.k === roomSel);
+    g.userData.mats.forEach(m => { if (m.userData.dim === !inside) return; m.userData.dim = !inside; m.transparent = !inside; m.opacity = inside ? 1 : .2; m.depthWrite = inside; m.needsUpdate = true; });
+  });
+  redraw();
+}
+function updateRoomCard() {
+  const card = $('#roomCard'); card.hidden = !roomSel; if (!roomSel) return;
+  const r = ROOMDEF.find(x => x.k === roomSel), q = rectOf(r.r), area = q.w * q.d;
+  const inRoom = items.filter(it => roomOf(it)?.k === roomSel);
+  const occ = inRoom.filter(it => !floats(CATALOG[it.type])).reduce((s, it) => s + CATALOG[it.type].w * CATALOG[it.type].d, 0);
+  const hits = inRoom.filter(it => it.hit).length, areaTxt = units === 'm' ? area.toFixed(1) + ' m²' : Math.round(area * 10.7639) + ' ft²';
+  $('#roomInfo').innerHTML = `<b>${title(r.n)}</b> · ${fmt(q.w)} × ${fmt(q.d)} · ${areaTxt}<br><small>${inRoom.length} piezas · muebles ocupan ${Math.round(occ / area * 100)}%` +
+    `${hits ? ` · <span class="bad">⚠ ${hits} choque${hits > 1 ? 's' : ''}</span>` : ''}${r.k === 'bed2' ? ' · clóset aparte (0.62 × 2.46 m)' : ''}</small>`;
+}
+function clearRoom(k) { pushHist(); const ids = items.filter(it => roomOf(it)?.k === k).map(i => i.id); ids.forEach(removeGroup); items = items.filter(it => !ids.includes(it.id)); }
+function finishRoomEdit() { select(null); checkCollisions(); save(); applyRoomFocus(); redraw(); }
+$('#rcClear').onclick = () => { if (roomSel) { clearRoom(roomSel); finishRoomEdit(); } };
+$('#rcReset').onclick = () => { if (!roomSel) return; clearRoom(roomSel); JAPANDI_ITEMS.filter(it => roomOf(it)?.k === roomSel).forEach(it => { const c = { ...it, id: nextId++ }; items.push(c); addGroup(c); }); finishRoomEdit(); };
+
 function addItem(type) {
   setNDC({ clientX: innerWidth / 2, clientY: innerHeight * .42 });
   const p = new THREE.Vector3();
@@ -890,8 +948,9 @@ function focusRoom(k) {
   const dist = Math.max(q.w / (2 * tf * camera.aspect), q.d / (2 * tf)) * 1.55 + 1.2, dir = new THREE.Vector3(.35, .95, .75).normalize();
   flyTo(t.clone().addScaledVector(dir, dist), t);
   focusK = k; markMini();
+  if (roomSel !== k) setRoomSel(k, 'none');
 }
-const title = n => n[0] + n.slice(1).toLowerCase();
+const title =n => n[0] + n.slice(1).toLowerCase();
 const CHIP_AT = { prim: [360, 900], liv: [560, 890], kit: [520, 1100], bed2: [400, 1290], patio: [440, 690] };
 const CHIP_KEYS = Object.keys(CHIP_AT);
 const chips = ROOMDEF.filter(r => CHIP_KEYS.includes(r.k)).map(r => {
@@ -1066,13 +1125,14 @@ function capture(w, h, pos, target, fov, walls, numbers) {
   const prev = { p: camera.position.clone(), q: camera.quaternion.clone(), fov: camera.fov, asp: camera.aspect, wm: wallMode, ring: ring.visible };
   const sprites = numbers ? items.map((it, i) => { const sp = numberSprite(i + 1); sp.position.set(it.x - (CATALOG[it.type].rug ? .55 : 0), 2.2, it.z); scene.add(sp); return sp; }) : [];
   gapObjs.forEach(g => { g.line.visible = g.sp.visible = false; }); ring.visible = false; roomLabels.forEach(m => { m.visible = !!numbers; });
+  const rs = roomSel; roomSel = null; applyRoomFocus(); roomOutline.visible = false;   // las capturas no llevan el cuarto atenuado
   renderer.setPixelRatio(1); renderer.setSize(w, h, false);
   camera.fov = fov; camera.aspect = w / h; camera.position.copy(pos); camera.lookAt(target); camera.updateProjectionMatrix();
   wallMode = walls; applyWalls();
   renderer.render(scene, camera);
   const url = canvas.toDataURL('image/jpeg', .92);
   sprites.forEach(sp => { scene.remove(sp); sp.material.map.dispose(); sp.material.dispose(); });
-  scene.background = bg; wallMode = prev.wm; applyWalls(); ring.visible = prev.ring;
+  scene.background = bg; wallMode = prev.wm; applyWalls(); ring.visible = prev.ring; roomSel = rs; applyRoomFocus(); updateOutline();
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.setSize(innerWidth, innerHeight, false);
   camera.fov = prev.fov; camera.aspect = prev.asp; camera.position.copy(prev.p); camera.quaternion.copy(prev.q); camera.updateProjectionMatrix();
   if (pv) { camera.setViewOffset(pv.fullWidth, pv.fullHeight, pv.offsetX, pv.offsetY, pv.width, pv.height); camera.updateProjectionMatrix(); }
@@ -1573,7 +1633,7 @@ const saved = load();
 resize();
 applyWalls(); drawRoomLabels(); drawChips();
 $('#unitsBtn').textContent = 'Unidades: ' + units;
-buildTabs(); buildCards();
+buildRoomBar(); buildTabs(); buildCards();
 loadItems(saved || JAPANDI_ITEMS);
 setView('3d');
 if (location.hash === '#top') setView('top');

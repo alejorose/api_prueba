@@ -249,3 +249,16 @@ body.hudoff .hudtop,body.hudoff #joy,body.hudoff #hudPre,body.hudoff #hudAsp,bod
 /* botones secundarios arriba (zona de pulgar libre): fila bajo la barra superior */
 .hudmid{bottom:auto;top:calc(env(safe-area-inset-top) + 70px)}
 #hudPresets,#gestureHint{top:calc(env(safe-area-inset-top) + 128px)}
+
+/* ===== Selector de cuartos ===== */
+.roombar{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:8px}
+.roombar button{flex:none;min-height:42px;padding:0 15px;border-radius:12px;font-size:14.5px;font-weight:600;background:rgba(255,255,255,.08)}
+.roombar button.on{background:var(--accent);border-color:transparent;color:#fff}
+.roomcard{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;padding:8px 10px;border-radius:12px;background:rgba(91,140,255,.12);border:1px solid var(--line);font-size:14px;line-height:1.3}
+.roomcard[hidden]{display:none}
+.roomcard small{color:var(--muted);font-size:12.5px}
+.roomcard .bad{color:#ffb24d}
+.rc-btns{display:flex;flex-direction:column;gap:4px;flex:none}
+.rc-btns button{min-height:34px;padding:0 10px;font-size:12.5px;border-radius:10px}
+body.tray-min .roomcard{display:none}
+body.roomsel #stats,body.roomsel .shoot-btn,body.roomsel #hint{display:none}

@@ -38,14 +38,14 @@ FURNITURE (measured, numbers match the plan)
 32. IKEA TJUSIG bench with shoe storage in black, 1.08 × 0.34 × 0.5 m (W × D × H); entry hall: centre 2.61 m from the west wall and 0.17 m from the north wall; pushed against the north wall; front faces south; 1.45 m free in front
 33. IKEA TJUSIG wall hanger rail 78 cm hung with bags and a scarf, 0.78 × 0.06 × 0.12 m (W × D × H); entry hall: centre 2.61 m from the west wall and 0.05 m from the north wall; pushed against the north wall; front faces south; mounted 1.55 m above the floor
 34. IKEA MOSSLANDA picture ledge 55 cm holding small framed art, 0.55 × 0.12 × 0.05 m (W × D × H); entry hall: centre 2.61 m from the west wall and 0.09 m from the north wall; pushed against the north wall; front faces south; mounted 1.90 m above the floor
-35. full-length black-frame floor mirror 51×160 cm with warm LED backlight, leaning on the wall, 0.51 × 0.05 × 1.6 m (W × D × H); entry hall: centre 1.79 m from the west wall and 1.76 m from the north wall; pushed against the south wall; front faces north; 1.74 m free in front
+35. IKEA LINDBYN black aluminium-frame arched-top full-length mirror 60×170 cm, leaning against the wall, 0.6 × 0.04 × 1.7 m (W × D × H); entry hall: centre 1.79 m from the west wall and 1.76 m from the north wall; pushed against the south wall; front faces north; 1.74 m free in front
 36. IKEA LOHALS flatwoven natural jute rug 80×150 cm, 0.8 × 1.5 m (W × D); entry hall: centre 2.11 m from the west wall and 0.94 m from the north wall; front faces east
 
 STYLE (decor and textiles only; keep the furniture colours above)
-Alternative Japandi mood from the attached inspiration photos: cozy evening atmosphere with warm amber accent lighting (glowing orange glass lamp, paper lanterns, LED-backlit mirror, LED strip under shelves), natural jute rugs, light pine and oak wood, matte black metal accents, linen bedding in charcoal, oat and rust, trailing pothos and potted plants, framed abstract art, dim warm lamp light mixed with soft window light. Reproduce the mood of the inspiration photos but keep the exact furniture list, sizes and positions below.
+Alternative Japandi mood from the attached inspiration photos: cozy evening atmosphere with warm amber accent lighting (glowing orange glass lamp, paper lanterns, black-framed mirrors, LED strip under shelves), natural jute rugs, light pine and oak wood, matte black metal accents, linen bedding in charcoal, oat and rust, trailing pothos and potted plants, framed abstract art, dim warm lamp light mixed with soft window light. Reproduce the mood of the inspiration photos but keep the exact furniture list, sizes and positions below.
 
 CAMERA
-Eye level at 1.5 m, 24 mm wide-angle lens, vertical lines straight, standing at the west end of the entry hall (next to the washer/dryer) looking east toward the front door: the bench with the hook rail and shelf on the left (north wall), the LED-backlit floor mirror on the right (south wall), the jute rug on the floor.
+Eye level at 1.5 m, 24 mm wide-angle lens, vertical lines straight, standing at the west end of the entry hall (next to the washer/dryer) looking east toward the front door: the bench with the hook rail and shelf on the left (north wall), the black arched-top floor mirror leaning on the right (south wall), the jute rug on the floor.
 Lighting: follow the STYLE section (warm lamps on, plus soft window light). Soft realistic shadows, 4K architectural photography, interior magazine quality.
 ```
 

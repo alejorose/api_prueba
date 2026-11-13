@@ -77,6 +77,9 @@ export const PRODUCTS = [
   { id: 'mirror_led', name: 'Espejo de piso con LED 20×63"', en: 'full-length black-frame floor mirror 51×160 cm with warm LED backlight, leaning on the wall', store: 'Amazon / Home Depot', room: 'Entrada',
     url: 'https://www.amazon.ca/s?k=led+full+length+floor+mirror+20x63', w: .51, d: .05, h: 1.6, b: 'mirror', color: '#2b2e33', em: '🪞',
     price: 189, lo: 150, hi: 230, basis: 'EST', dims: 'V', note: '~51×160 cm (20×63 in). Precio visto en EE. UU., convertido.' },
+  { id: 'lindbyn_arch', name: 'Espejo LINDBYN de arco 60×170', en: 'IKEA LINDBYN black aluminium-frame arched-top full-length mirror 60×170 cm, leaning against the wall', store: 'IKEA', room: 'Entrada / recámaras',
+    url: 'https://www.ikea.com/ca/en/p/-40597234/', w: .6, d: .04, h: 1.7, b: 'archmirror', color: '#1f2226', em: '🪞',
+    price: 80, lo: 70, hi: 90, basis: 'CA', dims: 'V', note: '60×170 cm, marco de aluminio negro con arco arriba. CA$79.99 en IKEA Canadá. Apoyado en la pared con 1 tornillo de anclaje. (Es el modelo más parecido a tu foto.)' },
 ];
 
 // Complementos sin figura 3D: suman al presupuesto.
@@ -107,5 +110,5 @@ export const JAPANDI = [
   ['tarva_full', 418, 1291, 180], ['gra', 350, 1345, 180], ['gra', 486, 1345, 180], ['lantern', 350, 1352, 180], ['lantern', 486, 1352, 180],
   ['art', 418, 1353, 180], ['desk', 501, 1255, -90], ['plant', 345, 1215, 0],
   // Entrada
-  ['tjusig', 692, 1251, 0], ['hooks', 692, 1243, 0], ['ledge', 692, 1246, 0, 1.9], ['mirror_led', 640, 1353, 180], ['lohals_s', 660, 1300, 90],
+  ['tjusig', 692, 1251, 0], ['hooks', 692, 1243, 0], ['ledge', 692, 1246, 0, 1.9], ['lindbyn_arch', 640, 1353, 180], ['lohals_s', 660, 1300, 90],
 ];

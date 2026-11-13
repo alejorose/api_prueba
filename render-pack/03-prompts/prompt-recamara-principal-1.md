@@ -47,7 +47,7 @@ FURNITURE (measured, numbers match the plan)
 23. potted trailing pothos or monstera plant in a woven basket, 0.4 × 0.4 × 1.2 m (W × D × H); primary bedroom: centre 2.48 m from the west wall and 0.28 m from the north wall; pushed against the east and north wall; front faces south; 2.83 m free in front
 
 STYLE (decor and textiles only; keep the furniture colours above)
-Alternative Japandi mood from the attached inspiration photos: cozy evening atmosphere with warm amber accent lighting (glowing orange glass lamp, paper lanterns, LED-backlit mirror, LED strip under shelves), natural jute rugs, light pine and oak wood, matte black metal accents, linen bedding in charcoal, oat and rust, trailing pothos and potted plants, framed abstract art, dim warm lamp light mixed with soft window light. Reproduce the mood of the inspiration photos but keep the exact furniture list, sizes and positions below.
+Alternative Japandi mood from the attached inspiration photos: cozy evening atmosphere with warm amber accent lighting (glowing orange glass lamp, paper lanterns, black-framed mirrors, LED strip under shelves), natural jute rugs, light pine and oak wood, matte black metal accents, linen bedding in charcoal, oat and rust, trailing pothos and potted plants, framed abstract art, dim warm lamp light mixed with soft window light. Reproduce the mood of the inspiration photos but keep the exact furniture list, sizes and positions below.
 
 CAMERA
 Eye level at 1.5 m, 24 mm wide-angle lens, vertical lines straight, standing in the north-east corner of the room (window side), looking south-west toward the bed.

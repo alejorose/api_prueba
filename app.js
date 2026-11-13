@@ -47,7 +47,7 @@ const ROOMDEF = [
     cam: 'standing in the north-east corner of the room by the door, looking south-west toward the bed',
     alt: { eye: [440, 1215], tg: [420, 1350], fov: 66, cam: 'standing by the room door at the north end, looking south straight at the bed head with the wall art, the two wall lamps and the floating bedside shelves' } },
   { k: 'entry', n: 'ENTRADA', en: 'Entry hall', r: [525, 1240, 738, 1355], lab: [650, 1270], eye: [548, 1286], tg: [705, 1296], fov: 74,
-    cam: 'standing at the west end of the entry hall (next to the washer/dryer) looking east toward the front door: the bench with the hook rail and shelf on the left (north wall), the LED-backlit floor mirror on the right (south wall), the jute rug on the floor' },
+    cam: 'standing at the west end of the entry hall (next to the washer/dryer) looking east toward the front door: the bench with the hook rail and shelf on the left (north wall), the black arched-top floor mirror leaning on the right (south wall), the jute rug on the floor' },
   { k: 'patio', n: 'PATIO', en: 'Balcony', r: [268, 615, 628, 758], lab: [440, 740] },
 ];
 
@@ -334,6 +334,14 @@ const BUILD = {
     const tube = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 40, .013, 8), dark); tube.castShadow = true; g.add(tube);
     const sh = new THREE.Mesh(new THREE.SphereGeometry(.22, 28, 12, 0, Math.PI * 2, 0, Math.PI / 2), mat(c, { emissive: c, emissiveIntensity: .8, side: THREE.DoubleSide }));
     sh.position.set(0, 1.55, 1.2); g.add(sh);
+  },
+  archmirror(g, it, { w, d, h }, c) {   // espejo de piso con arco, apoyado en la pared (inclinado ~3.5°)
+    const mk = (ww, hh, dep, y, m) => {
+      const r = ww / 2, sh = new THREE.Shape(); sh.moveTo(-r, 0); sh.lineTo(r, 0); sh.lineTo(r, hh - r); sh.absarc(0, hh - r, r, 0, Math.PI, false); sh.lineTo(-r, 0);
+      const mesh = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: dep, bevelEnabled: false, curveSegments: 28 }), m);
+      mesh.position.set(0, y, -d / 2 + h * Math.sin(.06)); mesh.rotation.x = -.06; mesh.castShadow = true; g.add(mesh);   // la base queda separada de la pared y la parte alta la toca
+    };
+    mk(w, h, d, 0, mat(c)); mk(w - .05, h - .05, d + .004, .025, mat('#dfe8f2', { roughness: .08, metalness: .85 }));
   },
   mirror(g, it, { w, d, h }, c) {      // espejo de piso con LED cálido
     part(g, w + .05, h + .05, .008, 0, h / 2, -d / 2 - .002, mat('#ffb067', { emissive: '#ffa550', emissiveIntensity: 1.3 }));
@@ -1039,7 +1047,7 @@ const EN = { bed_queen: 'queen bed', bed_king: 'king bed', bed_single: 'twin bed
   chair: 'dining chair', stool: 'counter stool', desk: 'desk', deskchair: 'desk chair', rug: 'area rug', rug_s: 'small area rug', plant: 'potted plant', lamp: 'floor lamp' };
 for (const p of PRODUCTS) EN['p_' + p.id] = p.en;
 const STYLES = {
-  japandi: ['Japandi alternativo (tus fotos)', 'Alternative Japandi mood from the attached inspiration photos: cozy evening atmosphere with warm amber accent lighting (glowing orange glass lamp, paper lanterns, LED-backlit mirror, LED strip under shelves), natural jute rugs, light pine and oak wood, matte black metal accents, linen bedding in charcoal, oat and rust, trailing pothos and potted plants, framed abstract art, dim warm lamp light mixed with soft window light. Reproduce the mood of the inspiration photos but keep the exact furniture list, sizes and positions below.'],
+  japandi: ['Japandi alternativo (tus fotos)', 'Alternative Japandi mood from the attached inspiration photos: cozy evening atmosphere with warm amber accent lighting (glowing orange glass lamp, paper lanterns, black-framed mirrors, LED strip under shelves), natural jute rugs, light pine and oak wood, matte black metal accents, linen bedding in charcoal, oat and rust, trailing pothos and potted plants, framed abstract art, dim warm lamp light mixed with soft window light. Reproduce the mood of the inspiration photos but keep the exact furniture list, sizes and positions below.'],
   modern: ['Moderno neutro', 'Contemporary modern decor: cream bouclé and linen textiles, charcoal-black accents, sage-green plants, light wool rugs, soft warm lighting.'],
   scandi: ['Escandinavo', 'Scandinavian decor: light oak, white and soft grey textiles, linen, simple ceramics, bright airy natural light.'],
   warm: ['Cálido orgánico', 'Warm organic-modern decor: terracotta and olive accents, walnut wood, rattan, chunky knit textiles, warm lamp light.'],

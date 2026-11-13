@@ -47,7 +47,7 @@ FURNITURE (measured, numbers match the plan)
 10. IKEA MOSSLANDA picture ledge 55 cm holding small framed art, 0.55 × 0.12 × 0.05 m (W × D × H); living room: centre 2.64 m from the west wall and 2.45 m from the north wall; pushed against the east wall; front faces west; mounted 1.85 m above the floor
 
 STYLE (decor and textiles only; keep the furniture colours above)
-Alternative Japandi mood from the attached inspiration photos: cozy evening atmosphere with warm amber accent lighting (glowing orange glass lamp, paper lanterns, LED-backlit mirror, LED strip under shelves), natural jute rugs, light pine and oak wood, matte black metal accents, linen bedding in charcoal, oat and rust, trailing pothos and potted plants, framed abstract art, dim warm lamp light mixed with soft window light. Reproduce the mood of the inspiration photos but keep the exact furniture list, sizes and positions below.
+Alternative Japandi mood from the attached inspiration photos: cozy evening atmosphere with warm amber accent lighting (glowing orange glass lamp, paper lanterns, black-framed mirrors, LED strip under shelves), natural jute rugs, light pine and oak wood, matte black metal accents, linen bedding in charcoal, oat and rust, trailing pothos and potted plants, framed abstract art, dim warm lamp light mixed with soft window light. Reproduce the mood of the inspiration photos but keep the exact furniture list, sizes and positions below.
 
 CAMERA
 Eye level at 1.5 m, 24 mm wide-angle lens, vertical lines straight, standing at the south edge of the living room (kitchen side), looking north toward the floor-to-ceiling balcony windows.

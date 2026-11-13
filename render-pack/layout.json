@@ -547,19 +547,19 @@
   },
   {
    "n": 35,
-   "name": "Espejo de piso con LED 20×63\"",
-   "store": "Amazon / Home Depot",
-   "w": 0.51,
-   "d": 0.05,
-   "h": 1.6,
+   "name": "Espejo LINDBYN de arco 60×170",
+   "store": "IKEA",
+   "w": 0.6,
+   "d": 0.04,
+   "h": 1.7,
    "elev": 0,
-   "price": 189,
-   "url": "https://www.amazon.ca/s?k=led+full+length+floor+mirror+20x63",
+   "price": 80,
+   "url": "https://www.ikea.com/ca/en/p/-40597234/",
    "dims": "V",
    "x": 5.897,
    "z": 11.513,
    "rot": 180,
-   "type": "p_mirror_led"
+   "type": "p_lindbyn_arch"
   },
   {
    "n": 36,

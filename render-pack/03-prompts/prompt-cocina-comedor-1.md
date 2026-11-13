@@ -44,7 +44,7 @@ FURNITURE (measured, numbers match the plan)
 15. IKEA REGOLIT paper pendant lampshade 45 cm, glowing warm, 0.45 × 0.45 × 0.45 m (W × D × H); kitchen and dining area: centre 1.05 m from the west wall and 1.37 m from the north wall; front faces south; mounted 1.75 m above the floor
 
 STYLE (decor and textiles only; keep the furniture colours above)
-Alternative Japandi mood from the attached inspiration photos: cozy evening atmosphere with warm amber accent lighting (glowing orange glass lamp, paper lanterns, LED-backlit mirror, LED strip under shelves), natural jute rugs, light pine and oak wood, matte black metal accents, linen bedding in charcoal, oat and rust, trailing pothos and potted plants, framed abstract art, dim warm lamp light mixed with soft window light. Reproduce the mood of the inspiration photos but keep the exact furniture list, sizes and positions below.
+Alternative Japandi mood from the attached inspiration photos: cozy evening atmosphere with warm amber accent lighting (glowing orange glass lamp, paper lanterns, black-framed mirrors, LED strip under shelves), natural jute rugs, light pine and oak wood, matte black metal accents, linen bedding in charcoal, oat and rust, trailing pothos and potted plants, framed abstract art, dim warm lamp light mixed with soft window light. Reproduce the mood of the inspiration photos but keep the exact furniture list, sizes and positions below.
 
 CAMERA
 Eye level at 1.5 m, 24 mm wide-angle lens, vertical lines straight, standing in the hallway at the south end, looking north along the kitchen counter (on the right) and the dining table.

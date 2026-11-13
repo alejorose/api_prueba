@@ -38,7 +38,7 @@ Números = los del `plano-numerado.jpg`. Medidas en cm (ancho × fondo × alto).
 | 32 | [Banca TJUSIG con zapatera](https://www.ikea.com/ca/en/p/tjusig-bench-with-shoe-storage-black-50152703) | IKEA | 108 × 34 × 50 ✓ | — | CA$90 |
 | 33 | [Barra de ganchos TJUSIG 78](https://www.ikea.com/ca/en/search/?q=TJUSIG+hanger) | IKEA | 78 × 6 × 12 ✓ | 155 cm | CA$16 |
 | 34 | [Repisa MOSSLANDA 55](https://www.ikea.com/ca/en/search/?q=MOSSLANDA+55) | IKEA | 55 × 12 × 5 ✓ | 190 cm | CA$10 |
-| 35 | [Espejo de piso con LED 20×63"](https://www.amazon.ca/s?k=led+full+length+floor+mirror+20x63) | Amazon / Home Depot | 51 × 5 × 160 ✓ | — | CA$189 |
+| 35 | [Espejo LINDBYN de arco 60×170](https://www.ikea.com/ca/en/p/-40597234/) | IKEA | 60 × 4 × 170 ✓ | — | CA$80 |
 | 36 | [Tapete de yute LOHALS 80×150](https://www.ikea.com/ca/en/search/?q=LOHALS) | IKEA | 80 × 150 × 2 ✓ | — | CA$39 |
 
 ## Complementos sin figura 3D
@@ -53,7 +53,7 @@ Números = los del `plano-numerado.jpg`. Medidas en cm (ancho × fondo × alto).
 - 1× Manta tejida y cojines (IKEA / Amazon) ~CA$60 c/u
 - 1× Velas y decoración pequeña (IKEA) ~CA$40 c/u
 
-**Total estimado: CA$5,122** (rango CA$4,085 – 6,535).
+**Total estimado: CA$5,013** (rango CA$4,005 – 6,395).
 
 ## Posición exacta de cada pieza (texto del prompt)
 
@@ -91,5 +91,5 @@ Números = los del `plano-numerado.jpg`. Medidas en cm (ancho × fondo × alto).
 - 32. IKEA TJUSIG bench with shoe storage in black, 1.08 × 0.34 × 0.5 m (W × D × H); entry hall: centre 2.61 m from the west wall and 0.17 m from the north wall; pushed against the north wall; front faces south; 1.45 m free in front
 - 33. IKEA TJUSIG wall hanger rail 78 cm hung with bags and a scarf, 0.78 × 0.06 × 0.12 m (W × D × H); entry hall: centre 2.61 m from the west wall and 0.05 m from the north wall; pushed against the north wall; front faces south; mounted 1.55 m above the floor
 - 34. IKEA MOSSLANDA picture ledge 55 cm holding small framed art, 0.55 × 0.12 × 0.05 m (W × D × H); entry hall: centre 2.61 m from the west wall and 0.09 m from the north wall; pushed against the north wall; front faces south; mounted 1.90 m above the floor
-- 35. full-length black-frame floor mirror 51×160 cm with warm LED backlight, leaning on the wall, 0.51 × 0.05 × 1.6 m (W × D × H); entry hall: centre 1.79 m from the west wall and 1.76 m from the north wall; pushed against the south wall; front faces north; 1.74 m free in front
+- 35. IKEA LINDBYN black aluminium-frame arched-top full-length mirror 60×170 cm, leaning against the wall, 0.6 × 0.04 × 1.7 m (W × D × H); entry hall: centre 1.79 m from the west wall and 1.76 m from the north wall; pushed against the south wall; front faces north; 1.74 m free in front
 - 36. IKEA LOHALS flatwoven natural jute rug 80×150 cm, 0.8 × 1.5 m (W × D); entry hall: centre 2.11 m from the west wall and 0.94 m from the north wall; front faces east

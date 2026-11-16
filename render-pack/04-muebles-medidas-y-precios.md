@@ -33,13 +33,14 @@ Números = los del `plano-numerado.jpg`. Medidas en cm (ancho × fondo × alto).
 | 27 | [Lámpara de pared linterna de papel](https://www.amazon.ca/s?k=paper+lantern+plug+in+wall+sconce+black+arm) | Amazon | 32 × 38 × 32 (?) | 150 cm | CA$49 |
 | 28 | [Lámpara de pared linterna de papel](https://www.amazon.ca/s?k=paper+lantern+plug+in+wall+sconce+black+arm) | Amazon | 32 × 38 × 32 (?) | 150 cm | CA$49 |
 | 29 | [Cuadro abstracto grande](https://www.ikea.com/ca/en/search/?q=BJORKSTA) | IKEA / Amazon | 100 × 4 × 70 (?) | 110 cm | CA$85 |
-| 30 | [Escritorio 105×50](https://www.ikea.com/ca/en/search/?q=MICKE+desk) | IKEA | 105 × 50 × 75 (?) | — | CA$99 |
-| 31 | [Planta (pothos / monstera)](https://www.ikea.com/ca/en/search/?q=plant) | IKEA / vivero | 40 × 40 × 120 (?) | — | CA$29 |
-| 32 | [Banca TJUSIG con zapatera](https://www.ikea.com/ca/en/p/tjusig-bench-with-shoe-storage-black-50152703) | IKEA | 108 × 34 × 50 ✓ | — | CA$90 |
-| 33 | [Barra de ganchos TJUSIG 78](https://www.ikea.com/ca/en/search/?q=TJUSIG+hanger) | IKEA | 78 × 6 × 12 ✓ | 155 cm | CA$16 |
-| 34 | [Repisa MOSSLANDA 55](https://www.ikea.com/ca/en/search/?q=MOSSLANDA+55) | IKEA | 55 × 12 × 5 ✓ | 190 cm | CA$10 |
-| 35 | [Espejo LINDBYN de arco 60×170](https://www.ikea.com/ca/en/p/-40597234/) | IKEA | 60 × 4 × 170 ✓ | — | CA$80 |
-| 36 | [Tapete de yute LOHALS 80×150](https://www.ikea.com/ca/en/search/?q=LOHALS) | IKEA | 80 × 150 × 2 ✓ | — | CA$39 |
+| 30 | [Escritorio MICKE 105×50](https://www.ikea.com/ca/en/search/?q=MICKE+desk) | IKEA | 105 × 50 × 75 ✓ | — | CA$149 |
+| 31 | [Cajonera MICKE 35×75](https://www.ikea.com/ca/en/search/?q=MICKE+drawer+unit) | IKEA | 35 × 50 × 75 ✓ | — | CA$129 |
+| 32 | [Planta (pothos / monstera)](https://www.ikea.com/ca/en/search/?q=plant) | IKEA / vivero | 40 × 40 × 120 (?) | — | CA$29 |
+| 33 | [Banca TJUSIG con zapatera](https://www.ikea.com/ca/en/p/tjusig-bench-with-shoe-storage-black-50152703) | IKEA | 108 × 34 × 50 ✓ | — | CA$90 |
+| 34 | [Barra de ganchos TJUSIG 78](https://www.ikea.com/ca/en/search/?q=TJUSIG+hanger) | IKEA | 78 × 6 × 12 ✓ | 155 cm | CA$16 |
+| 35 | [Repisa MOSSLANDA 55](https://www.ikea.com/ca/en/search/?q=MOSSLANDA+55) | IKEA | 55 × 12 × 5 ✓ | 190 cm | CA$10 |
+| 36 | [Espejo LINDBYN de arco 60×170](https://www.ikea.com/ca/en/p/-40597234/) | IKEA | 60 × 4 × 170 ✓ | — | CA$80 |
+| 37 | [Tapete de yute LOHALS 80×150](https://www.ikea.com/ca/en/search/?q=LOHALS) | IKEA | 80 × 150 × 2 ✓ | — | CA$39 |
 
 ## Complementos sin figura 3D
 
@@ -51,7 +52,7 @@ Números = los del `plano-numerado.jpg`. Medidas en cm (ancho × fondo × alto).
 - 1× Manta tejida y cojines (IKEA / Amazon) ~CA$60 c/u
 - 1× Velas y decoración pequeña (IKEA) ~CA$40 c/u
 
-**Total estimado: CA$5,328** (rango CA$4,237 – 6,867).
+**Total estimado: CA$5,507** (rango CA$4,436 – 7,016).
 
 ## Posición exacta de cada pieza (texto del prompt)
 
@@ -80,14 +81,15 @@ Números = los del `plano-numerado.jpg`. Medidas en cm (ancho × fondo × alto).
 - 23. potted trailing pothos or monstera plant in a woven basket, 0.4 × 0.4 × 1.2 m (W × D × H); primary bedroom: centre 2.48 m from the west wall and 0.28 m from the north wall; pushed against the east and north wall; front faces south; 2.75 m free in front
 - 24. VECELO full-size black velvet upholstered platform bed frame with a tall vertical channel-tufted headboard and 4 storage drawers, with charcoal linen bedding and oat pillows, 1.52 × 1.994 × 1.12 m (W × D × H); second bedroom: centre 1.53 m from the west wall and 1.47 m from the north wall; pushed against the south wall; front faces north; 1.51 m free in front
 - 25. IKEA GRÅFJÄLLET wall-mounted bedside shelf in black steel, 0.42 × 0.29 × 0.31 m (W × D × H); second bedroom: centre 0.47 m from the west wall and 2.31 m from the north wall; pushed against the south wall; front faces north; mounted 0.30 m above the floor; 1.68 m free in front
-- 26. IKEA GRÅFJÄLLET wall-mounted bedside shelf in black steel, 0.42 × 0.29 × 0.31 m (W × D × H); second bedroom: centre 2.59 m from the west wall and 2.31 m from the north wall; pushed against the south wall; front faces north; mounted 0.30 m above the floor; 0.73 m free in front
+- 26. IKEA GRÅFJÄLLET wall-mounted bedside shelf in black steel, 0.42 × 0.29 × 0.31 m (W × D × H); second bedroom: centre 2.59 m from the west wall and 2.31 m from the north wall; pushed against the south wall; front faces north; mounted 0.30 m above the floor; 0.37 m free in front
 - 27. plug-in wall lamp with a white paper lantern shade on a black arm, 0.32 × 0.38 × 0.32 m (W × D × H); second bedroom: centre 0.47 m from the west wall and 2.42 m from the north wall; pushed against the south wall; front faces north; mounted 1.50 m above the floor
 - 28. plug-in wall lamp with a white paper lantern shade on a black arm, 0.32 × 0.38 × 0.32 m (W × D × H); second bedroom: centre 2.59 m from the west wall and 2.42 m from the north wall; pushed against the south wall; front faces north; mounted 1.50 m above the floor
 - 29. large abstract framed painting with deep red organic shapes on cream, thin dark wood frame, 1 × 0.04 × 0.7 m (W × D × H); second bedroom: centre 1.53 m from the west wall and 2.43 m from the north wall; pushed against the south wall; front faces north; mounted 1.10 m above the floor
-- 30. IKEA MICKE-style desk 105×50 cm in white, 1.05 × 0.5 × 0.75 m (W × D × H); second bedroom: centre 2.82 m from the west wall and 0.90 m from the north wall; pushed against the east wall; front faces west; 0.28 m free in front
-- 31. potted trailing pothos or monstera plant in a woven basket, 0.4 × 0.4 × 1.2 m (W × D × H); second bedroom: centre 0.39 m from the west wall and 0.28 m from the north wall; pushed against the north wall; front faces south; 1.68 m free in front
-- 32. IKEA TJUSIG bench with shoe storage in black, 1.08 × 0.34 × 0.5 m (W × D × H); entry hall: centre 2.61 m from the west wall and 0.17 m from the north wall; pushed against the north wall; front faces south; 1.45 m free in front
-- 33. IKEA TJUSIG wall hanger rail 78 cm hung with bags and a scarf, 0.78 × 0.06 × 0.12 m (W × D × H); entry hall: centre 2.61 m from the west wall and 0.05 m from the north wall; pushed against the north wall; front faces south; mounted 1.55 m above the floor
-- 34. IKEA MOSSLANDA picture ledge 55 cm holding small framed art, 0.55 × 0.12 × 0.05 m (W × D × H); entry hall: centre 2.61 m from the west wall and 0.09 m from the north wall; pushed against the north wall; front faces south; mounted 1.90 m above the floor
-- 35. IKEA LINDBYN black aluminium-frame arched-top full-length mirror 60×170 cm, leaning against the wall, 0.6 × 0.04 × 1.7 m (W × D × H); entry hall: centre 1.79 m from the west wall and 1.76 m from the north wall; pushed against the south wall; front faces north; 1.74 m free in front
-- 36. IKEA LOHALS flatwoven natural jute rug 80×150 cm, 0.8 × 1.5 m (W × D); entry hall: centre 2.11 m from the west wall and 0.94 m from the north wall; front faces east
+- 30. IKEA MICKE desk 105x50 cm in white with a cable hole, white panel legs, 1.05 × 0.5 × 0.75 m (W × D × H); second bedroom: centre 2.82 m from the west wall and 0.90 m from the north wall; pushed against the east wall; front faces west; 0.28 m free in front
+- 31. IKEA MICKE drawer unit / drop file storage 35 cm wide, 75 cm tall, white, with three drawers and a file drawer, 0.35 × 0.5 × 0.75 m (W × D × H); second bedroom: centre 2.82 m from the west wall and 1.61 m from the north wall; pushed against the east wall; front faces west; 0.28 m free in front
+- 32. potted trailing pothos or monstera plant in a woven basket, 0.4 × 0.4 × 1.2 m (W × D × H); second bedroom: centre 0.39 m from the west wall and 0.28 m from the north wall; pushed against the north wall; front faces south; 1.68 m free in front
+- 33. IKEA TJUSIG bench with shoe storage in black, 1.08 × 0.34 × 0.5 m (W × D × H); entry hall: centre 2.61 m from the west wall and 0.17 m from the north wall; pushed against the north wall; front faces south; 1.45 m free in front
+- 34. IKEA TJUSIG wall hanger rail 78 cm hung with bags and a scarf, 0.78 × 0.06 × 0.12 m (W × D × H); entry hall: centre 2.61 m from the west wall and 0.05 m from the north wall; pushed against the north wall; front faces south; mounted 1.55 m above the floor
+- 35. IKEA MOSSLANDA picture ledge 55 cm holding small framed art, 0.55 × 0.12 × 0.05 m (W × D × H); entry hall: centre 2.61 m from the west wall and 0.09 m from the north wall; pushed against the north wall; front faces south; mounted 1.90 m above the floor
+- 36. IKEA LINDBYN black aluminium-frame arched-top full-length mirror 60×170 cm, leaning against the wall, 0.6 × 0.04 × 1.7 m (W × D × H); entry hall: centre 1.79 m from the west wall and 1.76 m from the north wall; pushed against the south wall; front faces north; 1.74 m free in front
+- 37. IKEA LOHALS flatwoven natural jute rug 80×150 cm, 0.8 × 1.5 m (W × D); entry hall: centre 2.11 m from the west wall and 0.94 m from the north wall; front faces east

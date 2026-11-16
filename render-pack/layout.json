@@ -467,15 +467,15 @@
   },
   {
    "n": 30,
-   "name": "Escritorio 105×50",
+   "name": "Escritorio MICKE 105×50",
    "store": "IKEA",
    "w": 1.05,
    "d": 0.5,
    "h": 0.75,
    "elev": 0,
-   "price": 99,
+   "price": 149,
    "url": "https://www.ikea.com/ca/en/search/?q=MICKE+desk",
-   "dims": "E",
+   "dims": "V",
    "x": 3.728,
    "z": 9.984,
    "rot": -90,
@@ -483,6 +483,22 @@
   },
   {
    "n": 31,
+   "name": "Cajonera MICKE 35×75",
+   "store": "IKEA",
+   "w": 0.35,
+   "d": 0.5,
+   "h": 0.75,
+   "elev": 0,
+   "price": 129,
+   "url": "https://www.ikea.com/ca/en/search/?q=MICKE+drawer+unit",
+   "dims": "V",
+   "x": 3.728,
+   "z": 10.694,
+   "rot": -90,
+   "type": "p_micke_d"
+  },
+  {
+   "n": 32,
    "name": "Planta (pothos / monstera)",
    "store": "IKEA / vivero",
    "w": 0.4,
@@ -498,7 +514,7 @@
    "type": "p_plant"
   },
   {
-   "n": 32,
+   "n": 33,
    "name": "Banca TJUSIG con zapatera",
    "store": "IKEA",
    "w": 1.08,
@@ -514,7 +530,7 @@
    "type": "p_tjusig"
   },
   {
-   "n": 33,
+   "n": 34,
    "name": "Barra de ganchos TJUSIG 78",
    "store": "IKEA",
    "w": 0.78,
@@ -530,7 +546,7 @@
    "type": "p_hooks"
   },
   {
-   "n": 34,
+   "n": 35,
    "name": "Repisa MOSSLANDA 55",
    "store": "IKEA",
    "w": 0.55,
@@ -546,7 +562,7 @@
    "type": "p_ledge"
   },
   {
-   "n": 35,
+   "n": 36,
    "name": "Espejo LINDBYN de arco 60×170",
    "store": "IKEA",
    "w": 0.6,
@@ -562,7 +578,7 @@
    "type": "p_lindbyn_arch"
   },
   {
-   "n": 36,
+   "n": 37,
    "name": "Tapete de yute LOHALS 80×150",
    "store": "IKEA",
    "w": 0.8,

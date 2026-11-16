@@ -70,9 +70,12 @@ export const PRODUCTS = [
   { id: 'art', name: 'Cuadro abstracto grande', en: 'large abstract framed painting with deep red organic shapes on cream, thin dark wood frame', store: 'IKEA / Amazon', room: 'Recámaras',
     url: 'https://www.ikea.com/ca/en/search/?q=BJORKSTA', w: 1.0, d: .04, h: .7, elev: 1.1, air: 1, b: 'frame', color: '#a83a32', em: '🖼️',
     price: 85, lo: 60, hi: 130, basis: 'EST', dims: 'E', note: 'Marco + lámina ~100×70 cm sobre la cabecera.' },
-  { id: 'desk', name: 'Escritorio 105×50', en: 'IKEA MICKE-style desk 105×50 cm in white', store: 'IKEA', room: 'Recámara 2',
-    url: 'https://www.ikea.com/ca/en/search/?q=MICKE+desk', w: 1.05, d: .5, h: .75, b: 'table', color: '#e8e2d8', em: '🖥️',
-    price: 99, lo: 79, hi: 129, basis: 'EST', dims: 'E', note: 'Medidas de memoria, confirmar en la ficha.' },
+  { id: 'desk', name: 'Escritorio MICKE 105×50', en: 'IKEA MICKE desk 105x50 cm in white with a cable hole, white panel legs', store: 'IKEA', room: 'Recámara 2',
+    url: 'https://www.ikea.com/ca/en/search/?q=MICKE+desk', w: 1.05, d: .5, h: .75, b: 'deskp', color: '#f4f1eb', em: '🖥️',
+    price: 149, lo: 149, hi: 149, basis: 'CA', dims: 'V', note: '105×50 cm, alto 75 cm (todas las piezas MICKE miden lo mismo). CA$149 en etiqueta de tienda; el módulo de cajones se monta a la izquierda o a la derecha.' },
+  { id: 'micke_d', name: 'Cajonera MICKE 35×75', en: 'IKEA MICKE drawer unit / drop file storage 35 cm wide, 75 cm tall, white, with three drawers and a file drawer', store: 'IKEA', room: 'Recámara 2',
+    url: 'https://www.ikea.com/ca/en/search/?q=MICKE+drawer+unit', w: .35, d: .5, h: .75, b: 'cabinet', color: '#f4f1eb', em: '🗄️',
+    price: 129, lo: 129, hi: 129, basis: 'CA', dims: 'V', note: '35×75 cm (fondo ~50 cm), mismo alto que el escritorio: se puede pegar a él o usarse sola. CA$129 en etiqueta; también existe con ruedas.' },
   // ---------- Entrada ----------
   { id: 'tjusig', name: 'Banca TJUSIG con zapatera', en: 'IKEA TJUSIG bench with shoe storage in black', store: 'IKEA', room: 'Entrada',
     url: 'https://www.ikea.com/ca/en/p/tjusig-bench-with-shoe-storage-black-50152703', w: 1.08, d: .34, h: .5, b: 'cabinet', color: '#2b2e33', em: '👟',
@@ -112,7 +115,7 @@ export const JAPANDI = [
   ['art', 279, 878, 90], ['lohals_s', 423, 878, 90], ['plant', 436, 786, 0],
   // Recámara 2
   ['vecelo_f', 418, 1291, 180], ['gra', 350, 1345, 180], ['gra', 486, 1345, 180], ['lantern', 350, 1352, 180], ['lantern', 486, 1352, 180],
-  ['art', 418, 1353, 180], ['desk', 501, 1255, -90], ['plant', 345, 1215, 0],
+  ['art', 418, 1353, 180], ['desk', 501, 1255, -90], ['micke_d', 501, 1300.5, -90], ['plant', 345, 1215, 0],
   // Entrada
   ['tjusig', 692, 1251, 0], ['hooks', 692, 1243, 0], ['ledge', 692, 1246, 0, 1.9], ['lindbyn_arch', 640, 1353, 180], ['lohals_s', 660, 1300, 90],
 ];

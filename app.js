@@ -444,6 +444,13 @@ const BUILD = {
     const lm = mat(shade(c, -.25));
     [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([a, b]) => part(g, .05, h - .04, .05, a * (w / 2 - .06), (h - .04) / 2, b * (d / 2 - .06), lm));
   },
+  deskp(g, it, { w, d, h }, c) {      // MICKE: tablero + dos paneles laterales + trasera
+    const m = mat(c);
+    part(g, w, .04, d, 0, h - .02, 0, m);
+    [-1, 1].forEach(a => part(g, .03, h - .04, d - .04, a * (w / 2 - .02), (h - .04) / 2, 0, m));
+    part(g, w - .08, h * .45, .02, 0, h - .04 - h * .225, -(d / 2 - .03), m);
+    part(g, .05, .005, .05, -w * .3, h + .002, -d * .25, mat('#cfc8bd'));   // pasacables
+  },
   round(g, it, { w, h }, c) {
     cyl(g, w / 2, w / 2, .04, 0, h - .02, 0, mat(c), 32);
     cyl(g, .05, .05, h - .06, 0, (h - .06) / 2, 0, mat('#555b63'));

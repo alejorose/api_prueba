@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+/* ───────── MIMOSA "Spectrum" design tokens ─────────
+   Brand-derived (from live site CSS + logo): orange #FF6B50 family, near-black navy #151B26, border #E0E6E8.
+   Cool NIR accent is used ONLY as UI chrome for "invisible" moments, never to encode clinical data. */
+:root {
+  --canvas: #f8f8f5;
+  --surface: #ffffff;
+  --ink: #151b26;
+  --ink-2: #4f5b66; /* 7.0:1 on canvas */
+  --navy: #151b26;
+  --navy-2: #1d2736;
+  --line: #e0e6e8;
+  --accent: #ff6b50; /* fills / large display only */
+  --accent-ink: #b8400f; /* accent for text on light (5.6:1) */
+  --brand-amber: #ffa330;
+  --nir: #6ab8c8;
+  --focus: #1a5fd0;
+  --radius: 4px;
+  --gutter: clamp(16px, 4vw, 40px);
+}
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink2: var(--ink-2);
+  --color-navy: var(--navy);
+  --color-navy2: var(--navy-2);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accentink: var(--accent-ink);
+  --color-nir: var(--nir);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+html { scroll-behavior: smooth; scroll-padding-top: 96px; }
+body {
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: clamp(16px, 0.95rem + 0.2vw, 19px);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* Fluid type scale (display 64–104 / h1 48–76 / h2 36–56 / h3 24–36) */
+.t-display { font-size: clamp(2.75rem, 1.2rem + 6.4vw, 6.5rem); line-height: 0.98; letter-spacing: -0.035em; font-weight: 500; }
+.t-h1 { font-size: clamp(2.25rem, 1rem + 4.6vw, 4.75rem); line-height: 1.02; letter-spacing: -0.03em; font-weight: 500; }
+.t-h2 { font-size: clamp(1.9rem, 1rem + 3vw, 3.5rem); line-height: 1.08; letter-spacing: -0.025em; font-weight: 500; }
+.t-h3 { font-size: clamp(1.4rem, 1rem + 1.4vw, 2.25rem); line-height: 1.15; letter-spacing: -0.02em; font-weight: 500; }
+.t-h4 { font-size: clamp(1.1rem, 1rem + 0.5vw, 1.375rem); line-height: 1.3; font-weight: 600; letter-spacing: -0.01em; }
+.t-label { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.measure { max-width: 68ch; }
+
+/* 12 / 6 / 4 column grid, max 1440 */
+.wrap { width: 100%; max-width: 1440px; margin-inline: auto; padding-inline: var(--gutter); }
+.grid12 { display: grid; gap: 24px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (min-width: 640px) { .grid12 { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+@media (min-width: 1024px) { .grid12 { grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 32px; } }
+.section { padding-block: clamp(64px, 9vw, 144px); }
+
+/* Focus: visible everywhere (WCAG 2.4.7 / 2.4.11) */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 2px;
+}
+.on-dark :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible { outline-color: #ffffff; }
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; gap: 0.6em; min-height: 48px; padding: 0.75em 1.4em; font-weight: 600; font-size: 1rem;
+  border-radius: 999px; border: 1.5px solid transparent; transition: background-color .2s, color .2s, border-color .2s, transform .2s; cursor: pointer; text-decoration: none; }
+.btn-primary { background: var(--accent); color: var(--navy); }
+.btn-primary:hover { background: #ff8068; }
+.btn-dark { background: var(--navy); color: #fff; }
+.btn-dark:hover { background: #2a3648; }
+.btn-ghost { border-color: currentColor; color: inherit; }
+.btn-ghost:hover { background: rgb(127 127 127 / .12); }
+.btn[aria-busy="true"] { opacity: .65; cursor: progress; }
+
+.skip { position: absolute; left: -9999px; top: 8px; background: #fff; color: var(--ink); padding: 12px 16px; z-index: 100; border-radius: 4px; }
+.skip:focus { left: 8px; }
+
+/* Wavelength rule — decorative, carries no data */
+.spectrum-rule { height: 2px; background: linear-gradient(90deg, var(--brand-amber), var(--accent) 45%, var(--nir) 46%, var(--nir) 100%); }
+.prose-src p { margin-block: 0 1.1em; max-width: 68ch; }
+.prose-src a { text-decoration: underline; text-underline-offset: 3px; }
+
+/* Reveal: content is visible by default; motion is progressive enhancement */
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.js .reveal { animation: rise .7s cubic-bezier(.2,.7,.2,1) both; }

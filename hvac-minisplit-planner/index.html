@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>IMIX 10C · Layout 3D</title>
+<meta name="theme-color" content="#12151b">
+<link rel="stylesheet" href="style.css">
+<script type="importmap">
+{ "imports": {
+  "three": "./vendor/three.module.js",
+  "three/addons/": "./vendor/addons/"
+} }
+</script>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<header id="top">
+  <div class="brand">
+    <b>IMIX · Suite 10C</b>
+    <span>664 sq ft · 2 hab · 2 baños</span>
+  </div>
+  <button id="undoBtn" class="ico" aria-label="Deshacer" disabled>↶</button>
+  <div class="seg" id="views">
+    <button data-view="3d" class="on">3D</button>
+    <button data-view="top">Planta</button>
+    <button data-view="eye">Persona</button>
+  </div>
+  <button id="photoBtn" class="ico" aria-label="Foto-realista con ChatGPT">📷</button>
+  <button id="menuBtn" class="ico" aria-label="Menú">⋯</button>
+</header>
+
+<div id="chips"></div>
+<aside id="mini" aria-label="Mapa de cuartos"></aside>
+<div id="stats"><span>2 hab</span><span>2 baños</span><span>664 ft²</span></div>
+
+<button id="shootBtn" class="cart shoot-btn" aria-label="Modo tomas">🎥 Tomas</button>
+
+<div id="keyHint"><b>Teclado y mouse</b>
+  <span>W A S D mover · Q / E bajar / subir</span>
+  <span>Shift rápido · Alt lento · [ ] velocidad</span>
+  <span>Clic + arrastrar: mirar · Botón central: deslizar</span>
+  <span>Rueda: acercar / alejar · Enter: capturar · H: ocultar</span></div>
+
+<div id="frameGuide" hidden><div id="frameBox"></div></div>
+
+<div id="hud">
+  <div class="hudtop">
+    <button id="hudExit" class="hbtn" aria-label="Salir del modo tomas">✕</button>
+    <span id="hudInfo"></span>
+    <button id="hudSetBtn" class="hbtn" aria-label="Ajustes de gestos">⚙</button>
+  </div>
+  <div id="hudPresets"></div>
+  <p id="gestureHint">☝ Arrastra: mirar · 🤏 Pellizca: lente · ✌ Dos dedos: deslizar / subir / girar · Doble toque: ir ahí · Joystick: caminar</p>
+  <div id="joy" aria-label="Joystick para caminar"><div id="joyKnob"></div></div>
+  <div class="hudmid">
+    <button id="hudPre" class="hbtn" aria-label="Vistas">📍</button>
+    <button id="hudAsp" class="hbtn txt" aria-label="Formato">3:2</button>
+    <button id="hudHide" class="hbtn" aria-label="Ocultar controles">👁</button>
+  </div>
+  <div class="hudright">
+    <button id="hUp" class="hbtn" aria-label="Subir">▲</button>
+    <button id="hDn" class="hbtn" aria-label="Bajar">▼</button>
+    <button id="hudShutter" aria-label="Capturar">📸</button>
+  </div>
+  <section id="hudSet" hidden>
+    <div class="selrow"><b>Gestos y controles</b><button id="hudSetClose" class="ico sm" aria-label="Cerrar">✕</button></div>
+    <label class="sl2">Sensibilidad al mirar <input type="range" id="setSens" min="0.08" max="0.5" step="0.01"></label>
+    <label class="chk"><input type="checkbox" id="setInvert"> Invertir mirar (como "agarrar" el mundo)</label>
+    <label class="chk"><input type="checkbox" id="setLefty"> Modo zurdo (joystick a la derecha)</label>
+    <label class="chk"><input type="checkbox" id="setClassic"> Panel clásico con sliders</label>
+  </section>
+</div>
+
+<section id="cam" hidden>
+  <div class="camhead"><span id="camInfo"></span>
+    <span class="camtools">
+      <button id="lockBtn" class="ico sm" title="Mouse libre (Esc para soltar)" aria-label="Mouse libre">🖱</button>
+      <button id="camToggle" class="ico sm" title="Minimizar controles" aria-label="Minimizar controles">▾</button>
+      <button id="camExit" class="done">Salir</button>
+    </span>
+  </div>
+  <div class="presets" id="camPresets"></div>
+  <div class="camgrid">
+    <div class="cluster"><small>Moverme</small>
+      <div class="pad4">
+        <span></span><button id="mvF" aria-label="Avanzar">▲</button><span></span>
+        <button id="mvL" aria-label="Mover a la izquierda">◀</button><button id="mvB" aria-label="Retroceder">▼</button><button id="mvR" aria-label="Mover a la derecha">▶</button>
+      </div>
+    </div>
+    <div class="cluster"><small>Mirar</small>
+      <div class="pad4 look">
+        <button id="tlU" aria-label="Mirar arriba">⤒</button><button id="tlD" aria-label="Mirar abajo">⤓</button>
+        <button id="tnL" aria-label="Girar a la izquierda">⟲</button><button id="tnR" aria-label="Girar a la derecha">⟳</button>
+      </div>
+    </div>
+  </div>
+  <label class="sl">Altura <input type="range" id="camH" min="0.3" max="6" step="0.05"><output id="camHv"></output></label>
+  <label class="sl">Lente <input type="range" id="camMM" min="14" max="85" step="1"><output id="camMMv"></output></label>
+  <div class="camrow"><button id="camAspect">Horizontal 3:2</button><button id="shotNow" class="primary big">📸 Capturar</button></div>
+</section>
+
+<div id="shotModal" hidden>
+  <div class="sheet" id="shotBody">
+    <div class="selrow"><b>Tu toma</b><button id="shotClose" class="ico sm" aria-label="Cerrar">✕</button></div>
+    <div class="shotthumbs" id="shotThumbs"></div>
+    <p class="fine">Guarda las imágenes: mantén presionada cada una (o toca Compartir). Luego adjúntalas en ChatGPT con los archivos que se indican y pega el prompt. El prompt lista lo que cae en tu encuadre sin calcular qué tapa un muro: si algo no se ve en tu toma, bórralo del texto.</p>
+    <div id="shotImgs" class="shots"></div>
+    <p id="shotWarn" class="warnline"></p>
+    <div class="row"><select id="mstyle" aria-label="Estilo"></select></div>
+    <div class="checks">
+      <label><input type="checkbox" id="mPlan" checked> Plano numerado</label>
+      <label><input type="checkbox" id="mTour" checked> Fotos del tour</label>
+      <label><input type="checkbox" id="mInspo" checked> Inspiración</label>
+    </div>
+    <p id="shotAttach" class="fine"></p>
+    <textarea id="shotPrompt" rows="12" aria-label="Prompt para ChatGPT (editable)"></textarea>
+    <div class="row">
+      <button id="shotCopy" class="primary">Copiar prompt + toma</button>
+      <button id="shotCopyTxt">Solo prompt</button>
+      <button id="shotCopyImg">Solo imagen</button>
+      <a id="shotGpt" class="btn" href="https://chatgpt.com/" target="_blank" rel="noopener">Abrir ChatGPT</a>
+      <button id="shotShare" hidden>Compartir imágenes</button>
+      <button id="shotMore">Otra toma</button>
+    </div>
+  </div>
+</div>
+
+<div id="zoom">
+  <button id="zIn" aria-label="Acercar">+</button>
+  <button id="zOut" aria-label="Alejar">−</button>
+  <button id="zFit" aria-label="Ajustar vista">⌖</button>
+  <button id="lockView" aria-label="Bloquear muebles para recorrer la vista" aria-pressed="false" title="Recorrer sin mover muebles (L)">🔓</button>
+</div>
+
+<button id="cartBtn" class="cart" aria-label="Lista de compras">🛒 <span id="cartTotal">—</span></button>
+
+<div id="shop" hidden>
+  <div class="sheet" id="shopBody">
+    <div class="selrow"><b>Lista de compras · Japandi</b><button id="shopClose" class="ico sm" aria-label="Cerrar">✕</button></div>
+    <div id="shopTotal" class="shoptotal"></div>
+    <div id="shopList"></div>
+    <div class="row"><button id="copyShop" class="primary">Copiar lista</button></div>
+    <p class="fine">IKEA no ofrece API pública oficial y la API de Amazon exige una cuenta de afiliado con ventas, por eso los precios son estimados y los enlaces abren la tienda para confirmar precio, color y existencias. ✓ = medidas vistas en la ficha del producto.</p>
+  </div>
+</div>
+
+<div id="menu" hidden>
+  <button id="wallsBtn">Muros: bajos</button>
+  <button id="unitsBtn">Unidades: m</button>
+  <button id="dimsBtn">Cotas de cuartos: sí</button>
+  <button id="snapBtn">Imán: 5 cm</button>
+  <small id="calInfo" class="cal"></small>
+  <hr>
+  <button id="packBtn">Paquete automático (tomas fijas)</button>
+  <button id="resetBtn">Layout Japandi (tienda)</button>
+  <button id="baseBtn">Layout base (sin tienda)</button>
+  <button id="clearBtn">Vaciar espacio</button>
+  <hr>
+  <button id="shotBtn">Guardar captura PNG</button>
+  <button id="exportBtn">Exportar layout (.json)</button>
+  <button id="importBtn">Importar layout</button>
+  <input type="file" id="importFile" accept="application/json" hidden>
+</div>
+
+<div id="hint">Toca un mueble para moverlo · arrastra el fondo para mover la vista · pellizca para zoom · gira dos dedos para rotar la vista</div>
+
+<section id="sel" hidden>
+  <div class="selrow">
+    <div class="selname"><b id="selName"></b><small id="selDims"></small></div>
+    <button id="selClose" class="done">Listo</button>
+  </div>
+  <div class="gaps" id="selGaps"></div>
+  <div class="pad">
+    <div class="grp">
+      <button id="rotL" aria-label="Girar izquierda 15 grados">↺ 15°</button>
+      <button id="rotR" aria-label="Girar derecha 15 grados">↻ 15°</button>
+      <button id="rot90" aria-label="Girar 90 grados">⟳ 90°</button>
+    </div>
+    <div class="grp dpad">
+      <button class="nud" data-dx="-1" data-dz="0" aria-label="Mover izquierda">◀</button>
+      <button class="nud" data-dx="0" data-dz="-1" aria-label="Mover arriba">▲</button>
+      <button class="nud" data-dx="0" data-dz="1" aria-label="Mover abajo">▼</button>
+      <button class="nud" data-dx="1" data-dz="0" aria-label="Mover derecha">▶</button>
+    </div>
+  </div>
+  <div class="selrow tools">
+    <div class="swatches" id="swatches"></div>
+    <button id="dup">Duplicar</button>
+    <button id="del" class="danger">Borrar</button>
+  </div>
+</section>
+
+<div id="photo" hidden>
+  <div class="sheet" id="photoBody">
+    <div class="selrow"><b>Foto-realista con ChatGPT</b><button id="photoClose" class="ico sm" aria-label="Cerrar">✕</button></div>
+    <ol class="steps">
+      <li>Elige la toma y el estilo.</li>
+      <li>Guarda las imágenes, incluidas las fotos de inspiración (mantén presionado cada una) o toca Compartir.</li>
+      <li>Abre ChatGPT, adjunta las imágenes en este orden, pega el prompt y envía.</li>
+    </ol>
+    <div class="row"><select id="shotSel" aria-label="Toma"></select><select id="styleSel" aria-label="Estilo"></select></div>
+    <p id="photoWarn" class="warnline"></p>
+    <div id="shots" class="shots"></div>
+    <textarea id="promptTxt" readonly rows="12" aria-label="Prompt para ChatGPT"></textarea>
+    <div class="row">
+      <button id="copyPrompt" class="primary">Copiar prompt</button>
+      <a id="openGpt" class="btn" href="https://chatgpt.com/" target="_blank" rel="noopener">Abrir ChatGPT</a>
+      <button id="shareImgs" hidden>Compartir imágenes</button>
+    </div>
+  </div>
+</div>
+
+<footer id="tray">
+  <div class="roombar" id="roomBar" aria-label="Elegir cuarto"></div>
+  <div class="roomcard" id="roomCard" hidden>
+    <span id="roomInfo"></span>
+    <span class="rc-btns"><button id="rcClear">Vaciar</button><button id="rcReset">Restaurar</button></span>
+  </div>
+  <div class="trayhead"><div class="tabs" id="tabs"></div><button id="trayToggle" class="ico sm" aria-label="Ocultar catálogo">▾</button></div>
+  <div class="cards" id="cards"></div>
+</footer>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

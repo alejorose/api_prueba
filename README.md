@@ -70,3 +70,7 @@ Navegación con teclado y mouse (WASD, Q/E, Shift, mirar con clic + arrastrar, r
 En la bandeja inferior: **Todo · Principal · Recámara 2 · Sala · Cocina · Entrada · Balcón**. Al elegir un cuarto la vista pasa a planta centrada
 en él, lo demás se atenúa, el catálogo muestra primero "★ Este cuarto" y una tarjeta resume medidas, área, piezas y % de ocupación
 (con aviso de choques). **Vaciar** lo deja libre para planear desde cero y **Restaurar** vuelve a la propuesta Japandi (ambos con deshacer).
+
+## Recrear el proyecto con otra aplicación
+
+`docs/RECREAR-PROYECTO-HVAC.md` es una guía para que otra sesión de Claude replique este visor con mini splits (HVAC) en lugar de muebles.

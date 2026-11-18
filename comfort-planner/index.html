@@ -377,14 +377,14 @@ function evalModel(m,wi){
     const out=cat.outdoors.find(o=>o.id===s.out)||cat.outdoors.find(o=>o.type===s.type)||cat.outdoors[0];
     const rooms=cond.filter(r=>r.sys===s.id);
     const heat=sum(rooms.map(r=>loads[r.id].heat)), cool=sum(rooms.map(r=>loads[r.id].cool));
-    const r5=out.r5/100, ret=retention(Tdes,r5), single=out.type==='SZ';
+    const r5=out.r5/100, ret=retention(Tdes,r5), single=out.type!=='MZ', heats=out.heats!==false;
     const heads=single?[]:rooms.map(r=>{
       const need=loads[r.id].heat, sug=autoHead(need,cat.heads,ret), btu=r.head||sug, cap=btu*ret;
       return {room:r,need,btu,sug,auto:!r.head,cap,cov:need>0?cap/need:9,cool:loads[r.id].cool};
     });
     const connected=single?out.btu:sum(heads.map(h=>h.btu));
-    const capDes=out.btu*ret;
-    const cap=T=>out.btu*retention(T,r5);
+    const capDes=heats?out.btu*ret:0;
+    const cap=T=>heats?out.btu*retention(T,r5):0;
     return {sys:s,out,rooms,heat,cool,heads,single,connected,connPct:connected/out.btu*100,capDes,ret,
       cov:heat>0?capDes/heat:9,covName:heat>0?out.btu/heat:9,coolRatio:cool>0?out.btu/cool:9,
       bp:balancePoint(heat,Tdes,cap),cap};
@@ -430,10 +430,23 @@ const DEFAULT_CATALOG=()=>({
   outdoors:[
     {id:'VIR12HP230V1R32AO',short:'VIR12',type:'SZ',btu:12000,maxHeads:1,r5:90,maxConn:100,verify:true},
     {id:'MUL30HP230V1R32AO',short:'MUL30',type:'MZ',btu:30000,maxHeads:4,r5:90,maxConn:130,verify:true},
-    {id:'MUL42HP230V1R32AO',short:'MUL42',type:'MZ',btu:42000,maxHeads:5,r5:90,maxConn:130,verify:true}
+    {id:'MUL42HP230V1R32AO',short:'MUL42',type:'MZ',btu:42000,maxHeads:5,r5:90,maxConn:130,verify:true},
+    {id:'Gree 3-ton Central Air',short:'Gree 3T',type:'CA',btu:36000,maxHeads:1,r5:90,maxConn:100,verify:true,heats:true},
+    {id:'Gree 5-ton Central Air',short:'Gree 5T',type:'CA',btu:60000,maxHeads:1,r5:90,maxConn:100,verify:true,heats:true},
+    {id:'Mitsubishi 3-ton Central Air',short:'Mitsu 3T',type:'CA',btu:36000,maxHeads:1,r5:90,maxConn:100,verify:true,heats:true},
+    {id:'Mitsubishi 5-ton Central Air',short:'Mitsu 5T',type:'CA',btu:60000,maxHeads:1,r5:90,maxConn:100,verify:true,heats:true}
   ],
-  heads:[9000,12000,18000,24000]
+  heads:[9000,12000,18000,24000],
+  services:[{n:'Bathroom Heater',p:1250},{n:'Oil Tank Removal',p:''},{n:'Boiler Removal',p:''},{n:'50 Gallon Watertank',p:''},{n:'Subpanel',p:''},{n:'Project Management',p:''},
+    {n:'Decommission',p:2500},{n:'Electrical/Permit Work Protection Fee',p:''},{n:'NYC Design and Permitting',p:''},{n:'Westchester & Rockland NY Design and Permitting',p:''},{n:'Electrical Upgrade MPU Replacement or Relo',p:''}]
 });
+function migrateModel(m){
+  const d=DEFAULT_CATALOG();m.catalog=m.catalog||d;
+  d.outdoors.forEach(o=>{if(!m.catalog.outdoors.some(x=>x.id===o.id)) m.catalog.outdoors.push(o)});
+  if(!m.catalog.services) m.catalog.services=d.services;
+  m.catalog.heads=[...new Set([...(m.catalog.heads||[]),...d.heads])].sort((a,b)=>a-b);
+  return m;
+}
 function blankModel(){
   return {v:1,job:'',demo:false,mode:'consult',mapBy:'fit',fin:{years:10,apr:7,downPct:0},
     climate:{label:'Berkshire County, MA',winterOut:1,summerOut:87,winterIn:70,summerIn:75,grains:30,alt:.988},
@@ -489,6 +502,7 @@ function propertyModel(){
   const plan=autoDesign(m),names={u1:'Unit 1',u2:'Unit 2'};
   m.systems=plan.map(p=>({id:p.id,type:p.type,name:(names[p.group]?names[p.group]+' · ':'')+p.name,out:p.out}));
   plan.forEach(p=>p.rooms.forEach(id=>{m.rooms.find(r=>r.id===id).sys=p.id}));
+  m.quote.addons=[{n:'NYC Design and Permitting',p:''}];
   m.quote.tbd=['Room layout and window count: measure on site. The 2001 alteration plans exist only on DOB microfilm.'];
   m.property={address:'3816 Surf Ave, Brooklyn, NY 11224',footprint:fp,footprintArea:area,perimeter:Math.round(per),
     rows:[['Tax lot (BBL)','3-07030-0007'],['Building ID (BIN)','3189325'],['Class','B2, two-family dwelling'],['Built','1930'],
@@ -502,7 +516,7 @@ function propertyModel(){
 }
 let M=null;
 function load(){
-  try{const s=localStorage.getItem(KEY);if(s){const o=JSON.parse(s);if(o&&o.v===1&&o.rooms) return o}}catch(e){}
+  try{const s=localStorage.getItem(KEY);if(s){const o=JSON.parse(s);if(o&&o.v===1&&o.rooms) return migrateModel(o)}}catch(e){}
   return propertyModel();
 }
 
@@ -877,7 +891,7 @@ function renderSystems(){
     const st=s.heat?statusCov(s.cov,.9):'info';
     const outs=M.catalog.outdoors.filter(o=>o.type===s.sys.type);
     const connWarn=!s.single&&s.connPct>s.out.maxConn;
-    const rows=s.single?`<tr><td>${s.rooms.map(r=>esc(r.name)).join(' + ')||'<span class="muted">No rooms assigned</span>'}</td><td class="r num">${fmt(s.heat)}</td><td class="r num">${fmt(s.out.btu)}</td><td class="r num">${s.heat?pc(s.out.btu*s.ret/s.heat):'-'}</td><td class="muted small">One shared indoor unit</td></tr>`
+    const rows=s.single?`<tr><td>${s.rooms.map(r=>esc(r.name)).join(' + ')||'<span class="muted">No rooms assigned</span>'}</td><td class="r num">${fmt(s.heat)}</td><td class="r num">${fmt(s.out.btu)}</td><td class="r num">${s.heat?pc(s.capDes/s.heat):'-'}</td><td class="muted small">One shared indoor unit</td></tr>`
       :s.heads.map(h=>{const hs=statusCov(h.cov,.8);return `<tr><td><b>${esc(h.room.name)}</b></td><td class="r num">${fmt(h.need)}</td>
         <td class="r"><select id="hd-${h.room.id}" data-act="headSel" data-rid="${h.room.id}" aria-label="Indoor unit size for ${esc(h.room.name)}"><option value="">Auto (${k1(h.sug)})</option>${M.catalog.heads.map(b=>`<option value="${b}"${+h.room.head===b?' selected':''}>${fmt(b)}</option>`).join('')}</select></td>
         <td class="r num">${pc(h.cov)}</td><td><span class="pill ${hs}">${hs==='good'?'Fits':hs==='warn'?'Tight':'Under'}</span></td></tr>`}).join('')||'<tr><td colspan="5" class="muted">No rooms assigned yet. Choose this system in a room card.</td></tr>';
@@ -885,7 +899,7 @@ function renderSystems(){
     return `<div class="sys" data-sid="${s.sys.id}">
      <div class="sys-head"><span class="sysdot" style="background:${sysColor(s.sys.id)}"></span>
       <input type="text" id="sn-${s.sys.id}" data-act="sysName" data-sid="${s.sys.id}" value="${esc(s.sys.name)}" aria-label="System name">
-      <select id="so-${s.sys.id}" data-act="sysOut" data-sid="${s.sys.id}" aria-label="Outdoor unit" style="width:auto">${outs.map(o=>`<option value="${o.id}"${o.id===s.out.id?' selected':''}>${esc(outName(o))} · ${fmt(o.btu)} BTU ${o.type==='MZ'?'multi-zone':'single-zone'}</option>`).join('')}</select>
+      <select id="so-${s.sys.id}" data-act="sysOut" data-sid="${s.sys.id}" aria-label="Outdoor unit" style="width:auto">${outs.map(o=>`<option value="${o.id}"${o.id===s.out.id?' selected':''}>${esc(outName(o))} · ${fmt(o.btu)} BTU ${{MZ:'multi-zone',SZ:'single-zone',CA:'central air'}[o.type]||o.type}</option>`).join('')}</select>
       <span class="pill ${st}">${s.heat?sLabel[st]:'Empty'}</span>
       <button class="btn sm ghost danger" data-act="delSys" data-sid="${s.sys.id}">Remove</button></div>
      ${s.heat?meter(s.heat,s.capDes,s.cov):''}
@@ -898,7 +912,7 @@ function renderSystems(){
    ${e.homeHeat?`<div style="margin-bottom:16px">${balanceChart(e.homeHeat,e.capT,c.winterOut,e.nameplate,e.bp,'Whole home')}</div>`:''}
    <div class="stack" style="gap:14px">${cards||'<p class="muted">No systems yet. Add one, or let the planner suggest a layout.</p>'}</div>
    <div class="tools" style="margin-top:14px">
-    <button class="btn" data-act="addSys" data-v="MZ">+ Multi-zone system</button><button class="btn" data-act="addSys" data-v="SZ">+ Single-zone system</button>
+    <button class="btn" data-act="addSys" data-v="MZ">+ Multi-zone system</button><button class="btn" data-act="addSys" data-v="SZ">+ Single-zone system</button><button class="btn" data-act="addSys" data-v="CA">+ Central air system</button>
     <button class="btn primary" data-act="auto">Suggest a layout</button>${M._undo?'<button class="btn" data-act="undo">Undo suggestion</button>':''}</div>`;
 }
 
@@ -990,7 +1004,7 @@ function renderQuote(){
       <input type="number" id="sp-${s.id}" data-act="sysPrice" data-sid="${s.id}" value="${q.sysPrice[s.id]??''}" min="0" placeholder="Price" aria-label="Price for ${esc(s.name)}"><span></span></div>`}).join('')}
     ${q.addons.map((a,i)=>`<div class="qrow"><input type="text" id="an-${i}" data-act="addonName" data-v="${i}" value="${esc(a.n)}" aria-label="Add-on name"><input type="number" id="ap-${i}" data-act="addonPrice" data-v="${i}" value="${a.p??''}" min="0" aria-label="Add-on price"><button class="xbtn" style="width:40px;height:40px" data-act="delAddon" data-v="${i}" aria-label="Remove add-on">×</button></div>`).join('')}
     ${t.lines.filter(l=>l.wi).map(l=>`<div class="qrow sub"><div>${esc(l.n)} <span class="small">(what-if upgrade)</span></div><div class="r num" style="text-align:right">${money(l.p)}</div><span></span></div>`).join('')}
-    <div style="padding:8px 0"><button class="btn sm" data-act="addAddon">+ Add a line</button></div>
+    <div style="padding:8px 0;display:flex;flex-wrap:wrap;gap:8px;align-items:center"><select id="svc-pick" aria-label="Item from the price list" style="width:auto;max-width:100%">${(M.catalog.services||[]).map((v,i)=>`<option value="${i}">${esc(v.n)}${v.p!==''&&v.p!=null?' · '+money(v.p):''}</option>`).join('')}</select><button class="btn sm" data-act="addSvc">Add from price list</button><button class="btn sm ghost" data-act="addAddon">+ Custom line</button></div>
     <div class="qrow sub"><div>Subtotal</div><div class="num" style="text-align:right" id="qSub">${money(t.sub)}</div><span></span></div>
     <div class="qrow"><div>Rebates &amp; incentives (enter amount)</div><input type="number" id="q-reb" data-act="rebate" value="${q.rebate}" min="0" placeholder="0" aria-label="Rebate amount"><span></span></div>
     <div class="qrow total"><div>You pay</div><div class="num" style="text-align:right" id="qNet">${money(t.net)}</div><span></span></div>
@@ -1026,17 +1040,22 @@ function renderTech(){
 function renderSettings(){
   const ov=$('#overlay'),cat=M.catalog;
   ov.innerHTML=`<div class="card" role="dialog" aria-label="Equipment catalog"><header><h2>Equipment catalog</h2><button class="btn" data-act="closeSettings">Done</button></header>
-  <p class="hint" style="margin-bottom:12px">The three outdoor units come from your Sunseb/Portrex documents. Units marked "assumed" have placeholder numbers: replace them with the manufacturer's data. Capacity at 5°F is the most important number, because it sets how much heat the unit still makes on the coldest nights.</p>
-  <div class="tablewrap"><table><thead><tr><th>Model</th><th>Type</th><th class="r">Nameplate BTU</th><th class="r">Max indoor units</th><th class="r">% of nameplate at 5°F</th><th class="r">Max connected %</th><th></th></tr></thead><tbody>
+  <p class="hint" style="margin-bottom:12px">The mini-split outdoor units come from your Sunseb/Portrex documents; the central air units (CA) from the company price list. "Heats" says whether a unit also heats (heat pump) or only cools. Units marked "assumed" have placeholder numbers: replace them with the manufacturer's data. Capacity at 5°F is the most important number, because it sets how much heat the unit still makes on the coldest nights.</p>
+  <div class="tablewrap"><table><thead><tr><th>Model</th><th>Type</th><th class="r">Nameplate BTU</th><th class="r">Max indoor units</th><th class="r">% of nameplate at 5°F</th><th class="r">Max connected %</th><th>Heats</th><th></th></tr></thead><tbody>
   ${cat.outdoors.map((o,i)=>`<tr><td><input type="text" id="co-id${i}" data-cat="id" data-i="${i}" value="${esc(o.id)}" style="min-width:170px"></td>
-   <td><select id="co-t${i}" data-cat="type" data-i="${i}"><option${o.type==='SZ'?' selected':''}>SZ</option><option${o.type==='MZ'?' selected':''}>MZ</option></select></td>
+   <td><select id="co-t${i}" data-cat="type" data-i="${i}"><option${o.type==='SZ'?' selected':''}>SZ</option><option${o.type==='MZ'?' selected':''}>MZ</option><option${o.type==='CA'?' selected':''}>CA</option></select></td>
    <td class="r"><input type="number" id="co-b${i}" data-cat="btu" data-i="${i}" value="${o.btu}" style="width:100px"></td>
    <td class="r"><input type="number" id="co-h${i}" data-cat="maxHeads" data-i="${i}" value="${o.maxHeads}" style="width:70px"></td>
    <td class="r"><input type="number" id="co-r${i}" data-cat="r5" data-i="${i}" value="${o.r5}" style="width:80px">${o.verify?' <span class="pill warn">assumed</span>':''}</td>
    <td class="r"><input type="number" id="co-c${i}" data-cat="maxConn" data-i="${i}" value="${o.maxConn}" style="width:80px"></td>
+    <td><input type="checkbox" id="co-ht${i}" data-cat="heats" data-i="${i}" ${o.heats!==false?'checked':''} aria-label="Provides heat"></td>
    <td><button class="xbtn" style="width:40px;height:40px" data-act="delOut" data-v="${i}" aria-label="Remove model">×</button></td></tr>`).join('')}</tbody></table></div>
   <div class="tools" style="margin:10px 0"><button class="btn sm" data-act="addOut">+ Add outdoor model</button><button class="btn sm danger" data-act="resetCat">Reset catalog</button></div>
-  <label class="field"><span>Indoor unit sizes (BTU, comma separated). 9k and 12k appear in your documents; 18k and 24k are assumed.</span><input type="text" id="cat-heads" data-cat="heads" value="${cat.heads.join(', ')}"></label>
+  <label class="field"><span>Indoor unit sizes (BTU, comma separated). Matches the company price list: 9k, 12k, 18k, 24k.</span><input type="text" id="cat-heads" data-cat="heads" value="${cat.heads.join(', ')}"></label>
+  <h3 style="margin-top:14px">Services and add-ons (price list)</h3>
+  <div class="tablewrap"><table><thead><tr><th>Item</th><th class="r">Price ($)</th><th></th></tr></thead><tbody>
+  ${(cat.services||[]).map((v,i)=>`<tr><td><input type="text" id="sv-n${i}" data-svc="n" data-i="${i}" value="${esc(v.n)}"></td><td class="r"><input type="number" id="sv-p${i}" data-svc="p" data-i="${i}" value="${v.p??''}" placeholder="enter" style="width:110px"></td><td><button class="xbtn" style="width:40px;height:40px" data-act="delSvcRow" data-v="${i}" aria-label="Remove item">×</button></td></tr>`).join('')}</tbody></table></div>
+  <div class="tools" style="margin:10px 0"><button class="btn sm" data-act="addSvcRow">+ Add item</button></div>
   <details><summary>Save or load this job</summary><div class="stack" style="gap:10px;margin-top:8px">
    <div class="tools"><button class="btn sm" data-act="copyJson">Copy job as text</button><span id="jsonMsg" class="copied" aria-live="polite"></span></div>
    <textarea id="jsonBox" aria-label="Job data" placeholder="Paste job text here, then press Load"></textarea>
@@ -1136,11 +1155,14 @@ const ACTIONS={
   delAddon(t){M.quote.addons.splice(+t.dataset.v,1);refresh()},
   addTbd(){M.quote.tbd.push('Item to be quoted');M.quote.tbd=M.quote.tbd.map(String);refresh();const li=$$('#sec-quote li');},
   delTbd(t){M.quote.tbd.splice(+t.dataset.v,1);refresh()},
+  addSvcRow(){M.catalog.services.push({n:'New item',p:''});renderSettings()},
+  delSvcRow(t){M.catalog.services.splice(+t.dataset.v,1);renderSettings()},
+  addSvc(){const sv=M.catalog.services[+$('#svc-pick').value];if(!sv) return;M.quote.addons.push({n:sv.n,p:sv.p??''});refresh()},
   addOut(){M.catalog.outdoors.push({id:'NEW-MODEL',short:'NEW',type:'MZ',btu:36000,maxHeads:4,r5:90,maxConn:130,verify:true});renderSettings()},
   delOut(t){M.catalog.outdoors.splice(+t.dataset.v,1);renderSettings()},
   resetCat(){M.catalog=DEFAULT_CATALOG();renderSettings()},
   copyJson(t){const o=JSON.parse(JSON.stringify(M));delete o._undo;copyText(JSON.stringify(o),null).then(ok=>{$('#jsonMsg').textContent=ok?'Copied to clipboard':'Copy failed: select the box below and copy by hand'});if(!$('#jsonBox').value)$('#jsonBox').value=JSON.stringify(o)},
-  loadJson(){try{const o=JSON.parse($('#jsonBox').value);if(!o||o.v!==1||!o.rooms) throw 0;M=o;$('#overlay').hidden=true;fullRender()}catch(e){$('#jsonMsg').textContent='That text is not a saved job.'}},
+  loadJson(){try{const o=JSON.parse($('#jsonBox').value);if(!o||o.v!==1||!o.rooms) throw 0;M=migrateModel(o);$('#overlay').hidden=true;fullRender()}catch(e){$('#jsonMsg').textContent='That text is not a saved job.'}},
   blank(){M=blankModel();$('#overlay').hidden=true;fullRender()}
 };
 function onInput(e){
@@ -1181,11 +1203,12 @@ function onInput(e){
 }
 function onChange(e){
   const t=e.target,a=t.dataset.act;
+  if(t.dataset.svc){const v=M.catalog.services[+t.dataset.i];v[t.dataset.svc]=t.dataset.svc==='p'?(t.value===''?'':parseFloat(t.value)):t.value;save();return}
   if(t.dataset.cat){
     const k=t.dataset.cat;
     if(k==='heads'){const h=t.value.split(/[ ,]+/).map(Number).filter(n=>n>0);if(h.length) M.catalog.heads=[...new Set(h)].sort((x,y)=>x-y);return}
     const o=M.catalog.outdoors[+t.dataset.i];
-    o[k]=(k==='id'||k==='type')?t.value:(parseFloat(t.value)||0);
+    o[k]=k==='heats'?t.checked:(k==='id'||k==='type')?t.value:(parseFloat(t.value)||0);
     if(k==='id') o.short=t.value.slice(0,5).toUpperCase();
     if(k==='r5') o.verify=false;
     renderSettings();return;

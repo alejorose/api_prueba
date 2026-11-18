@@ -258,7 +258,8 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:30px}
       <button id="modePres" aria-pressed="false" data-act="mode" data-v="present">Presenting</button>
     </div>
     <button class="btn primary" id="btnEdit" data-act="drawer">Edit home</button>
-    <button class="btn" id="btnDemo" data-act="demo">Load demo home</button>
+    <button class="btn" id="btnProp" data-act="loadProp">3816 Surf Ave</button>
+    <button class="btn" id="btnDemo" data-act="demo">Demo home</button>
     <button class="btn tech" id="btnSettings" data-act="settings">Equipment</button>
     <button class="btn" id="btnCopy" data-act="copy">Copy summary</button>
   </div>
@@ -406,8 +407,8 @@ function autoDesign(m){
   const rooms=ev.cond.map(r=>({r,need:ev.loads[r.id].heat})).sort((a,b)=>b.need-a.need);
   const biggest=mz[mz.length-1]; const groups=[];
   for(const it of rooms){
-    const g=groups.find(g=>g.items.length<(biggest?biggest.maxHeads:1)&&g.load+it.need<=(biggest?eff(biggest):0));
-    if(g){g.items.push(it);g.load+=it.need}else groups.push({items:[it],load:it.need});
+    const key=it.r.group||'';const g=groups.find(g=>g.key===key&&g.items.length<(biggest?biggest.maxHeads:1)&&g.load+it.need<=(biggest?eff(biggest):0));
+    if(g){g.items.push(it);g.load+=it.need}else groups.push({key,items:[it],load:it.need});
   }
   const systems=[]; let nMZ=0,nSZ=0;
   groups.forEach(g=>{
@@ -415,7 +416,7 @@ function autoDesign(m){
     const pool=single?sz:mz; if(!pool.length) return;
     let out=pool.find(o=>eff(o)>=g.load&&(o.maxHeads||1)>=g.items.length)||pool[pool.length-1];
     const id='sys'+(systems.length+1)+'_'+Date.now().toString(36);
-    systems.push({id,type:out.type,name:out.type==='MZ'?'MZ-'+(++nMZ):'SZ-'+(++nSZ),out:out.id,rooms:g.items.map(i=>i.r.id)});
+    systems.push({id,group:g.key,type:out.type,name:out.type==='MZ'?'MZ-'+(++nMZ):'SZ-'+(++nSZ),out:out.id,rooms:g.items.map(i=>i.r.id)});
   });
   return systems;
 }
@@ -448,7 +449,7 @@ function newRoom(type,over){
   setGlassPreset(r,'avg'); return Object.assign(r,over||{});
 }
 function demoModel(){
-  const m=blankModel(); m.demo=true; m.job='Demo home (ranch, 6 rooms)';
+  const m=blankModel(); m.demo=true; m.view='rooms'; m.job='Demo home (ranch, 6 rooms)';
   const R=(name,type,sqft,ceil,wallSqft,glass,o)=>newRoom(type,Object.assign({name,sqft,ceil,wallSqft,glass,glassCustom:true,glassPreset:null,ext:2,occ:0,appS:0,appL:0},o||{}));
   const b1=R('Bedroom 1','bedroom',201,7.9,234,[{k:'w',a:32,o:'NE'}],{occ:1,orient:'NE',mj:{heat:5847}});
   const b2=R('Bedroom 2','bedroom',122,7.9,162,[{k:'w',a:13,o:'NE'}],{occ:1,orient:'NE',mj:{heat:3175}});
@@ -463,10 +464,46 @@ function demoModel(){
     tbd:['Electrical subpanel for the new outdoor units (change order, price per electrician)'],rebate:''};
   return m;
 }
+
+const FP_3816=[[18.2,0],[37.2,8.2],[39.1,3.9],[61.2,13.5],[44.5,52.4],[27.1,44.9],[28.6,41.3],[22.4,38.6],[16,53.5],[0,46.6],[6.4,31.6],[4.9,30.9]];
+function propertyModel(){
+  const fp=FP_3816,m=blankModel();
+  m.job='3816 Surf Ave, Brooklyn NY 11224';m.view='building';
+  m.climate={label:'New York City (design temps assumed)',winterOut:15,summerOut:89,winterIn:70,summerIn:75,grains:45,alt:1};
+  m.house={walls:'poor',attic:'poor',floor:'crawl_poor',winType:'double',leak:'loose'};
+  const per=fp.reduce((a,p,i)=>{const q=fp[(i+1)%fp.length];return a+Math.hypot(q[0]-p[0],q[1]-p[1])},0);
+  const area=Math.round(Math.abs(fp.reduce((a,p,i)=>{const q=fp[(i+1)%fp.length];return a+(p[0]*q[1]-q[0]*p[1])},0)/2));
+  const mk=(name,fl,group,sqft,ceil,over)=>{
+    const gross=per*ceil*(sqft/area),gl=Math.round(sqft*.12);
+    return newRoom('other',Object.assign({name,fl,group,sqft,ceil,orient:'S',wallSqft:Math.max(0,Math.round(gross-gl)),
+      glass:[{k:'w',a:gl/2,o:'S'},{k:'w',a:gl/2,o:'N'}],glassCustom:true,glassPreset:null,occ:0,appS:0,appL:0},over||{}));
+  };
+  const z1=Math.round((area-400)/3),z2=Math.round(area/3);
+  const kit={occ:2,appS:2365,appL:358};
+  m.rooms=[
+    mk('Unit 2 · Zone A',2,'u2',z2,8,Object.assign({floor:'heated'},kit)),mk('Unit 2 · Zone B',2,'u2',z2,8,{floor:'heated',occ:1}),mk('Unit 2 · Zone C',2,'u2',z2,8,{floor:'heated',occ:1}),
+    mk('Unit 1 · Zone A',1,'u1',z1,9,Object.assign({attic:'none'},kit)),mk('Unit 1 · Zone B',1,'u1',z1,9,{attic:'none',occ:1}),mk('Unit 1 · Zone C',1,'u1',z1,9,{attic:'none',occ:1}),
+    mk('Garage (2-car)',1,'u0',400,9,{attic:'none',cond:false}),
+    mk('Basement (recreation)',0,'u0',area,8,{attic:'none',floor:'heated',cond:false})
+  ];
+  const plan=autoDesign(m),names={u1:'Unit 1',u2:'Unit 2'};
+  m.systems=plan.map(p=>({id:p.id,type:p.type,name:(names[p.group]?names[p.group]+' · ':'')+p.name,out:p.out}));
+  plan.forEach(p=>p.rooms.forEach(id=>{m.rooms.find(r=>r.id===id).sys=p.id}));
+  m.quote.tbd=['Room layout and window count: measure on site. The 2001 alteration plans exist only on DOB microfilm.'];
+  m.property={address:'3816 Surf Ave, Brooklyn, NY 11224',footprint:fp,footprintArea:area,perimeter:Math.round(per),
+    rows:[['Tax lot (BBL)','3-07030-0007'],['Building ID (BIN)','3189325'],['Class','B2, two-family dwelling'],['Built','1930'],
+      ['Stories','2 (certificate of occupancy), 21 ft'],['Building area','4,040 ft² (city record)'],['Footprint','1,983 ft² (from city footprint)'],
+      ['Roof height','35.6 ft above grade'],['Ground elevation','11 ft'],['Lot','57 × 63.5 ft, 3,620 ft², corner'],['Zoning','R3-1'],
+      ['Flood zone','Special Flood Hazard Area'],['Construction','Brick (1934 certificate)'],
+      ['Legal use (2002 CO)','Basement: recreation. 1st: 1 dwelling + 2-car garage. 2nd: 1 dwelling.']],
+    sources:['NYC PLUTO (tax lot data)','NYC Building Footprints (polygon, roof height)','NYC DOB BIS property profile and certificates of occupancy (1934, 1952, 2002)'],
+    assumptions:['Walls: uninsulated brick (1930). Attic: poor insulation. Windows: older double-pane. Air leakage: drafty.','Floor-to-floor height 10.5 ft; garage 400 ft²; each unit split into 3 placeholder zones until the real rooms are measured.','Glass is 12% of floor area, half north, half south, until counted on site.','Design temperatures 15°F / 89°F are approximate for New York City: confirm with the Manual J weather station.']};
+  return m;
+}
 let M=null;
 function load(){
   try{const s=localStorage.getItem(KEY);if(s){const o=JSON.parse(s);if(o&&o.v===1&&o.rooms) return o}}catch(e){}
-  return demoModel();
+  return propertyModel();
 }
 
 let saveT=0;
@@ -632,9 +669,75 @@ function treemap(items,x,y,w,h){
   const A=items.slice(0,best),B=items.slice(best),f=sum(A.map(i=>i.a))/total;
   return w>=h?[...treemap(A,x,y,w*f,h),...treemap(B,x+w*f,y,w*(1-f),h)]:[...treemap(A,x,y,w,h*f),...treemap(B,x,y+h*f,w,h*(1-f))];
 }
+
+function roomStat(r,e){
+  const sys=e.systems.find(s=>s.sys.id===r.sys);if(!sys) return 'none';
+  if(sys.single) return statusCov(sys.cov,.9);
+  const h=sys.heads.find(h=>h.room.id===r.id);return h?statusCov(h.cov,.8):'none';
+}
+function renderBuilding(by){
+  const e=EV.cur,pr=M.property,fp=pr.footprint;
+  const S=5.8,zs=S*.8,X0=330,Y0=190,g=M.explode?13:0;
+  const P=(x,y,z)=>[X0+(x-y)*.866*S,Y0+(x+y)*.5*S-z*zs];
+  const pt=(x,y,z)=>P(x,y,z).map(v=>v.toFixed(1)).join(',');
+  const A2=fp.reduce((a,p,i)=>{const q=fp[(i+1)%fp.length];return a+(p[0]*q[1]-q[0]*p[1])},0),ccw=A2>0;
+  const cx=fp.reduce((a,p)=>a+p[0],0)/fp.length,cy=fp.reduce((a,p)=>a+p[1],0)/fp.length;
+  const vis=fp.map((p,i)=>{const q=fp[(i+1)%fp.length],dx=q[0]-p[0],dy=q[1]-p[1],n=ccw?[dy,-dx]:[-dy,dx];return {p,q,v:(n[0]+n[1])>0,d:(p[0]+q[0]+p[1]+q[1])/2}}).filter(x=>x.v).sort((a,b)=>a.d-b.d);
+  const levels=[{fl:0,name:'Basement',z0:-9-g,h:9},{fl:1,name:'1st floor',z0:0,h:10.5},{fl:2,name:'2nd floor',z0:10.5+g,h:10.5}];
+  const info=levels.map(L=>{
+    const rs=M.rooms.filter(r=>r.fl===L.fl),cr=rs.filter(r=>r.cond!==false);
+    const heat=sum(cr.map(r=>e.loads[r.id].heat)),cool=sum(cr.map(r=>e.loads[r.id].cool)),sq=sum(cr.map(r=>r.sqft));
+    const st=cr.map(r=>roomStat(r,e)),worst=['bad','warn','none','good'].find(k=>st.includes(k))||'none';
+    const sys=[...new Set(cr.map(r=>r.sys).filter(Boolean))];
+    return Object.assign({},L,{rs,cr,heat,cool,sq,worst,sys,dens:sq?(by==='cool'?cool:heat)/sq:0});
+  });
+  const dv=info.filter(i=>i.cr.length).map(i=>i.dens),mx=Math.max(1,...dv),mn=Math.min(...dv,mx);
+  const fillOf=i=>{
+    if(!i.cr.length) return 'var(--surface2)';
+    if(by==='fit') return i.worst==='none'?'var(--surface2)':`color-mix(in srgb,var(--${i.worst}) 52%,#0c1530)`;
+    if(by==='sys') return i.sys.length?`color-mix(in srgb,${sysColor(i.sys[0])} 55%,#0c1530)`:'var(--surface2)';
+    return `color-mix(in srgb,var(${by==='cool'?'--cool':'--heat'}) ${Math.round(22+62*(i.dens-mn)/Math.max(.001,mx-mn))}%,#0c1530)`;
+  };
+  let out='',pad=10;
+  const xs=fp.map(p=>p[0]),ys=fp.map(p=>p[1]),x0=Math.min(...xs)-pad,x1=Math.max(...xs)+pad,y0=Math.min(...ys)-pad,y1=Math.max(...ys)+pad;
+  out+=`<polygon points="${[[x0,y0],[x1,y0],[x1,y1],[x0,y1]].map(q=>pt(q[0],q[1],-9-g)).join(' ')}" fill="rgba(255,255,255,.04)" stroke="rgba(255,255,255,.2)" stroke-dasharray="5 4"/>`;
+  const anchors={};
+  info.forEach(i=>{
+    const zt=i.z0+i.h,f=fillOf(i),dash=i.cr.length?'':' dash';
+    let wl='';vis.forEach(ed=>{wl+=`<polygon class="wall${dash}" style="fill:color-mix(in srgb,${f} 45%,rgba(255,255,255,.10))" points="${pt(ed.p[0],ed.p[1],i.z0)} ${pt(ed.q[0],ed.q[1],i.z0)} ${pt(ed.q[0],ed.q[1],zt)} ${pt(ed.p[0],ed.p[1],zt)}"/>`});
+    const top=`<polygon class="floor${dash}" style="fill:${f}" points="${fp.map(q=>pt(q[0],q[1],zt)).join(' ')}"/>`;
+    const first=i.rs[0];
+    out+=`<g role="button" tabindex="0" data-act="gotoRoom" data-v="${first?first.id:''}" aria-label="${i.name}">${wl}${top}</g>`;
+    anchors[i.fl]=P(cx,cy,zt);
+  });
+  const top=21+g,apex=35.6+g;
+  let rf='';vis.forEach(ed=>{rf+=`<polygon class="wall" style="fill:rgba(150,170,215,.20)" points="${pt(ed.p[0],ed.p[1],top)} ${pt(ed.q[0],ed.q[1],top)} ${pt(cx,cy,apex)}"/>`});
+  out+=rf;
+  const ex=Math.max(...fp.map(p=>p[0])),n=Math.max(1,e.systems.length);let od='',tubes='';
+  e.systems.forEach((s,k)=>{
+    const col=sysColor(s.sys.id),xb=ex+8,yb=(k+1)*54/(n+1)-4,dx=8,dy=8,dz=9,T=P(xb+dx/2,yb+dy/2,dz);
+    s.rooms.forEach(r=>{const A=anchors[r.fl];if(!A) return;const mx=(A[0]+T[0])/2,my=Math.min(A[1],T[1])-30,d=`M${A[0].toFixed(1)} ${A[1].toFixed(1)} Q${mx.toFixed(1)} ${my.toFixed(1)} ${T[0].toFixed(1)} ${T[1].toFixed(1)}`;tubes+=`<path class="tubeg" d="${d}"/><path class="tube" d="${d}" style="stroke:${col}"/>`});
+    od+=`<g><polygon class="od" style="stroke:${col}" points="${pt(xb,yb+dy,0)} ${pt(xb+dx,yb+dy,0)} ${pt(xb+dx,yb+dy,dz)} ${pt(xb,yb+dy,dz)}"/><polygon class="od" style="stroke:${col}" points="${pt(xb+dx,yb,0)} ${pt(xb+dx,yb+dy,0)} ${pt(xb+dx,yb+dy,dz)} ${pt(xb+dx,yb,dz)}"/><polygon class="odt" style="stroke:${col}" points="${pt(xb,yb,dz)} ${pt(xb+dx,yb,dz)} ${pt(xb+dx,yb+dy,dz)} ${pt(xb,yb+dy,dz)}"/><ellipse cx="${T[0].toFixed(1)}" cy="${T[1].toFixed(1)}" rx="14" ry="8" fill="none" stroke="${col}" stroke-width="1.5"/><text class="rs" x="${T[0].toFixed(1)}" y="${(T[1]+34).toFixed(1)}" style="font-size:11px">${esc(s.sys.name)} · ${esc(outName(s.out))}</text></g>`;
+  });
+  let lab='';
+  info.forEach(i=>{
+    const a=P(Math.max(...xs),fp.find(q=>q[0]===Math.max(...xs))[1],i.z0+i.h/2),ly=a[1];
+    const stTxt=i.cr.length?`${i.cr.length} zone${i.cr.length>1?'s':''} · ${{good:'covered',warn:'close',bad:'undersized',none:'no unit'}[i.worst]}`:'not air-conditioned';
+    lab+=`<line x1="${a[0].toFixed(1)}" y1="${ly.toFixed(1)}" x2="640" y2="${ly.toFixed(1)}" stroke="rgba(255,255,255,.3)" stroke-dasharray="3 3"/><circle cx="${a[0].toFixed(1)}" cy="${ly.toFixed(1)}" r="3" fill="#fff"/>
+     <text class="rs" x="648" y="${(ly-14).toFixed(1)}" style="text-anchor:start;font-size:14px;font-weight:800">${i.name}</text>
+     <text class="rs" x="648" y="${(ly).toFixed(1)}" style="text-anchor:start">${i.cr.length?'Needs '+fmt(by==='cool'?i.cool:i.heat)+' BTU/h':'—'}</text>
+     <text class="rs" x="648" y="${(ly+14).toFixed(1)}" style="text-anchor:start;font-weight:600">${stTxt}</text>`;
+  });
+  const N0=[70,540],N1=[N0[0]+.866*S*5,N0[1]-.5*S*5];
+  const meta=`<g><line x1="${N0[0]}" y1="${N0[1]}" x2="${N1[0].toFixed(1)}" y2="${N1[1].toFixed(1)}" stroke="#fff" stroke-width="2"/><text class="rs" x="${(N1[0]+8).toFixed(1)}" y="${(N1[1]-2).toFixed(1)}" style="font-size:12px">N</text>
+   <text class="rs" x="20" y="580" style="text-anchor:start;font-size:11px;font-weight:600">Real footprint ${fmt(pr.footprintArea)} ft² · roof 35.6 ft · schematic floors and roof</text></g>`;
+  return {svg:`<svg class="iso" viewBox="0 0 840 600" role="group" aria-label="3D model of 3816 Surf Ave from the city building footprint"><defs><filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3.5"/></filter></defs>${out}${tubes}${od}${lab}${meta}</svg>`};
+}
 const MAP_MODES=[['fit','Fit'],['heat','Heat'],['cool','Cool'],['sys','Systems']];
 function renderMap(){
   const e=EV.cur; let by=M.mapBy; if(!MAP_MODES.some(m=>m[0]===by)) by='fit';
+  const hasProp=!!(M.property&&M.property.footprint),bView=hasProp&&M.view!=='rooms',B=bView?renderBuilding(by):null;
+  const viewSeg=hasProp?`<div class="utabs" style="margin-top:8px" role="group" aria-label="View"><button data-act="view" data-v="building" aria-pressed="${bView}">Building 3D</button><button data-act="view" data-v="rooms" aria-pressed="${!bView}">Rooms</button>${bView?`<button data-act="explode" aria-pressed="${!!M.explode}">Explode</button>`:''}</div>`:'';
   const rooms=M.rooms.filter(r=>r.cond!==false);
   const FW=100,FD=70,S=5,X0=343,Y0=92,H=18;
   const P=(x,y,z)=>[X0+(x-y)*.866*S,Y0+(x+y)*.5*S-z];
@@ -694,9 +797,9 @@ function renderMap(){
     :by==='sys'?`<span class="legend">${M.systems.map(s=>`<span><s style="background:${sysColor(s.id)}"></s>${esc(s.name)}</span>`).join('')}</span>`
     :`<span class="legend"><span>Brighter = more ${by==='cool'?'cooling':'heat'} per square foot</span></span>`;
   $('#sec-map').innerHTML=`<div class="stage-top"><div><div class="utabs" role="group" aria-label="What to show">${MAP_MODES.map(([k,l])=>`<button data-act="mapBy" data-v="${k}" aria-pressed="${by===k}">${l}</button>`).join('')}</div>
-    <div class="btuinfo"><div class="k">${rk}</div><div class="v2 num">${range}</div></div></div>
+    ${viewSeg}<div class="btuinfo"><div class="k">${rk}</div><div class="v2 num">${range}</div></div></div>
     <div class="thumb">Floor plan<svg width="124" height="90" viewBox="0 0 124 90" aria-hidden="true">${thumb}</svg></div></div>
-   ${tiles.length?`<svg class="iso" viewBox="0 0 840 560" role="group" aria-label="Isometric cutaway of the home, rooms sized by floor area">
+   ${bView?B.svg:tiles.length?`<svg class="iso" viewBox="0 0 840 560" role="group" aria-label="Isometric cutaway of the home, rooms sized by floor area">
     <defs><filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3.5"/></filter></defs>${rm}${tubes}${od}</svg>`:'<p class="muted" style="padding:60px 20px;text-align:center">Tap Edit home and add rooms to build the 3D view.</p>'}
    <div class="stage-bot">${legend}<span class="hint">Schematic: sizes and fit, not exact wall positions. Tap a room to edit it.</span></div>`;
 }
@@ -722,6 +825,7 @@ function renderPanels(){
   <div class="panel"><div class="bk">Your home</div><h2 style="font-size:1.5rem">${esc(M.job||'New home')}</h2><div class="muted small">${esc(c.label)}</div>
    <div class="stat4"><div><b class="num">${M.rooms.length}</b><span>Rooms</span></div><div><b class="num">${fmt(sq)}</b><span>ft²</span></div><div><b class="num">${M.systems.length}</b><span>Systems</span></div><div><b class="num">${fmt(e.nameplate/12000*1)/1>0?(e.nameplate/12000).toFixed(1):'0'}</b><span>Tons</span></div></div>
    <div class="chipline"><span class="cl">${c.winterOut}°F coldest</span><span class="cl">${c.summerOut}°F hottest</span><span class="cl">${esc(WINDOWS[M.house.winType].name)}</span><span class="cl">${esc(LEAK[M.house.leak].name)} air</span></div></div>
+  ${M.property?`<div class="panel"><div class="bk">Property record</div><div class="tablewrap"><table><tbody>${M.property.rows.map(r=>`<tr><td class="muted small" style="width:38%">${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join('')}</tbody></table></div><p class="hint" style="margin-top:8px">Public records: ${M.property.sources.map(esc).join('; ')}.</p></div>`:''}
   ${renderVerdict()}
   <div class="panel"><div class="bk">Payment calculator</div>
    <div class="finrow"><label class="field"><span>Term</span><select id="fin-y" data-act="finYears">${[3,5,7,10,12,15].map(y=>`<option value="${y}"${f.years===y?' selected':''}>${y} years</option>`).join('')}</select></label>
@@ -908,6 +1012,7 @@ function renderTech(){
   }
   $('#sec-tech').innerHTML=`<header><h2>Engineering notes</h2><p>For the consultant. Hidden in Presenting mode.</p></header>
    <div class="stack" style="gap:14px">${cmp}
+   ${M.property?`<div><h3>Assumed for this property (verify on site)</h3><ul class="small muted" style="margin:6px 0 0;padding-left:20px;line-height:1.6">${M.property.assumptions.map(a=>`<li>${esc(a)}</li>`).join('')}</ul></div>`:''}
    <div><h3>Assumptions in use</h3><ul class="small muted" style="margin:6px 0 0;padding-left:20px;line-height:1.6">
     <li>Heat loss = area × U-value × (indoor − outdoor), plus air leakage at ${LEAK[M.house.leak].ach} air changes/hour (altitude factor ${M.climate.alt}).</li>
     <li>Wall, ceiling and window U-values for "Standard older" construction come from the MJ8 report this was calibrated on; Low-E, R-19 and R-49 values are typical.</li>
@@ -991,6 +1096,9 @@ function addSystem(type,name,outId){
   const s={id:sid(),type,name:name||(type+'-'+n),out:outId||o.id};M.systems.push(s);return s;
 }
 const ACTIONS={
+  loadProp(){M=propertyModel();fullRender()},
+  view(t){M.view=t.dataset.v;refresh()},
+  explode(){M.explode=!M.explode;refresh()},
   drawer(){$('#editor').classList.add('open');$('#scrim').hidden=false},
   closeDrawer(){$('#editor').classList.remove('open');$('#scrim').hidden=true},
   mode(t){M.mode=t.dataset.v;refresh()},
